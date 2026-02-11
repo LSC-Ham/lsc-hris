@@ -1,20 +1,19 @@
-import { prisma } from "@/lib/prisma";
-
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
-  const users = await prisma.user.findMany();
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center -mt-16">
-      <h1 className="text-4xl font-bold mb-8 font-[family-name:var(--font-geist-sans)] text-[#333333]">
-        Superblog
-      </h1>
-      <ol className="list-decimal list-inside font-[family-name:var(--font-geist-sans)]">
-        {users.map((user) => (
-          <li key={user.id} className="mb-2">
-            {user.password}
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
+  // 1. Check if the user has a valid session (Database check happens inside here)
+  const session = await getServerSession(authOptions);
+
+  // 2. Decide where to send them
+  if (session) {
+    redirect("/dashboard");
+  } else {
+    redirect("/login");
+  }
+
+  // This return is unreachable because of the redirects, 
+  // but Typescript might want a valid component return.
+  return null;
 }

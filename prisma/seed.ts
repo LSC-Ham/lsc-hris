@@ -19,6 +19,7 @@ export async function main() {
             username: "ad03069",
             email: "hmarandang@lakeshore.edu.ph",
             password: await bcrypt.hash("@lakeshore123", SALT_ROUNDS),
+            role: "admin"
         },
     ];
 
