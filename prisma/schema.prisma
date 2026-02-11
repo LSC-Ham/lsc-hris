@@ -1,0 +1,187 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username         String    @unique
+  email            String    @unique
+  password         String?
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime? @updatedAt @db.Timestamp(6)
+  password_changed Boolean   @default(false)
+
+  accounts  Accounts[]  @relation("UserAccounts")
+  sessions  Session[]   @relation("UserSessions")
+  employees employees[]
+
+  @@map("users")
+}
+
+model Accounts {
+  id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String  @map("user_id") @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation("UserAccounts", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionToken String    @unique @map("session_token")
+  userId       String    @map("user_id") @db.Uuid
+  expires      DateTime  @map("expires_at") @db.Timestamp(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime? @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  user User @relation("UserSessions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model employees {
+  id         String    @id @db.Uuid
+  id_number  String    @unique
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
+
+  users                  User                     @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  personal_information   personal_information[]
+  address                address[]
+  family_background      family_background[]
+  eligibility            eligibility[]
+  educational_background educational_background[]
+  work_experience        work_experience[]
+}
+
+model personal_information {
+  id           String  @id @db.Uuid
+  surname      String
+  firstname    String
+  middlename   String?
+  extension    String?
+  birthdate    String
+  birthplace   String?
+  sex          String
+  civil_status String
+  telephone_no String?
+  mobile_no    String?
+  email        String?
+  nationality  String
+  height       String?
+  weight       String?
+  blood_type   String?
+
+  employees employees @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model address {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employees_id String    @db.Uuid
+  address_type String
+  region       String?
+  province     String?
+  city         String?
+  barangary    String?
+  house_no     String?
+  street       String?
+  subdivision  String?
+  zip_code     String?
+  created_at   DateTime  @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @updatedAt @db.Timestamp(6)
+
+  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model family_background {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employees_id  String    @db.Uuid
+  relation_type String
+  surname       String?
+  firstname     String?
+  middlename    String?
+  extension     String?
+  created_at    DateTime  @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @updatedAt @db.Timestamp(6)
+
+  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model eligibility {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employees_id     String    @db.Uuid
+  qualification    String?
+  rating           String?
+  date_examination String?
+  plan_examination String?
+  id_number        String?
+  date_validity    String?
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime? @updatedAt @db.Timestamp(6)
+
+  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model educational_background {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employees_id   String    @db.Uuid
+  level          String?
+  school         String?
+  degree         String?
+  date_from      DateTime?
+  date_to        DateTime?
+  units_earned   String?
+  year_graduated String?
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @updatedAt @db.Timestamp(6)
+
+  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model work_experience {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employees_id       String    @db.Uuid
+  date_from          DateTime?
+  date_to            DateTime?
+  position_title     String?
+  company            String?
+  montly_salary      String?
+  appointment_status String?
+  gov_service        Boolean
+  created_at         DateTime  @default(now()) @db.Timestamp(6)
+  updated_at         DateTime? @updatedAt @db.Timestamp(6)
+
+  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
