@@ -1,20 +1,42 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { Sidebar } from "@/components/Sidebar";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+        redirect("/login");
+    }
+
+    const userRole = (session.user as any).role || "EMPLOYEE";
+    const userEmail = session.user.email;
 
     if (!session) {
         redirect("/login");
     }
 
     return (
-        <section>
-            <nav>
-                Logged in as: {session.user?.name}
-            </nav>
-            {children}
-        </section>
+        <div className="flex min-h-screen bg-slate-50">
+            <Sidebar userRole={userRole} />
+
+            <div className="flex-1 flex flex-col">
+
+                <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10">
+                    <h2 className="text-sm font-semibold text-gray-500">
+                        Welcome back, <span className="text-gray-900">{userEmail}</span>
+                    </h2>
+
+                    <LogoutButton />
+                </header>
+
+                {/* Page Content */}
+                <main className="p-8">
+                    {children}
+                </main>
+            </div>
+        </div>
     );
 }
