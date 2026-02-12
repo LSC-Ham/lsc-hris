@@ -40,12 +40,22 @@ export default function ProfilePage() {
         spouseName: "",
     });
 
-    const handleInputChange = (e: any) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+    const handleInputChange = (fieldOrEvent: any, value?: any) => {
+        // CHECK: Is this a direct (key, value) update from our Smart Components?
+        if (typeof fieldOrEvent === 'string') {
+            setFormData((prev: any) => ({
+                ...prev,
+                [fieldOrEvent]: value
+            }));
+        }
+        // OTHERWISE: It's a standard HTML event (from simple inputs)
+        else {
+            const { name, value } = fieldOrEvent.target;
+            setFormData((prev: any) => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
 
     // This helper function decides what to render

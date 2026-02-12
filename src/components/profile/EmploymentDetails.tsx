@@ -3,20 +3,21 @@
 import { useState, useEffect } from "react";
 import { getSystemData } from "@/actions/settings";
 
-const POSITION_STATUSES = ["Full-Time", "Part-Time",];
+const POSITION_STATUSES = ["Full-Time", "Part-Time"];
 
 interface EmploymentDetailsProps {
     mode?: "view" | "create";
     formData: any;
     onChange: (field: string, value: any) => void;
+    onSave?: () => void; // <--- Added optional onSave prop
 }
 
-export function EmploymentDetails({ mode = "view", formData, onChange }: EmploymentDetailsProps) {
+export function EmploymentDetails({ mode = "view", formData, onChange, onSave }: EmploymentDetailsProps) {
 
     // 1. Create State to hold the DB Options
     const [divisions, setDivisions] = useState<string[]>([]);
     const [departments, setDepartments] = useState<string[]>([]);
-    const [positions, setPositions] = useState<string[]>([]); // Fixed typo (postions -> positions)
+    const [positions, setPositions] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     // 2. Fetch the data directly inside this component
@@ -27,8 +28,6 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
 
                 const divList = data.divisions.map((d: any) => d.division);
                 const depList = data.departments.map((d: any) => d.department);
-
-                // Fixed: mapped 'd.position' (singular) assuming your DB column is named 'position'
                 const posList = data.positions.map((d: any) => d.position);
 
                 setDivisions(divList);
@@ -89,7 +88,7 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                         isEditing={isEditing}
                         onChange={(e: any) => onChange("id_number", e.target.value)}
                         required
-                        disabled={true} // <--- ADD THIS LINE
+                        disabled={true}
                     />
 
                     {/* Division & Department Dropdowns */}
@@ -153,8 +152,6 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                             <div className="bg-green-50/50 border border-green-100 rounded-xl p-4 space-y-4">
                                 <h4 className="text-xs font-bold text-[#1a6b36] uppercase">Add New Position</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                                    {/* UPDATED: Uses 'positions' state instead of POSITION_OPTIONS */}
                                     <ProfileSelect
                                         label="Position Title"
                                         value={tempPosition.position}
@@ -163,7 +160,6 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                                         onChange={(e: any) => handleTempChange("position", e.target.value)}
                                         required
                                     />
-
                                     <ProfileSelect label="Status" value={tempPosition.status} options={POSITION_STATUSES} isEditing={true} onChange={(e: any) => handleTempChange("status", e.target.value)} required />
                                 </div>
                                 <ProfileField label="Description" value={tempPosition.description} isEditing={true} placeholder="Optional details..." onChange={(e: any) => handleTempChange("description", e.target.value)} />
@@ -192,11 +188,28 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                     </div>
                 </div>
             </div>
+
+            {/* --- SAVE BUTTON SECTION --- */}
+            {/* Logic: Not in create mode AND currently editing */}
+            {mode !== "create" && isEditing && (
+                <div className="flex justify-end pt-6 border-t border-gray-100 mt-6">
+                    <button
+                        type="button"
+                        onClick={onSave}
+                        className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95"
+                    >
+                        Save Changes
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
 
-// Keep your Helper Functions (ProfileField / ProfileSelect) here as they were
+// ----------------------------------------------------------------------
+// HELPER COMPONENTS
+// ----------------------------------------------------------------------
+
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
     return (
         <div>
@@ -211,8 +224,11 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
                     onChange={onChange}
                     required={required}
                     disabled={disabled}
-                    className={`w-full p-2.5 border rounded-lg text-sm bg-white focus:ring-1 outline-none transition-all shadow-sm
-                    ${required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                    className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm outline-none
+                    ${disabled
+                            ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
+                            : "bg-white focus:ring-1 " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
+                        }`}
                 />
             ) : (
                 <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center">
