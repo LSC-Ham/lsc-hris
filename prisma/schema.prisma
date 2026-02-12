@@ -15,8 +15,8 @@ datasource db {
 
 model User {
   id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  username         String    @unique
-  email            String    @unique
+  username         String?   @unique
+  email            String?   @unique
   password         String?
   role             String?
   created_at       DateTime  @default(now()) @db.Timestamp(6)
@@ -72,19 +72,103 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
+model divisions {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  division    String    @unique
+  description String?
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @updatedAt @db.Timestamp(6)
+
+  employeesDivisions employees_divisions[]
+}
+
+model employees_divisions {
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employees_id String @db.Uuid
+  divisions_id String @db.Uuid
+
+  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  divisions divisions @relation(fields: [divisions_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([employees_id, divisions_id], name: "unique_employees_departments")
+}
+
+model departments {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  department  String    @unique
+  description String?
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @updatedAt @db.Timestamp(6)
+
+  employees employees_departments[]
+}
+
+model employees_departments {
+  id             String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employees_id   String @db.Uuid
+  departments_id String @db.Uuid
+
+  employees   employees   @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  departments departments @relation(fields: [departments_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([employees_id, departments_id], name: "unique_employees_departments")
+}
+
+model positions {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  position    String    @unique
+  description String?
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @updatedAt @db.Timestamp(6)
+
+  employees employees_positions[]
+}
+
+model employees_positions {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employees_id String    @db.Uuid
+  positions_id String    @db.Uuid
+  status       String?
+  description  String?
+  start_at     DateTime? @db.Timestamp(6)
+  end_at       DateTime? @db.Timestamp(6)
+
+  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  positions positions @relation(fields: [positions_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([employees_id, positions_id], name: "unique_employees_positions")
+}
+
 model employees {
   id         String    @id @db.Uuid
   id_number  String    @unique
+  hired_at   DateTime? @db.Timestamp(6)
+  remarks    String?
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @updatedAt @db.Timestamp(6)
 
   users                  User                     @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  government_ids         employees_govIDs[]
   personal_information   personal_information[]
   address                address[]
   family_background      family_background[]
   eligibility            eligibility[]
   educational_background educational_background[]
   work_experience        work_experience[]
+  positions              employees_positions[]
+  departments            employees_departments[]
+  divisions              employees_divisions[]
+}
+
+model employees_govIDs {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employees_id String    @db.Uuid
+  id_label     String
+  id_number    String
+  created_at   DateTime  @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @updatedAt @db.Timestamp(6)
+
+  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model personal_information {
@@ -93,7 +177,7 @@ model personal_information {
   firstname    String
   middlename   String?
   extension    String?
-  birthdate    String
+  birthdate    String?
   birthplace   String?
   sex          String
   civil_status String

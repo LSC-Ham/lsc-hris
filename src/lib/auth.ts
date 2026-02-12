@@ -18,11 +18,29 @@ export const authOptions: NextAuthOptions = {
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials) {
-                const user = await prisma.user.findUnique({
-                    where: { username: credentials?.username },
+                if (!credentials?.username || !credentials?.password) {
+                    return null;
+                }
+                const user = await prisma.user.findFirst({
+                    where: {
+                        OR: [
+                            // 1. Check if it matches the 'username' column in User table
+                            { username: credentials?.username },
+
+                            // 2. Check if it matches the 'id_number' in the related Employees table
+                            // (Assuming your User model has a relation to employees)
+                            {
+                                employees: {
+                                    some: {
+                                        id_number: credentials?.username,
+                                    }
+                                }
+                            }
+                        ]
+                    },
                 });
 
-                if (user && credentials?.password && user.password) {
+                if (user && user.password) {
                     const isValid = await bcrypt.compare(credentials.password, user.password);
                     if (isValid) return user;
                 }

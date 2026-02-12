@@ -4,7 +4,7 @@ import { useState, ChangeEvent } from "react";
 
 // 1. MAIN COMPONENT (The Container)
 // This is now very clean. It just decides WHAT sections to show.
-export function EmployeeAddress() {
+export function Address() {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* SECTION 2: Residential Address (New Content!) */}
@@ -65,8 +65,7 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
     };
 
     return (
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-
+        <div>
             {/* HEADER */}
             <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
                 <h2 className="text-xl font-bold text-gray-800 tracking-tight">{title}</h2>
@@ -192,7 +191,7 @@ function AddressField({ label, value, isEditing, type = "text", onChange }: Addr
                 />
             ) : (
                 <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center">
-                    {value || "-"}
+                    {value || <span className="text-gray-400 italic">Not set</span>}
                 </div>
             )}
         </div>

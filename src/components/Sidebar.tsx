@@ -73,8 +73,7 @@ export function Sidebar({ userRole }: { userRole: string }) {
 
             {/* 3. SIDEBAR CONTAINER */}
             {/* Mobile: Fixed position, slides in/out using translate-x
-          Desktop: Static position, always visible (md:translate-x-0)
-      */}
+          Desktop: Static position, always visible (md:translate-x-0)*/}
             <aside className={`
         /* MOBILE STYLES: Fixed off-screen */
         fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 

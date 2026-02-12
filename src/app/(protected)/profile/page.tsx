@@ -4,15 +4,15 @@ import { useState } from "react";
 
 // Import your new components here
 import { PersonalInformation } from "@/components/profile/ProfileInformation";
-import { EmployeeAddress } from "@/components/profile/EmployeeAddress";
+import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
-// import { FamilyBackgroundForm } from "@/components/profile/FamilyBackgroundForm"; 
-// ... etc
+import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 
 export default function ProfilePage() {
-    const [activeTab, setActiveTab] = useState("Personal Information");
+    const [activeTab, setActiveTab] = useState("Employment Details");
 
     const menuItems = [
+        "Employment Details",
         "Personal Information",
         "Employee Address",
         "Family Background",
@@ -28,10 +28,12 @@ export default function ProfilePage() {
     // This helper function decides what to render
     const renderContent = () => {
         switch (activeTab) {
+            case "Employment Details":
+                return <EmploymentDetails />;
             case "Personal Information":
                 return <PersonalInformation />;
             case "Employee Address":
-                return <EmployeeAddress />;
+                return <Address />;
             case "Family Background":
                 return <FamilyBackground />;
             // Add more cases here as you create files:
@@ -73,9 +75,6 @@ export default function ProfilePage() {
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">Juan Dela Cruz</h2>
                         <p className="text-xs text-gray-500 mb-1">HR Admin</p>
-                        <span className="text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wide">
-                            Active
-                        </span>
                     </div>
 
                     {/* Navigation Menu */}
