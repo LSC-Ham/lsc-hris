@@ -92,8 +92,16 @@ export async function main() {
                             create: {
                                 divisions_id: division.id,
                             }
+                        },
+                        personal_information: {
+                            create: {
+                                surname: 'marandang',
+                                firstname: 'hamodi',
+                                sex: 'male',
+                                civil_status: 'single',
+                                nationality: 'Philippines',
+                            }
                         }
-
                     },
 
                 },
