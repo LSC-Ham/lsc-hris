@@ -1,20 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation"; // Optional: for redirecting after save
+import { useState, useEffect } from "react"; // 1. Import useEffect
+import { useRouter } from "next/navigation";
 import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/ProfileInformation";
+
+// 2. Import the Server Action we just created
+import { generateNextEmployeeId } from "@/actions/users/employees";
 
 export default function CreateUserPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // 1. MASTER STATE: Holds data for BOTH components
     const [formData, setFormData] = useState({
         // --- Employment Data ---
-        id_number: "",
+        id_number: "", // This will be auto-filled on load
         division: "",
         department: "",
-        positions: [], // Array of objects
+        positions: [],
         gsis_no: "",
         pagibig_no: "",
         philhealth_no: "",
@@ -40,14 +42,23 @@ export default function CreateUserPage() {
         blood_type: "",
     });
 
-    // 2. SHARED HANDLER: Updates the Master State
+    // 3. ADD THIS: Auto-generate ID on page load
+    useEffect(() => {
+        const fetchAutoId = async () => {
+            const autoId = await generateNextEmployeeId();
+            if (autoId) {
+                setFormData(prev => ({ ...prev, id_number: autoId }));
+            }
+        };
+
+        fetchAutoId();
+    }, []); // Empty array [] ensures this runs only once when page opens
+
     const handleFieldChange = (field: string, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-    // 3. FINAL SUBMISSION
     const handleCreateAccount = async () => {
-        // Basic Validation
         if (!formData.id_number || !formData.surname || !formData.firstname) {
             alert("Please fill in the required fields (ID, Surname, First Name).");
             return;
@@ -57,10 +68,7 @@ export default function CreateUserPage() {
         console.log("Creating Account with FINAL Data:", formData);
 
         try {
-            // TODO: Call your Supabase/Prisma API here
-            // const response = await fetch('/api/employees', { method: 'POST', body: JSON.stringify(formData) });
-
-            // Simulation
+            // Your save logic here...
             await new Promise(resolve => setTimeout(resolve, 1500));
             alert("Employee Created Successfully!");
         } catch (error) {
@@ -73,7 +81,6 @@ export default function CreateUserPage() {
 
     return (
         <div className="space-y-6 pb-12">
-            {/* PAGE HEADER */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
@@ -84,7 +91,6 @@ export default function CreateUserPage() {
                     </p>
                 </div>
 
-                {/* --- MAIN ACTION BUTTON --- */}
                 <button
                     onClick={handleCreateAccount}
                     disabled={isSubmitting}
@@ -101,11 +107,10 @@ export default function CreateUserPage() {
                 </button>
             </div>
 
-            {/* PAGE CONTENT */}
             <div className="flex flex-col gap-6">
-
                 {/* 1. EMPLOYMENT DETAILS */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
+                    {/* The formData here now contains the auto-generated ID */}
                     <EmploymentDetails
                         mode="create"
                         formData={formData}

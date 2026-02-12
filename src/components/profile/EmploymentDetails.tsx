@@ -1,50 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getSystemData } from "@/actions/settings";
 
-const DIVISIONS = ["Administration", "Operations", "Finance", "Sales", "Engineering"];
-const DEPARTMENTS = ["HR", "IT", "Logistics", "Accounting", "Marketing", "Legal"];
-const POSITION_OPTIONS = ["Software Engineer", "Senior Developer", "Team Lead", "Project Manager", "Data Analyst", "UI/UX Designer", "HR Officer", "Accountant"];
-const POSITION_STATUSES = ["Active", "Probationary", "Acting", "Project-Based", "Resigned"];
+const POSITION_STATUSES = ["Full-Time", "Part-Time",];
 
 interface EmploymentDetailsProps {
     mode?: "view" | "create";
-    formData: any;       // RECEIVED FROM PARENT
-    onChange: (field: string, value: any) => void; // RECEIVED FROM PARENT
+    formData: any;
+    onChange: (field: string, value: any) => void;
 }
 
 export function EmploymentDetails({ mode = "view", formData, onChange }: EmploymentDetailsProps) {
 
-    // Only keep UI state (isEditing) and Temp Form state local
+    // 1. Create State to hold the DB Options
+    const [divisions, setDivisions] = useState<string[]>([]);
+    const [departments, setDepartments] = useState<string[]>([]);
+    const [positions, setPositions] = useState<string[]>([]); // Fixed typo (postions -> positions)
+    const [isLoading, setIsLoading] = useState(true);
+
+    // 2. Fetch the data directly inside this component
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getSystemData();
+
+                const divList = data.divisions.map((d: any) => d.division);
+                const depList = data.departments.map((d: any) => d.department);
+
+                // Fixed: mapped 'd.position' (singular) assuming your DB column is named 'position'
+                const posList = data.positions.map((d: any) => d.position);
+
+                setDivisions(divList);
+                setDepartments(depList);
+                setPositions(posList);
+            } catch (error) {
+                console.error("Failed to fetch options:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // UI State
     const [isEditing, setIsEditing] = useState(mode === "create");
 
-    // Temp State for the "Add Position" mini-form
+    // Temp State for "Add Position"
     const [tempPosition, setTempPosition] = useState({
-        position: "",
-        status: "",
-        description: "",
-        start_at: "",
-        end_at: ""
+        position: "", status: "", description: "", start_at: "", end_at: ""
     });
 
-    // Handle Temp Form Input
     const handleTempChange = (field: string, value: string) => {
         setTempPosition((prev) => ({ ...prev, [field]: value }));
     };
 
-    // Add Object to Main List (UPDATES PARENT STATE)
     const handleAddPositionObj = () => {
         if (!tempPosition.position || !tempPosition.status) return;
-
-        // Create new array and send to parent
         const updatedPositions = [...(formData.positions || []), tempPosition];
         onChange("positions", updatedPositions);
-
-        // Reset Temp Form
         setTempPosition({ position: "", status: "", description: "", start_at: "", end_at: "" });
     };
 
-    // Remove Object from Main List (UPDATES PARENT STATE)
     const handleRemovePosition = (indexToRemove: number) => {
         const updatedPositions = formData.positions.filter((_: any, index: number) => index !== indexToRemove);
         onChange("positions", updatedPositions);
@@ -71,25 +89,33 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                         isEditing={isEditing}
                         onChange={(e: any) => onChange("id_number", e.target.value)}
                         required
+                        disabled={true} // <--- ADD THIS LINE
                     />
 
+                    {/* Division & Department Dropdowns */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <ProfileSelect
-                            label="Division"
-                            value={formData.division}
-                            options={DIVISIONS}
-                            isEditing={isEditing}
-                            onChange={(e: any) => onChange("division", e.target.value)}
-                            required
-                        />
-                        <ProfileSelect
-                            label="Department"
-                            value={formData.department}
-                            options={DEPARTMENTS}
-                            isEditing={isEditing}
-                            onChange={(e: any) => onChange("department", e.target.value)}
-                            required
-                        />
+                        {isLoading ? (
+                            <div className="col-span-2 text-xs text-gray-400 animate-pulse">Loading options...</div>
+                        ) : (
+                            <>
+                                <ProfileSelect
+                                    label="Division"
+                                    value={formData.division}
+                                    options={divisions}
+                                    isEditing={isEditing}
+                                    onChange={(e: any) => onChange("division", e.target.value)}
+                                    required
+                                />
+                                <ProfileSelect
+                                    label="Department"
+                                    value={formData.department}
+                                    options={departments}
+                                    isEditing={isEditing}
+                                    onChange={(e: any) => onChange("department", e.target.value)}
+                                    required
+                                />
+                            </>
+                        )}
                     </div>
 
                     {/* Positions Logic */}
@@ -127,7 +153,17 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                             <div className="bg-green-50/50 border border-green-100 rounded-xl p-4 space-y-4">
                                 <h4 className="text-xs font-bold text-[#1a6b36] uppercase">Add New Position</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <ProfileSelect label="Position Title" value={tempPosition.position} options={POSITION_OPTIONS} isEditing={true} onChange={(e: any) => handleTempChange("position", e.target.value)} required />
+
+                                    {/* UPDATED: Uses 'positions' state instead of POSITION_OPTIONS */}
+                                    <ProfileSelect
+                                        label="Position Title"
+                                        value={tempPosition.position}
+                                        options={positions}
+                                        isEditing={true}
+                                        onChange={(e: any) => handleTempChange("position", e.target.value)}
+                                        required
+                                    />
+
                                     <ProfileSelect label="Status" value={tempPosition.status} options={POSITION_STATUSES} isEditing={true} onChange={(e: any) => handleTempChange("status", e.target.value)} required />
                                 </div>
                                 <ProfileField label="Description" value={tempPosition.description} isEditing={true} placeholder="Optional details..." onChange={(e: any) => handleTempChange("description", e.target.value)} />
@@ -160,9 +196,8 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
     );
 }
 
-// Reuse your Helper Functions ProfileField/ProfileSelect here...
-// (Paste the helpers from your previous code here)
-function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required }: any) {
+// Keep your Helper Functions (ProfileField / ProfileSelect) here as they were
+function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
     return (
         <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
@@ -175,6 +210,7 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
                     placeholder={placeholder}
                     onChange={onChange}
                     required={required}
+                    disabled={disabled}
                     className={`w-full p-2.5 border rounded-lg text-sm bg-white focus:ring-1 outline-none transition-all shadow-sm
                     ${required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
                 />
