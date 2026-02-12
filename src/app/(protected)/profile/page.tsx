@@ -25,13 +25,38 @@ export default function ProfilePage() {
         "References",
     ];
 
+    const [formData, setFormData] = useState({
+        firstName: "Juan",
+        lastName: "Dela Cruz",
+        email: "juan@example.com",
+        phone: "",
+        position: "HR Admin",
+        department: "Human Resources",
+        employeeId: "EMP-001",
+        dateHired: "2023-01-15",
+        street: "",
+        city: "",
+        province: "",
+        spouseName: "",
+    });
+
+    const handleInputChange = (e: any) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
     // This helper function decides what to render
     const renderContent = () => {
         switch (activeTab) {
             case "Employment Details":
-                return <EmploymentDetails />;
+                return <EmploymentDetails formData={formData}
+                    onChange={handleInputChange} />;
             case "Personal Information":
-                return <PersonalInformation />;
+                return <PersonalInformation formData={formData}
+                    onChange={handleInputChange} />;
             case "Employee Address":
                 return <Address />;
             case "Family Background":
