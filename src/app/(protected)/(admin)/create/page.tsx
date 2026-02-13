@@ -1,19 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react"; // 1. Import useEffect
-import { useRouter } from "next/navigation";
 import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/ProfileInformation";
 
 // 2. Import the Server Action we just created
-import { generateNextEmployeeId } from "@/actions/users/employees";
+import { generateEmployeeID } from "@/actions/users/employees";
 
 export default function CreateUserPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
-        // --- Employment Data ---
-        id_number: "", // This will be auto-filled on load
+        id_number: "",
         division: "",
         department: "",
         positions: [],
@@ -24,7 +22,6 @@ export default function CreateUserPage() {
         tin_no: "",
         agency_no: "",
 
-        // --- Personal Data ---
         firstname: "",
         surname: "",
         middlename: "",
@@ -42,18 +39,16 @@ export default function CreateUserPage() {
         blood_type: "",
     });
 
-    // 3. ADD THIS: Auto-generate ID on page load
     useEffect(() => {
         const fetchAutoId = async () => {
-            const autoId = await generateNextEmployeeId();
+            const autoId = await generateEmployeeID();
             if (autoId) {
                 setFormData(prev => ({ ...prev, id_number: autoId }));
             }
         };
 
         fetchAutoId();
-    }, []); // Empty array [] ensures this runs only once when page opens
-
+    }, []);
     const handleFieldChange = (field: string, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
@@ -68,7 +63,6 @@ export default function CreateUserPage() {
         console.log("Creating Account with FINAL Data:", formData);
 
         try {
-            // Your save logic here...
             await new Promise(resolve => setTimeout(resolve, 1500));
             alert("Employee Created Successfully!");
         } catch (error) {
@@ -108,9 +102,7 @@ export default function CreateUserPage() {
             </div>
 
             <div className="flex flex-col gap-6">
-                {/* 1. EMPLOYMENT DETAILS */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
-                    {/* The formData here now contains the auto-generated ID */}
                     <EmploymentDetails
                         mode="create"
                         formData={formData}
@@ -118,7 +110,6 @@ export default function CreateUserPage() {
                     />
                 </div>
 
-                {/* 2. PERSONAL INFORMATION */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
                     <PersonalInformation
                         mode="create"

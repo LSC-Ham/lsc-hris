@@ -14,14 +14,11 @@ interface PersonalInformationProps {
 
 export function PersonalInformation({ mode = "view", formData, onChange, onSave }: PersonalInformationProps) {
     const [isEditing, setIsEditing] = useState(mode === "create");
-
-    // --- State for API Options ---
     const [cityOptions, setCityOptions] = useState<string[]>([]);
     const [nationalityOptions, setNationalityOptions] = useState<string[]>([]);
     const [isLoadingCities, setIsLoadingCities] = useState(true);
     const [isLoadingNationalities, setIsLoadingNationalities] = useState(true);
 
-    // --- Fetch Cities ---
     useEffect(() => {
         const fetchCities = async () => {
             try {
@@ -146,7 +143,7 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
                     <ProfileField label="Mobile No." value={formData.mobile_no} isEditing={isEditing} placeholder="0999-XXX-XXXX" onChange={(e: any) => onChange("mobile_no", e.target.value)} />
                 </div>
 
-                <ProfileField label="Email Address" value={formData.email} isEditing={isEditing} placeholder="jdelacruz@lakeshore.edu.ph" onChange={(e: any) => onChange("email", e.target.value)} />
+                <ProfileField label="Personal Email Address" value={formData.email} isEditing={isEditing} placeholder="jdelacruz@lakeshore.edu.ph" onChange={(e: any) => onChange("email", e.target.value)} />
 
                 {/* Nationality with Flag API */}
                 {isLoadingNationalities ? (

@@ -3,16 +3,17 @@
 import { useState } from "react";
 
 // Import your new components here
+import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/ProfileInformation";
 import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
-import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 
 interface ProfilePageProps {
-    initialData: any; // You can be more specific with the type if you want
+    personal_information: any; // You can be more specific with the type if you want
+    employment_details: any;
 }
 
-export default function ProfilePage({ initialData }: ProfilePageProps) {
+export default function ProfilePage({ personal_information, employment_details }: ProfilePageProps) {
     const [activeTab, setActiveTab] = useState("Employment Details");
 
     const menuItems = [
@@ -32,31 +33,27 @@ export default function ProfilePage({ initialData }: ProfilePageProps) {
     const [formData, setFormData] = useState({
         // --- Personal Information Fields ---
         // We use the server data if it exists, otherwise default to empty
-        surname: initialData?.surname || "",
-        firstname: initialData?.firstname || "",
-        middlename: initialData?.middlename || "",
-        extension: initialData?.extension || "",
-        birthdate: initialData?.birthdate || "",
-        birthplace: initialData?.birthplace || "",
-        sex: initialData?.sex || "",
-        civil_status: initialData?.civil_status || "",
-        telephone_no: initialData?.telephone_no || "",
-        mobile_no: initialData?.mobile_no || "",
-        email: initialData?.email || "",
-        nationality: initialData?.nationality || "",
-        height: initialData?.height || "",
-        weight: initialData?.weight || "",
-        blood_type: initialData?.blood_type || "",
+        surname: personal_information?.surname || "",
+        firstname: personal_information?.firstname || "",
+        middlename: personal_information?.middlename || "",
+        extension: personal_information?.extension || "",
+        birthdate: personal_information?.birthdate || "",
+        birthplace: personal_information?.birthplace || "",
+        sex: personal_information?.sex || "",
+        civil_status: personal_information?.civil_status || "",
+        telephone_no: personal_information?.telephone_no || "",
+        mobile_no: personal_information?.mobile_no || "",
+        email: personal_information?.email || "",
+        nationality: personal_information?.nationality || "",
+        height: personal_information?.height || "",
+        weight: personal_information?.weight || "",
+        blood_type: personal_information?.blood_type || "",
 
         // --- Employment Details Fields (Existing) ---
-        position: initialData?.position || "HR Admin",
-        department: initialData?.department || "Human Resources",
-        employeeId: initialData?.id || "", // mapped from employee.id
-
-        // --- Address Fields (For later) ---
-        street: "",
-        city: "",
-        province: "",
+        id_number: employment_details?.id_number || "",
+        division: employment_details?.division || "",
+        department: employment_details?.department || "",
+        positions: employment_details?.positions || [],
     });
 
     const handleInputChange = (fieldOrEvent: any, value?: any) => {

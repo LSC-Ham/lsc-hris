@@ -23,13 +23,18 @@ export async function main() {
     // We combine User info and Employee info into one object for easier looping.
     const seeds = [
         {
-            username: "ad03069",
+            username: "",
             email: "hmarandang@lakeshore.edu.ph",
             password: hashedPassword,
             role: "admin",
+
+            // employee details
             id_number: "ad03069",
             department: "Information Technology",
+            hired_at: "",
             position: "IT Personnel",
+            status: "Full-Time",
+            start_at: new Date("1/22/2026"),
             division: "Admininistration"
         },
     ];
@@ -78,19 +83,13 @@ export async function main() {
                 employees: {
                     create: {
                         id_number: data.id_number,
-                        departments: {
-                            create: {
-                                departments_id: department.id,
-                            }
-                        },
+                        departments_id: department.id,
+                        divisions_id: division.id,
                         positions: {
                             create: {
                                 positions_id: position.id,
-                            }
-                        },
-                        divisions: {
-                            create: {
-                                divisions_id: division.id,
+                                status: data.status,
+                                start_at: data.start_at,
                             }
                         },
                         personal_information: {

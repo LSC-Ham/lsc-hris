@@ -5,26 +5,21 @@ import { authOptions } from "@/lib/auth"; // Make sure this path is correct
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
-export async function generateNextEmployeeId() {
+export async function generateEmployeeID() {
     try {
-        // 1. Get the total count (length) of the table
         const count = await prisma.employees.count();
 
-        // 2. Add 1 to the count
         const nextId = count + 1;
 
-        // 3. Convert to string (since your schema says id_number is String)
-        // Optional: Add .padStart(4, '0') if you want it to look like "0005" instead of just "5"
         return nextId.toString().padStart(4, '0');
     } catch (error) {
         console.error("Error generating ID:", error);
-        return ""; // Return empty string on failure so user can type manually
+        return "";
     }
 }
 
-export async function getUserProfile() {
+export async function getPersonalInformation() {
     try {
-        // 1. Get the current user's ID from session
         const session = await getServerSession(authOptions);
         if (!session?.user) {
             redirect("/login");
@@ -32,25 +27,17 @@ export async function getUserProfile() {
 
         const userId = (session.user as any).id;
 
-        // 2. Fetch Employee + Personal Info + Employment Details
         const employee = await prisma.employees.findUnique({
             where: { id: userId },
             include: {
                 personal_information: true,
-                // Assuming you have a relation for positions/employment
-                // employment_details: true, 
             },
         });
 
         if (!employee) return null;
 
-        // 3. Flatten the data to match your frontend State
-        // We merge employee table data AND personal_information table data
         return {
-            // --- IDs ---
             id: employee.id,
-
-            // --- Personal Info (Handling nulls with || "") ---
             surname: employee.personal_information?.surname || "",
             firstname: employee.personal_information?.firstname || "",
             middlename: employee.personal_information?.middlename || "",
@@ -66,6 +53,58 @@ export async function getUserProfile() {
             height: employee.personal_information?.height || "",
             weight: employee.personal_information?.weight || "",
             blood_type: employee.personal_information?.blood_type || "",
+        };
+
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+    }
+}
+
+export async function getEmployeeDetails() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) redirect("/login");
+
+        const userId = (session.user as any).id;
+
+        const employee = await prisma.employees.findUnique({
+            where: { id: userId },
+            include: {
+                // 1. Fetch the pivot table (employees_positions)
+                positions: {
+                    include: {
+                        positions: true
+                    },
+                    orderBy: {
+                        start_at: 'desc'
+                    }
+                },
+                government_ids: true,
+                divisions: true,
+                departments: true
+            }
+        });
+
+        if (!employee) return null;
+
+        // 3. Map the data to a clean structure for the frontend
+        const formattedPositions = employee.positions.map((record) => ({
+            id: record.id,                       // ID of the assignment
+            position_id: record.positions.id,    // ID of the position definition
+            position: record.positions.position, // THE NAME (e.g., "Software Engineer")
+            status: record.status,               // e.g., "Active", "Probationary"
+            description: record.description,
+            start_at: record.start_at,
+            end_at: record.end_at,
+        }));
+
+        return {
+            id_number: employee.id_number,
+            division: employee.divisions?.division, // or employee.divisions.name
+            department: employee.departments?.department,
+            positions: formattedPositions, // Return the formatted array
+            govt_ids: employee.government_ids,
         };
 
     } catch (error) {
