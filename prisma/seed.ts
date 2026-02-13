@@ -35,7 +35,9 @@ export async function main() {
             position: "IT Personnel",
             status: "Full-Time",
             start_at: new Date("1/22/2026"),
-            division: "Admininistration"
+            division: "Admininistration",
+            govt_id_label: "SSS No.",
+            govt_id_number: "414141",
         },
     ];
 
@@ -90,6 +92,12 @@ export async function main() {
                                 positions_id: position.id,
                                 status: data.status,
                                 start_at: data.start_at,
+                            }
+                        },
+                        government_ids: {
+                            create: {
+                                id_label: data.govt_id_label,
+                                id_number: data.govt_id_number,
                             }
                         },
                         personal_information: {

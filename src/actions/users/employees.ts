@@ -89,6 +89,12 @@ export async function getEmployeeDetails() {
         if (!employee) return null;
 
         // 3. Map the data to a clean structure for the frontend
+        const formattedGovIds = employee.government_ids.map((record) => ({
+            id: record.id,
+            id_label: record.id_label,
+            id_number: record.id_number,
+        }));
+
         const formattedPositions = employee.positions.map((record) => ({
             id: record.id,                       // ID of the assignment
             position_id: record.positions.id,    // ID of the position definition
@@ -104,7 +110,46 @@ export async function getEmployeeDetails() {
             division: employee.divisions?.division, // or employee.divisions.name
             department: employee.departments?.department,
             positions: formattedPositions, // Return the formatted array
-            govt_ids: employee.government_ids,
+            govt_ids: formattedGovIds,
+        };
+
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+    }
+}
+
+export async function getAddress() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) redirect("/login");
+
+        const userId = (session.user as any).id;
+
+        const employee = await prisma.employees.findUnique({
+            where: { id: userId },
+            include: {
+                address: true,
+            },
+        });
+
+        if (!employee) return null;
+
+        const formattedAddress = employee.address.map((record) => ({
+            id: record.id,
+            address_type: record.address_type,
+            region: record.region,
+            province: record.province,
+            city: record.city,
+            barangay: record.barangary,
+            house: record.house_no,
+            street: record.street,
+            subdivision: record.subdivision,
+            zip_code: record.zip_code,
+        }));
+        return {
+            id: employee.id,
+            address: formattedAddress,
         };
 
     } catch (error) {

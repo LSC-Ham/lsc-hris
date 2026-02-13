@@ -11,10 +11,17 @@ import { FamilyBackground } from "@/components/profile/FamilyBackground";
 interface ProfilePageProps {
     personal_information: any; // You can be more specific with the type if you want
     employment_details: any;
+    address: any;
 }
 
-export default function ProfilePage({ personal_information, employment_details }: ProfilePageProps) {
+export default function ProfilePage({ personal_information, employment_details, address }: ProfilePageProps) {
     const [activeTab, setActiveTab] = useState("Employment Details");
+
+    const findGovId = (label: string) => {
+        if (!employment_details?.govt_ids) return "";
+        const found = employment_details.govt_ids.find((id: any) => id.id_label === label);
+        return found ? found.id_number : "";
+    };
 
     const menuItems = [
         "Employment Details",
@@ -54,6 +61,14 @@ export default function ProfilePage({ personal_information, employment_details }
         division: employment_details?.division || "",
         department: employment_details?.department || "",
         positions: employment_details?.positions || [],
+        gsis_no: findGovId("GSIS No."),
+        pagibig_no: findGovId("Pag-IBIG No."),
+        philhealth_no: findGovId("PhilHealth No."),
+        sss_no: findGovId("SSS No."),
+        tin_no: findGovId("TIN No."),
+        agency_no: findGovId("Agency No."),
+        govt_ids: employment_details?.govt_ids || [],
+
     });
 
     const handleInputChange = (fieldOrEvent: any, value?: any) => {
@@ -120,10 +135,10 @@ export default function ProfilePage({ personal_information, employment_details }
                     {/* User Card */}
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
                         <div className="w-24 h-24 rounded-full bg-green-50 border-4 border-white shadow-sm flex items-center justify-center mb-4 text-2xl font-bold text-[#1a6b36]">
-                            JD
+
                         </div>
-                        <h2 className="text-lg font-bold text-gray-800">Juan Dela Cruz</h2>
-                        <p className="text-xs text-gray-500 mb-1">HR Admin</p>
+                        <h2 className="text-lg font-bold text-gray-800 capitalize">{formData.firstname} {formData.surname}</h2>
+                        <p className="text-xs text-gray-500 mb-1">{formData.department}</p>
                     </div>
 
                     {/* Navigation Menu */}

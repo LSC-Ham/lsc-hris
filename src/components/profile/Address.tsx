@@ -219,7 +219,7 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
                         onChange={handleProvinceChange}
                         disabled={provinces.length === 0}
                         placeholder={provinces.length === 0 && formData.region ? "N/A (Metro Manila)" : "Select Province"}
-                        required={provinces.length > 0}
+                        required
                     />
 
                     {/* City */}

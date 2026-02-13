@@ -143,7 +143,7 @@ model employees {
 model employees_govIDs {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   employees_id String    @db.Uuid
-  id_label     String
+  id_label     String 
   id_number    String
   created_at   DateTime  @default(now()) @db.Timestamp(6)
   updated_at   DateTime? @updatedAt @db.Timestamp(6)

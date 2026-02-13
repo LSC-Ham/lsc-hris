@@ -20,7 +20,7 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
 
     // --- UI State ---
     const [isEditing, setIsEditing] = useState(mode === "create");
-    const [tempPosition, setTempPosition] = useState({
+    const [assignedPosition, setAssignedPosition] = useState({
         position: "", status: "", description: "", start_at: "", end_at: ""
     });
 
@@ -50,15 +50,15 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
     }, []);
 
     // --- Handlers ---
-    const handleTempChange = (field: string, value: string) => {
-        setTempPosition((prev) => ({ ...prev, [field]: value }));
+    const handleAssignedChange = (field: string, value: string) => {
+        setAssignedPosition((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleAddPositionObj = () => {
-        if (!tempPosition.position || !tempPosition.status) return;
-        const updatedPositions = [...(formData.positions || []), tempPosition];
+        if (!assignedPosition.position || !assignedPosition.status) return;
+        const updatedPositions = [...(formData.positions || []), assignedPosition];
         onChange("positions", updatedPositions);
-        setTempPosition({ position: "", status: "", description: "", start_at: "", end_at: "" });
+        setAssignedPosition({ position: "", status: "", description: "", start_at: "", end_at: "" });
     };
 
     const handleRemovePosition = (indexToRemove: number) => {
@@ -133,8 +133,8 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                                     <div
                                         key={pos.id || index}
                                         className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-lg border transition-colors ${pos.status === 'Active'
-                                                ? 'bg-white border-green-200 shadow-sm'
-                                                : 'bg-gray-50 border-gray-100 opacity-75'
+                                            ? 'bg-white border-green-200 shadow-sm'
+                                            : 'bg-gray-50 border-gray-100 opacity-75'
                                             }`}
                                     >
                                         {/* Left Side: Position Info */}
@@ -146,8 +146,8 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
 
                                                 {/* Status Badge */}
                                                 <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border ${pos.status === 'Active'
-                                                        ? 'bg-green-50 text-green-700 border-green-200'
-                                                        : 'bg-gray-200 text-gray-600 border-gray-300'
+                                                    ? 'bg-green-50 text-green-700 border-green-200'
+                                                    : 'bg-gray-200 text-gray-600 border-gray-300'
                                                     }`}>
                                                     {pos.status || 'N/A'}
                                                 </span>
@@ -201,50 +201,50 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <ProfileSelect
                                         label="Position Title"
-                                        value={tempPosition.position}
+                                        value={assignedPosition.position}
                                         options={positions}
                                         isEditing={true}
-                                        onChange={(e: any) => handleTempChange("position", e.target.value)}
+                                        onChange={(e: any) => handleAssignedChange("position", e.target.value)}
                                         required
                                     />
                                     <ProfileSelect
                                         label="Status"
-                                        value={tempPosition.status}
+                                        value={assignedPosition.status}
                                         options={POSITION_STATUSES}
                                         isEditing={true}
-                                        onChange={(e: any) => handleTempChange("status", e.target.value)}
+                                        onChange={(e: any) => handleAssignedChange("status", e.target.value)}
                                         required
                                     />
                                 </div>
                                 <ProfileField
                                     label="Description"
-                                    value={tempPosition.description}
+                                    value={assignedPosition.description}
                                     isEditing={true}
                                     placeholder="Optional details..."
-                                    onChange={(e: any) => handleTempChange("description", e.target.value)}
+                                    onChange={(e: any) => handleAssignedChange("description", e.target.value)}
                                 />
                                 <div className="grid grid-cols-2 gap-4">
                                     <ProfileField
                                         label="Start Date"
                                         type="date"
-                                        value={tempPosition.start_at}
+                                        value={assignedPosition.start_at}
                                         isEditing={true}
-                                        onChange={(e: any) => handleTempChange("start_at", e.target.value)}
+                                        onChange={(e: any) => handleAssignedChange("start_at", e.target.value)}
                                         required
                                     />
                                     <ProfileField
                                         label="End Date (Optional)"
                                         type="date"
-                                        value={tempPosition.end_at}
+                                        value={assignedPosition.end_at}
                                         isEditing={true}
-                                        onChange={(e: any) => handleTempChange("end_at", e.target.value)}
+                                        onChange={(e: any) => handleAssignedChange("end_at", e.target.value)}
                                     />
                                 </div>
                                 <div className="flex justify-end">
                                     <button
                                         type="button"
                                         onClick={handleAddPositionObj}
-                                        disabled={!tempPosition.position || !tempPosition.status}
+                                        disabled={!assignedPosition.position || !assignedPosition.status}
                                         className="bg-[#1a6b36] text-white text-xs px-4 py-2 rounded-lg hover:bg-[#155a2b] disabled:opacity-50 transition-colors"
                                     >
                                         + Add Position
@@ -261,12 +261,42 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                         Government Identifiers
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <ProfileField label="GSIS No." value={formData.gsis_no} isEditing={isEditing} onChange={(e: any) => onChange("gsis_no", e.target.value)} />
-                        <ProfileField label="Pag-IBIG No." value={formData.pagibig_no} isEditing={isEditing} onChange={(e: any) => onChange("pagibig_no", e.target.value)} />
-                        <ProfileField label="PhilHealth No." value={formData.philhealth_no} isEditing={isEditing} onChange={(e: any) => onChange("philhealth_no", e.target.value)} />
-                        <ProfileField label="SSS No." value={formData.sss_no} isEditing={isEditing} onChange={(e: any) => onChange("sss_no", e.target.value)} />
-                        <ProfileField label="TIN No." value={formData.tin_no} isEditing={isEditing} onChange={(e: any) => onChange("tin_no", e.target.value)} />
-                        <ProfileField label="Agency No." value={formData.agency_no} isEditing={isEditing} onChange={(e: any) => onChange("agency_no", e.target.value)} />
+                        <ProfileField
+                            label="GSIS No."
+                            value={formData.gsis_no} // This now has the data from the array
+                            isEditing={isEditing}
+                            onChange={(e: any) => onChange("gsis_no", e.target.value)}
+                        />
+                        <ProfileField
+                            label="Pag-IBIG No."
+                            value={formData.pagibig_no}
+                            isEditing={isEditing}
+                            onChange={(e: any) => onChange("pagibig_no", e.target.value)}
+                        />
+                        <ProfileField
+                            label="PhilHealth No."
+                            value={formData.philhealth_no}
+                            isEditing={isEditing}
+                            onChange={(e: any) => onChange("philhealth_no", e.target.value)}
+                        />
+                        <ProfileField
+                            label="SSS No."
+                            value={formData.sss_no}
+                            isEditing={isEditing}
+                            onChange={(e: any) => onChange("sss_no", e.target.value)}
+                        />
+                        <ProfileField
+                            label="TIN No."
+                            value={formData.tin_no}
+                            isEditing={isEditing}
+                            onChange={(e: any) => onChange("tin_no", e.target.value)}
+                        />
+                        <ProfileField
+                            label="Agency No."
+                            value={formData.agency_no}
+                            isEditing={isEditing}
+                            onChange={(e: any) => onChange("agency_no", e.target.value)}
+                        />
                     </div>
                 </div>
             </div>
