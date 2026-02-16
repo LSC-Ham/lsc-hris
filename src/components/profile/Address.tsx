@@ -2,48 +2,11 @@
 
 import { useState, useEffect, ChangeEvent } from "react";
 
-// 1. MAIN COMPONENT (The Container)
-export function Address() {
-    return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* SECTION 1: Residential Address */}
-            <AddressSection
-                title="Residential Address"
-                initialData={{
-                    region: "",
-                    province: "",
-                    city: "",
-                    barangay: "",
-                    house_no: "",
-                    street: "",
-                    subdivision: "",
-                    zip_code: "",
-                }}
-            />
-
-            {/* SECTION 2: Permanent Address */}
-            <AddressSection
-                title="Permanent Address"
-                initialData={{
-                    region: "",
-                    province: "",
-                    city: "",
-                    barangay: "",
-                    house_no: "",
-                    street: "",
-                    subdivision: "",
-                    zip_code: "",
-                }}
-            />
-        </div>
-    );
-}
-
 // ----------------------------------------------------------------------
-// 2. SMART SECTION COMPONENT (API LOGIC)
+// 1. TYPES & INTERFACES
 // ----------------------------------------------------------------------
 
-interface AddressData {
+export interface AddressData {
     region: string;
     province: string;
     city: string;
@@ -59,9 +22,62 @@ interface GeoEntity {
     name: string;
 }
 
-function AddressSection({ title, initialData }: { title: string, initialData: AddressData }) {
+// The props this template expects from the parent page
+interface AddressTemplateProps {
+    residentialData?: AddressData;
+    permanentData?: AddressData;
+    onSave: (type: "Residential" | "Permanent", updatedData: AddressData) => void;
+}
+
+const defaultAddress: AddressData = {
+    region: "", province: "", city: "", barangay: "",
+    house_no: "", street: "", subdivision: "", zip_code: "",
+};
+
+// ----------------------------------------------------------------------
+// 2. MAIN COMPONENT (The Reusable Template)
+// ----------------------------------------------------------------------
+
+export function Address({
+    residentialData = defaultAddress,
+    permanentData = defaultAddress,
+    onSave
+}: AddressTemplateProps) {
+    return (
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* SECTION 1: Residential Address */}
+            <AddressSection
+                title="Residential Address"
+                type="Residential"
+                initialData={residentialData}
+                onSave={onSave}
+            />
+
+            {/* SECTION 2: Permanent Address */}
+            <AddressSection
+                title="Permanent Address"
+                type="Permanent"
+                initialData={permanentData}
+                onSave={onSave}
+            />
+        </div>
+    );
+}
+
+// ----------------------------------------------------------------------
+// 3. SMART SECTION COMPONENT (API LOGIC)
+// ----------------------------------------------------------------------
+
+interface AddressSectionProps {
+    title: string;
+    type: "Residential" | "Permanent";
+    initialData: AddressData;
+    onSave: (type: "Residential" | "Permanent", data: AddressData) => void;
+}
+
+function AddressSection({ title, type, initialData, onSave }: AddressSectionProps) {
     const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState(initialData);
+    const [formData, setFormData] = useState<AddressData>(initialData);
 
     // --- PSGC Data State ---
     const [regions, setRegions] = useState<GeoEntity[]>([]);
@@ -75,6 +91,11 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
     const [loadingCities, setLoadingCities] = useState(false);
     const [loadingBarangays, setLoadingBarangays] = useState(false);
 
+    // Sync formData if initialData changes from parent
+    useEffect(() => {
+        setFormData(initialData);
+    }, [initialData]);
+
     // 1. Fetch Regions on Mount (or when editing starts)
     useEffect(() => {
         if (isEditing && regions.length === 0) {
@@ -85,30 +106,25 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
                 .catch(err => console.error(err))
                 .finally(() => setLoadingRegions(false));
         }
-    }, [isEditing]);
+    }, [isEditing, regions.length]);
 
-    // 2. Handle Region Change -> Fetch Provinces (or Cities if NCR)
+    // 2. Handle Region Change
     const handleRegionChange = async (e: ChangeEvent<HTMLSelectElement>) => {
         const selectedName = e.target.value;
         const selectedRegion = regions.find(r => r.name === selectedName);
 
         setFormData(prev => ({ ...prev, region: selectedName, province: "", city: "", barangay: "" }));
-        setProvinces([]);
-        setCities([]);
-        setBarangays([]);
+        setProvinces([]); setCities([]); setBarangays([]);
 
         if (selectedRegion) {
             setLoadingProvinces(true);
             try {
-                // Try fetching provinces first
                 const provRes = await fetch(`https://psgc.gitlab.io/api/regions/${selectedRegion.code}/provinces/`);
                 const provData = await provRes.json();
 
                 if (provData.length > 0) {
-                    // Normal Region
                     setProvinces(provData.sort((a: GeoEntity, b: GeoEntity) => a.name.localeCompare(b.name)));
                 } else {
-                    // Metro Manila (NCR) has no provinces, fetch cities directly
                     setLoadingCities(true);
                     const cityRes = await fetch(`https://psgc.gitlab.io/api/regions/${selectedRegion.code}/cities-municipalities/`);
                     const cityData = await cityRes.json();
@@ -122,14 +138,13 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
         }
     };
 
-    // 3. Handle Province Change -> Fetch Cities
+    // 3. Handle Province Change
     const handleProvinceChange = async (e: ChangeEvent<HTMLSelectElement>) => {
         const selectedName = e.target.value;
         const selectedProv = provinces.find(p => p.name === selectedName);
 
         setFormData(prev => ({ ...prev, province: selectedName, city: "", barangay: "" }));
-        setCities([]);
-        setBarangays([]);
+        setCities([]); setBarangays([]);
 
         if (selectedProv) {
             setLoadingCities(true);
@@ -141,7 +156,7 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
         }
     };
 
-    // 4. Handle City Change -> Fetch Barangays
+    // 4. Handle City Change
     const handleCityChange = async (e: ChangeEvent<HTMLSelectElement>) => {
         const selectedName = e.target.value;
         const selectedCity = cities.find(c => c.name === selectedName);
@@ -167,14 +182,11 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
     // 6. UI Actions
     const handleCancel = () => {
         setIsEditing(false);
-        setFormData(initialData);
-        // Optional: clear fetched data or keep it cached
+        setFormData(initialData); // Reset back to parent's original data
     };
 
-    const handleSave = () => {
-        // Here you would typically send the data to your backend API
-        console.log(`Saving ${title}:`, formData);
-        alert(`Saved changes for ${title}!`);
+    const handleSaveClick = () => {
+        onSave(type, formData); // Pass the localized data back up to the parent
         setIsEditing(false);
     };
 
@@ -195,10 +207,6 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
             {/* FORM GRID */}
             <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                    {/* --- CASCADING DROPDOWNS --- */}
-
-                    {/* Region */}
                     <AddressSelect
                         label="Region"
                         value={formData.region}
@@ -208,8 +216,6 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
                         onChange={handleRegionChange}
                         required
                     />
-
-                    {/* Province (Hidden/Disabled if list is empty, e.g. NCR) */}
                     <AddressSelect
                         label="Province"
                         value={formData.province}
@@ -221,8 +227,6 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
                         placeholder={provinces.length === 0 && formData.region ? "N/A (Metro Manila)" : "Select Province"}
                         required
                     />
-
-                    {/* City */}
                     <AddressSelect
                         label="City / Municipality"
                         value={formData.city}
@@ -233,8 +237,6 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
                         disabled={cities.length === 0}
                         required
                     />
-
-                    {/* Barangay */}
                     <AddressSelect
                         label="Barangay"
                         value={formData.barangay}
@@ -245,9 +247,6 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
                         disabled={barangays.length === 0}
                         required
                     />
-
-                    {/* --- STANDARD TEXT FIELDS --- */}
-
                     <AddressField
                         label="House/Block/Lot No."
                         value={formData.house_no}
@@ -280,10 +279,10 @@ function AddressSection({ title, initialData }: { title: string, initialData: Ad
                     <div className="flex justify-end pt-6 border-t border-gray-100 mt-6 animate-in fade-in">
                         <button
                             type="button"
-                            onClick={handleSave}
+                            onClick={handleSaveClick}
                             className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95"
                         >
-                            Save Changes
+                            Save {title}
                         </button>
                     </div>
                 )}

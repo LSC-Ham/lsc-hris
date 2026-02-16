@@ -9,7 +9,7 @@ interface PersonalInformationProps {
     mode?: "view" | "create";
     formData: any;
     onChange: (field: string, value: any) => void;
-    onSave?: () => void;
+    onSave: () => void; // 👈 Add this line
 }
 
 export function PersonalInformation({ mode = "view", formData, onChange, onSave }: PersonalInformationProps) {
@@ -171,8 +171,11 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
                 <div className="flex justify-end pt-6 border-t border-gray-100 mt-6">
                     <button
                         type="button"
-                        onClick={onSave}
                         className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95"
+                        onClick={() => {
+                            onSave(); // Tell the parent to save to the DB
+                            setIsEditing(false); // Switch back to "view" mode
+                        }}
                     >
                         Save Changes
                     </button>

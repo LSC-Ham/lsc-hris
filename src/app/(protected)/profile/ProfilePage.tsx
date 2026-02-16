@@ -12,6 +12,7 @@ interface ProfilePageProps {
     personal_information: any; // You can be more specific with the type if you want
     employment_details: any;
     address: any;
+
 }
 
 export default function ProfilePage({ personal_information, employment_details, address }: ProfilePageProps) {
@@ -38,8 +39,7 @@ export default function ProfilePage({ personal_information, employment_details, 
     ];
 
     const [formData, setFormData] = useState({
-        // --- Personal Information Fields ---
-        // We use the server data if it exists, otherwise default to empty
+        // --- Personal Information Fields
         surname: personal_information?.surname || "",
         firstname: personal_information?.firstname || "",
         middlename: personal_information?.middlename || "",
@@ -56,7 +56,7 @@ export default function ProfilePage({ personal_information, employment_details, 
         weight: personal_information?.weight || "",
         blood_type: personal_information?.blood_type || "",
 
-        // --- Employment Details Fields (Existing) ---
+        // --- Employment Details Fields 
         id_number: employment_details?.id_number || "",
         division: employment_details?.division || "",
         department: employment_details?.department || "",
@@ -69,23 +69,41 @@ export default function ProfilePage({ personal_information, employment_details, 
         agency_no: findGovId("Agency No."),
         govt_ids: employment_details?.govt_ids || [],
 
+        // --- Address
+        address_type: address?.address_type || "", //it can be Resident Address, 
+        region: address?.region || "",
+        province: address?.province || "",
+        city: address?.city || "",
+        barangay: address?.barangay || "",
+
     });
 
     const handleInputChange = (fieldOrEvent: any, value?: any) => {
-        // CHECK: Is this a direct (key, value) update from our Smart Components?
         if (typeof fieldOrEvent === 'string') {
             setFormData((prev: any) => ({
                 ...prev,
                 [fieldOrEvent]: value
             }));
         }
-        // OTHERWISE: It's a standard HTML event (from simple inputs)
         else {
             const { name, value } = fieldOrEvent.target;
             setFormData((prev: any) => ({
                 ...prev,
                 [name]: value
             }));
+        }
+    };
+    const handleSaveChanges = async () => {
+        try {
+            // Here you will call your Server Action to save to the database
+            // Example: await updateProfile(formData);
+
+            console.log("Submitting this to database:", formData);
+            alert("Changes saved successfully!");
+
+        } catch (error) {
+            console.error("Failed to save:", error);
+            alert("Failed to save changes.");
         }
     };
 
@@ -95,9 +113,9 @@ export default function ProfilePage({ personal_information, employment_details, 
             case "Employment Details":
                 return <EmploymentDetails formData={formData} onChange={handleInputChange} />;
             case "Personal Information":
-                return <PersonalInformation formData={formData} onChange={handleInputChange} />;
+                return <PersonalInformation formData={formData} onChange={handleInputChange} onSave={handleSaveChanges} />;
             case "Employee Address":
-                return <Address />;
+                return <Address formData={formData} onSave={handleSaveChanges} />;
             case "Family Background":
                 return <FamilyBackground />;
             // Add more cases here as you create files:
