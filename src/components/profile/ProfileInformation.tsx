@@ -9,16 +9,53 @@ interface PersonalInformationProps {
     mode?: "view" | "create";
     formData: any;
     onChange: (field: string, value: any) => void;
-    onSave: () => void; // 👈 Add this line
+    onSave: () => void;
 }
 
 export function PersonalInformation({ mode = "view", formData, onChange, onSave }: PersonalInformationProps) {
     const [isEditing, setIsEditing] = useState(mode === "create");
+
+    // 1. Create a local draft to hold typed text safely
+    const [draftData, setDraftData] = useState(formData);
+
     const [cityOptions, setCityOptions] = useState<string[]>([]);
     const [nationalityOptions, setNationalityOptions] = useState<string[]>([]);
     const [isLoadingCities, setIsLoadingCities] = useState(true);
     const [isLoadingNationalities, setIsLoadingNationalities] = useState(true);
 
+    // 2. Keep the draft fresh if parent data updates
+    useEffect(() => {
+        setDraftData(formData);
+    }, [formData]);
+
+    // 3. Local handler: updates the draft, NOT the parent
+    const handleLocalChange = (field: string, value: any) => {
+        setDraftData((prev: any) => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    // 4. Cancel: Throw away the typed text and reset to original
+    const handleCancel = () => {
+        setDraftData(formData);
+        setIsEditing(false);
+    };
+
+    // 5. Save: Send the draft to the parent's handleInputChange function
+    const handleSaveClick = () => {
+        // Loop through the draft and update the parent only for changed fields
+        Object.keys(draftData).forEach((key) => {
+            if (draftData[key] !== formData[key]) {
+                onChange(key, draftData[key]);
+            }
+        });
+
+        setIsEditing(false);
+        setTimeout(() => onSave(), 0);
+    };
+
+    // --- Fetch Cities ---
     useEffect(() => {
         const fetchCities = async () => {
             try {
@@ -37,23 +74,14 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
         fetchCities();
     }, []);
 
-    // --- Fetch Nationalities (with Flags) ---
+    // --- Fetch Nationalities ---
     useEffect(() => {
         const fetchNationalities = async () => {
             try {
                 const response = await fetch("https://countriesnow.space/api/v0.1/countries/flag/unicode");
                 const result = await response.json();
-
-                // 1. Sort the raw data by the 'name' property
-                const sortedData = result.data.sort((a: any, b: any) =>
-                    a.name.localeCompare(b.name)
-                );
-
-                // 2. Now map the sorted data to include the flag
-                const formattedCountries = sortedData.map((country: any) =>
-                    `${country.name}`
-                );
-
+                const sortedData = result.data.sort((a: any, b: any) => a.name.localeCompare(b.name));
+                const formattedCountries = sortedData.map((country: any) => `${country.name}`);
                 setNationalityOptions(formattedCountries);
             } catch (error) {
                 console.error("Failed to fetch nationalities:", error);
@@ -73,96 +101,50 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
                 {mode !== "create" && (
                     <button
                         type="button"
-                        onClick={() => setIsEditing(!isEditing)}
-                        className="text-[#1a6b36] text-sm font-medium"
+                        onClick={isEditing ? handleCancel : () => setIsEditing(true)}
+                        className="text-[#1a6b36] text-sm font-medium hover:underline"
                     >
                         {isEditing ? "Cancel" : "Edit"}
                     </button>
                 )}
             </div>
 
-            {/* Form Fields */}
+            {/* Form Fields - Now wired to 'draftData' and 'handleLocalChange' */}
             <div className="space-y-6">
-                <ProfileField
-                    label="Surname"
-                    value={formData.surname}
-                    isEditing={isEditing}
-                    placeholder="Dela Cruz"
-                    onChange={(e: any) => onChange("surname", e.target.value)}
-                    required
-                />
-                <ProfileField
-                    label="First Name"
-                    value={formData.firstname}
-                    isEditing={isEditing}
-                    placeholder="Juan"
-                    onChange={(e: any) => onChange("firstname", e.target.value)}
-                    required
-                />
+                <ProfileField label="Surname" value={draftData.surname} isEditing={isEditing} placeholder="Dela Cruz" onChange={(e: any) => handleLocalChange("surname", e.target.value)} required />
+                <ProfileField label="First Name" value={draftData.firstname} isEditing={isEditing} placeholder="Juan" onChange={(e: any) => handleLocalChange("firstname", e.target.value)} required />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ProfileField label="Middle Name" value={formData.middlename} isEditing={isEditing} placeholder="Santos" onChange={(e: any) => onChange("middlename", e.target.value)} />
-                    <ProfileField label="Extension" value={formData.extension} isEditing={isEditing} placeholder="Jr." onChange={(e: any) => onChange("extension", e.target.value)} />
+                    <ProfileField label="Middle Name" value={draftData.middlename} isEditing={isEditing} placeholder="Santos" onChange={(e: any) => handleLocalChange("middlename", e.target.value)} />
+                    <ProfileField label="Extension" value={draftData.extension} isEditing={isEditing} placeholder="Jr." onChange={(e: any) => handleLocalChange("extension", e.target.value)} />
 
-                    <ProfileField label="Date of Birth" value={formData.birthdate} type="date" isEditing={isEditing} onChange={(e: any) => onChange("birthdate", e.target.value)} />
+                    <ProfileField label="Date of Birth" value={draftData.birthdate} type="date" isEditing={isEditing} onChange={(e: any) => handleLocalChange("birthdate", e.target.value)} />
 
-                    {/* Place of Birth */}
                     {isLoadingCities ? (
                         <LoadingPlaceholder label="Place of Birth" />
                     ) : (
-                        <ProfileSelect
-                            label="Place of Birth"
-                            value={formData.birthplace}
-                            options={cityOptions}
-                            isEditing={isEditing}
-                            onChange={(e: any) => onChange("birthplace", e.target.value)}
-                        />
+                        <ProfileSelect label="Place of Birth" value={draftData.birthplace} options={cityOptions} isEditing={isEditing} onChange={(e: any) => handleLocalChange("birthplace", e.target.value)} />
                     )}
 
-                    {/* Sex Dropdown */}
-                    <ProfileSelect
-                        label="Sex"
-                        value={formData.sex}
-                        options={SEX}
-                        isEditing={isEditing}
-                        onChange={(e: any) => onChange("sex", e.target.value)}
-                        required
-                    />
+                    <ProfileSelect label="Sex" value={draftData.sex} options={SEX} isEditing={isEditing} onChange={(e: any) => handleLocalChange("sex", e.target.value)} required />
+                    <ProfileSelect label="Civil Status" value={draftData.civil_status} options={CIVIL_STATUS} isEditing={isEditing} onChange={(e: any) => handleLocalChange("civil_status", e.target.value)} required />
 
-                    {/* Civil Status Dropdown */}
-                    <ProfileSelect
-                        label="Civil Status"
-                        value={formData.civil_status}
-                        options={CIVIL_STATUS}
-                        isEditing={isEditing}
-                        onChange={(e: any) => onChange("civil_status", e.target.value)}
-                        required
-                    />
-
-                    <ProfileField label="Telephone No." value={formData.telephone_no} isEditing={isEditing} placeholder="0909-XXX-XXXX" onChange={(e: any) => onChange("telephone_no", e.target.value)} />
-                    <ProfileField label="Mobile No." value={formData.mobile_no} isEditing={isEditing} placeholder="0999-XXX-XXXX" onChange={(e: any) => onChange("mobile_no", e.target.value)} />
+                    <ProfileField label="Telephone No." value={draftData.telephone_no} isEditing={isEditing} placeholder="0909-XXX-XXXX" onChange={(e: any) => handleLocalChange("telephone_no", e.target.value)} />
+                    <ProfileField label="Mobile No." value={draftData.mobile_no} isEditing={isEditing} placeholder="0999-XXX-XXXX" onChange={(e: any) => handleLocalChange("mobile_no", e.target.value)} />
                 </div>
 
-                <ProfileField label="Personal Email Address" value={formData.email} isEditing={isEditing} placeholder="jdelacruz@lakeshore.edu.ph" onChange={(e: any) => onChange("email", e.target.value)} />
+                <ProfileField label="Personal Email Address" value={draftData.email} isEditing={isEditing} placeholder="jdelacruz@lakeshore.edu.ph" onChange={(e: any) => handleLocalChange("email", e.target.value)} />
 
-                {/* Nationality with Flag API */}
                 {isLoadingNationalities ? (
                     <LoadingPlaceholder label="Nationality" />
                 ) : (
-                    <ProfileSelect
-                        label="Nationality"
-                        value={formData.nationality}
-                        options={nationalityOptions}
-                        isEditing={isEditing}
-                        onChange={(e: any) => onChange("nationality", e.target.value)}
-                        required
-                    />
+                    <ProfileSelect label="Nationality" value={draftData.nationality} options={nationalityOptions} isEditing={isEditing} onChange={(e: any) => handleLocalChange("nationality", e.target.value)} required />
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <ProfileField label="Height" value={formData.height} isEditing={isEditing} placeholder="1.79m" onChange={(e: any) => onChange("height", e.target.value)} />
-                    <ProfileField label="Weight" value={formData.weight} isEditing={isEditing} placeholder="80kg" onChange={(e: any) => onChange("weight", e.target.value)} />
-                    <ProfileField label="Blood Type" value={formData.blood_type} isEditing={isEditing} placeholder="O+" onChange={(e: any) => onChange("blood_type", e.target.value)} />
+                    <ProfileField label="Height" value={draftData.height} isEditing={isEditing} placeholder="1.79m" onChange={(e: any) => handleLocalChange("height", e.target.value)} />
+                    <ProfileField label="Weight" value={draftData.weight} isEditing={isEditing} placeholder="80kg" onChange={(e: any) => handleLocalChange("weight", e.target.value)} />
+                    <ProfileField label="Blood Type" value={draftData.blood_type} isEditing={isEditing} placeholder="O+" onChange={(e: any) => handleLocalChange("blood_type", e.target.value)} />
                 </div>
             </div>
 
@@ -172,10 +154,7 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
                     <button
                         type="button"
                         className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95"
-                        onClick={() => {
-                            onSave(); // Tell the parent to save to the DB
-                            setIsEditing(false); // Switch back to "view" mode
-                        }}
+                        onClick={handleSaveClick}
                     >
                         Save Changes
                     </button>
@@ -198,7 +177,7 @@ function LoadingPlaceholder({ label }: { label: string }) {
 }
 
 // ----------------------------------------------------------------------
-// HELPER COMPONENTS (ProfileField and ProfileSelect remain the same)
+// HELPER COMPONENTS
 // ----------------------------------------------------------------------
 
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
@@ -210,7 +189,7 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
             {isEditing ? (
                 <input
                     type={type}
-                    value={value}
+                    value={value || ""}
                     placeholder={placeholder}
                     onChange={onChange}
                     required={required}
@@ -239,7 +218,7 @@ function ProfileSelect({ label, value, options, isEditing, onChange, required, d
             {isEditing ? (
                 <div className="relative">
                     <select
-                        value={value}
+                        value={value || ""}
                         onChange={onChange}
                         required={required}
                         disabled={disabled}

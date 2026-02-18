@@ -9,10 +9,9 @@ import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
 
 interface ProfilePageProps {
-    personal_information: any; // You can be more specific with the type if you want
+    personal_information: any;
     employment_details: any;
-    address: any;
-
+    address: any; // Ideally, this comes in from the server as an array of address objects
 }
 
 export default function ProfilePage({ personal_information, employment_details, address }: ProfilePageProps) {
@@ -22,6 +21,14 @@ export default function ProfilePage({ personal_information, employment_details, 
         if (!employment_details?.govt_ids) return "";
         const found = employment_details.govt_ids.find((id: any) => id.id_label === label);
         return found ? found.id_number : "";
+    };
+
+    // Helper to find specific address type if the server passes an array of addresses
+    const getAddressByType = (type: string) => {
+        if (Array.isArray(address)) {
+            return address.find((a: any) => a.address_type === type) || {};
+        }
+        return address?.address_type === type ? address : {};
     };
 
     const menuItems = [
@@ -38,8 +45,9 @@ export default function ProfilePage({ personal_information, employment_details, 
         "References",
     ];
 
+    // --- 1. Main Flat Form Data (Personal & Employment) ---
     const [formData, setFormData] = useState({
-        // --- Personal Information Fields
+        // Personal Information Fields
         surname: personal_information?.surname || "",
         firstname: personal_information?.firstname || "",
         middlename: personal_information?.middlename || "",
@@ -56,7 +64,7 @@ export default function ProfilePage({ personal_information, employment_details, 
         weight: personal_information?.weight || "",
         blood_type: personal_information?.blood_type || "",
 
-        // --- Employment Details Fields 
+        // Employment Details Fields 
         id_number: employment_details?.id_number || "",
         division: employment_details?.division || "",
         department: employment_details?.department || "",
@@ -68,24 +76,40 @@ export default function ProfilePage({ personal_information, employment_details, 
         tin_no: findGovId("TIN No."),
         agency_no: findGovId("Agency No."),
         govt_ids: employment_details?.govt_ids || [],
-
-        // --- Address
-        address_type: address?.address_type || "", //it can be Resident Address, 
-        region: address?.region || "",
-        province: address?.province || "",
-        city: address?.city || "",
-        barangay: address?.barangay || "",
-
     });
 
+    // --- 2. Separate Nested State for Addresses ---
+    const [addressData, setAddressData] = useState({
+        residential: {
+            house_no: getAddressByType("Residential Address").house_no || "",
+            street: getAddressByType("Residential Address").street || "",
+            subdivision: getAddressByType("Residential Address").subdivision || "",
+            region: getAddressByType("Residential Address").region || "",
+            province: getAddressByType("Residential Address").province || "",
+            city: getAddressByType("Residential Address").city || "",
+            barangary: getAddressByType("Residential Address").barangary || "",
+            zip_code: getAddressByType("Residential Address").zip_code || "",
+        },
+        permanent: {
+            house_no: getAddressByType("Permanent Address").house_no || "",
+            street: getAddressByType("Permanent Address").street || "",
+            subdivision: getAddressByType("Permanent Address").subdivision || "",
+            region: getAddressByType("Permanent Address").region || "",
+            province: getAddressByType("Permanent Address").province || "",
+            city: getAddressByType("Permanent Address").city || "",
+            barangary: getAddressByType("Permanent Address").barangary || "",
+            zip_code: getAddressByType("Permanent Address").zip_code || "",
+        }
+    });
+
+    // Handler for flat data (Personal/Employment)
     const handleInputChange = (fieldOrEvent: any, value?: any) => {
         if (typeof fieldOrEvent === 'string') {
             setFormData((prev: any) => ({
                 ...prev,
                 [fieldOrEvent]: value
             }));
-        }
-        else {
+        } else {
             const { name, value } = fieldOrEvent.target;
             setFormData((prev: any) => ({
                 ...prev,
@@ -93,12 +117,25 @@ export default function ProfilePage({ personal_information, employment_details, 
             }));
         }
     };
+
+    // --- 3. Dedicated Handler for Nested Address Data ---
+    // This now receives the fully finalized draft data at once
+    const handleAddressChange = (updatedAddressData: any) => {
+        setAddressData(updatedAddressData);
+    };
+
     const handleSaveChanges = async () => {
         try {
-            // Here you will call your Server Action to save to the database
-            // Example: await updateProfile(formData);
+            // When submitting, you now have access to both main data and address data
+            const payload = {
+                ...formData,
+                addresses: [
+                    { address_type: "Residential Address", ...addressData.residential },
+                    { address_type: "Permanent Address", ...addressData.permanent }
+                ]
+            };
 
-            console.log("Submitting this to database:", formData);
+            console.log("Submitting this to database:", payload);
             alert("Changes saved successfully!");
 
         } catch (error) {
@@ -107,7 +144,6 @@ export default function ProfilePage({ personal_information, employment_details, 
         }
     };
 
-    // This helper function decides what to render
     const renderContent = () => {
         switch (activeTab) {
             case "Employment Details":
@@ -115,12 +151,10 @@ export default function ProfilePage({ personal_information, employment_details, 
             case "Personal Information":
                 return <PersonalInformation formData={formData} onChange={handleInputChange} onSave={handleSaveChanges} />;
             case "Employee Address":
-                return <Address formData={formData} onSave={handleSaveChanges} />;
+                // Pass the nested state and dedicated handler here
+                return <Address formData={addressData} onChange={handleAddressChange} onSave={handleSaveChanges} />;
             case "Family Background":
                 return <FamilyBackground />;
-            // Add more cases here as you create files:
-            // case "Family Background":
-            //   return <FamilyBackgroundForm />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">
@@ -138,7 +172,6 @@ export default function ProfilePage({ personal_information, employment_details, 
 
     return (
         <div className="space-y-6">
-
             {/* PAGE HEADER */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-800 tracking-tight">My Profile</h1>
@@ -146,14 +179,11 @@ export default function ProfilePage({ personal_information, employment_details, 
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-
                 {/* === LEFT COLUMN (Sticky Navigation) === */}
                 <div className="md:col-span-4 lg:col-span-3 space-y-6 sticky top-6">
-
                     {/* User Card */}
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
                         <div className="w-24 h-24 rounded-full bg-green-50 border-4 border-white shadow-sm flex items-center justify-center mb-4 text-2xl font-bold text-[#1a6b36]">
-
                         </div>
                         <h2 className="text-lg font-bold text-gray-800 capitalize">{formData.firstname} {formData.surname}</h2>
                         <p className="text-xs text-gray-500 mb-1">{formData.department}</p>
@@ -185,7 +215,6 @@ export default function ProfilePage({ personal_information, employment_details, 
 
                 {/* === RIGHT COLUMN (Dynamic Content) === */}
                 <div className="md:col-span-8 lg:col-span-9 space-y-6">
-
                     {/* Notice Area */}
                     <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-4 shadow-sm">
                         <div className="p-2 bg-amber-100 rounded-full text-amber-600 shrink-0">
@@ -205,7 +234,6 @@ export default function ProfilePage({ personal_information, employment_details, 
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-6">
                         {renderContent()}
                     </div>
-
                 </div>
             </div>
         </div>

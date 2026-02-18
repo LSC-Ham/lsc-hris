@@ -1,390 +1,237 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent } from "react";
-
-// ----------------------------------------------------------------------
-// 1. TYPES & INTERFACES
-// ----------------------------------------------------------------------
+import { useState, useEffect } from "react";
 
 export interface AddressData {
     region: string;
     province: string;
     city: string;
-    barangay: string;
+    barangary: string;
     house_no: string;
     street: string;
     subdivision: string;
     zip_code: string;
 }
 
-interface GeoEntity {
-    code: string;
-    name: string;
+interface AddressProps {
+    formData: {
+        residential: AddressData;
+        permanent: AddressData;
+    };
+    onChange: (updatedData: { residential: AddressData; permanent: AddressData }) => void;
+    onSave: () => void;
 }
 
-// The props this template expects from the parent page
-interface AddressTemplateProps {
-    residentialData?: AddressData;
-    permanentData?: AddressData;
-    onSave: (type: "Residential" | "Permanent", updatedData: AddressData) => void;
-}
+export function Address({ formData, onChange, onSave }: AddressProps) {
+    // 1. Separate edit states for each address type
+    const [editMode, setEditMode] = useState({
+        residential: false,
+        permanent: false
+    });
+    const [isSameAsResidential, setIsSameAsResidential] = useState(false);
 
-const defaultAddress: AddressData = {
-    region: "", province: "", city: "", barangay: "",
-    house_no: "", street: "", subdivision: "", zip_code: "",
-};
+    // 2. Draft state remains the same, holding both
+    const [draftData, setDraftData] = useState(formData);
 
-// ----------------------------------------------------------------------
-// 2. MAIN COMPONENT (The Reusable Template)
-// ----------------------------------------------------------------------
+    useEffect(() => {
+        setDraftData(formData);
+    }, [formData]);
 
-export function Address({
-    residentialData = defaultAddress,
-    permanentData = defaultAddress,
-    onSave
-}: AddressTemplateProps) {
+    const handleLocalChange = (type: "residential" | "permanent", field: keyof AddressData, value: string) => {
+        setDraftData((prev) => ({
+            ...prev,
+            [type]: {
+                ...prev[type],
+                [field]: value
+            }
+        }));
+    };
+
+    const handleSameAsResidentialToggle = () => {
+        const newValue = !isSameAsResidential;
+        setIsSameAsResidential(newValue);
+
+        if (newValue) {
+            setDraftData((prev) => ({
+                ...prev,
+                permanent: { ...prev.residential }
+            }));
+        }
+    };
+
+    // 3. Independent Cancel Actions
+    const handleCancel = (type: "residential" | "permanent") => {
+        // Revert only the specific address type being cancelled
+        setDraftData((prev) => ({
+            ...prev,
+            [type]: formData[type]
+        }));
+
+        setEditMode((prev) => ({ ...prev, [type]: false }));
+
+        if (type === "permanent") {
+            setIsSameAsResidential(false);
+        }
+    };
+
+    // 4. Independent Save Actions
+    const handleSaveClick = (type: "residential" | "permanent") => {
+        // Push the whole draft up (it contains the newly edited section + the untouched other section)
+        onChange(draftData);
+        setEditMode((prev) => ({ ...prev, [type]: false }));
+        setTimeout(() => onSave(), 0);
+    };
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* SECTION 1: Residential Address */}
-            <AddressSection
-                title="Residential Address"
-                type="Residential"
-                initialData={residentialData}
-                onSave={onSave}
-            />
 
-            {/* SECTION 2: Permanent Address */}
-            <AddressSection
-                title="Permanent Address"
-                type="Permanent"
-                initialData={permanentData}
-                onSave={onSave}
-            />
-        </div>
-    );
-}
+            <div className="space-y-12">
 
-// ----------------------------------------------------------------------
-// 3. SMART SECTION COMPONENT (API LOGIC)
-// ----------------------------------------------------------------------
-
-interface AddressSectionProps {
-    title: string;
-    type: "Residential" | "Permanent";
-    initialData: AddressData;
-    onSave: (type: "Residential" | "Permanent", data: AddressData) => void;
-}
-
-function AddressSection({ title, type, initialData, onSave }: AddressSectionProps) {
-    const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState<AddressData>(initialData);
-
-    // --- PSGC Data State ---
-    const [regions, setRegions] = useState<GeoEntity[]>([]);
-    const [provinces, setProvinces] = useState<GeoEntity[]>([]);
-    const [cities, setCities] = useState<GeoEntity[]>([]);
-    const [barangays, setBarangays] = useState<GeoEntity[]>([]);
-
-    // --- Loading States ---
-    const [loadingRegions, setLoadingRegions] = useState(false);
-    const [loadingProvinces, setLoadingProvinces] = useState(false);
-    const [loadingCities, setLoadingCities] = useState(false);
-    const [loadingBarangays, setLoadingBarangays] = useState(false);
-
-    // Sync formData if initialData changes from parent
-    useEffect(() => {
-        setFormData(initialData);
-    }, [initialData]);
-
-    // 1. Fetch Regions on Mount (or when editing starts)
-    useEffect(() => {
-        if (isEditing && regions.length === 0) {
-            setLoadingRegions(true);
-            fetch("https://psgc.gitlab.io/api/regions/")
-                .then(res => res.json())
-                .then(data => setRegions(data.sort((a: GeoEntity, b: GeoEntity) => a.name.localeCompare(b.name))))
-                .catch(err => console.error(err))
-                .finally(() => setLoadingRegions(false));
-        }
-    }, [isEditing, regions.length]);
-
-    // 2. Handle Region Change
-    const handleRegionChange = async (e: ChangeEvent<HTMLSelectElement>) => {
-        const selectedName = e.target.value;
-        const selectedRegion = regions.find(r => r.name === selectedName);
-
-        setFormData(prev => ({ ...prev, region: selectedName, province: "", city: "", barangay: "" }));
-        setProvinces([]); setCities([]); setBarangays([]);
-
-        if (selectedRegion) {
-            setLoadingProvinces(true);
-            try {
-                const provRes = await fetch(`https://psgc.gitlab.io/api/regions/${selectedRegion.code}/provinces/`);
-                const provData = await provRes.json();
-
-                if (provData.length > 0) {
-                    setProvinces(provData.sort((a: GeoEntity, b: GeoEntity) => a.name.localeCompare(b.name)));
-                } else {
-                    setLoadingCities(true);
-                    const cityRes = await fetch(`https://psgc.gitlab.io/api/regions/${selectedRegion.code}/cities-municipalities/`);
-                    const cityData = await cityRes.json();
-                    setCities(cityData.sort((a: GeoEntity, b: GeoEntity) => a.name.localeCompare(b.name)));
-                    setLoadingCities(false);
-                }
-            } catch (error) {
-                console.error("Error fetching sub-regions:", error);
-            }
-            setLoadingProvinces(false);
-        }
-    };
-
-    // 3. Handle Province Change
-    const handleProvinceChange = async (e: ChangeEvent<HTMLSelectElement>) => {
-        const selectedName = e.target.value;
-        const selectedProv = provinces.find(p => p.name === selectedName);
-
-        setFormData(prev => ({ ...prev, province: selectedName, city: "", barangay: "" }));
-        setCities([]); setBarangays([]);
-
-        if (selectedProv) {
-            setLoadingCities(true);
-            fetch(`https://psgc.gitlab.io/api/provinces/${selectedProv.code}/cities-municipalities/`)
-                .then(res => res.json())
-                .then(data => setCities(data.sort((a: GeoEntity, b: GeoEntity) => a.name.localeCompare(b.name))))
-                .catch(console.error)
-                .finally(() => setLoadingCities(false));
-        }
-    };
-
-    // 4. Handle City Change
-    const handleCityChange = async (e: ChangeEvent<HTMLSelectElement>) => {
-        const selectedName = e.target.value;
-        const selectedCity = cities.find(c => c.name === selectedName);
-
-        setFormData(prev => ({ ...prev, city: selectedName, barangay: "" }));
-        setBarangays([]);
-
-        if (selectedCity) {
-            setLoadingBarangays(true);
-            fetch(`https://psgc.gitlab.io/api/cities-municipalities/${selectedCity.code}/barangays/`)
-                .then(res => res.json())
-                .then(data => setBarangays(data.sort((a: GeoEntity, b: GeoEntity) => a.name.localeCompare(b.name))))
-                .catch(console.error)
-                .finally(() => setLoadingBarangays(false));
-        }
-    };
-
-    // 5. Standard Input Change
-    const handleChange = (field: keyof AddressData, value: string) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
-    };
-
-    // 6. UI Actions
-    const handleCancel = () => {
-        setIsEditing(false);
-        setFormData(initialData); // Reset back to parent's original data
-    };
-
-    const handleSaveClick = () => {
-        onSave(type, formData); // Pass the localized data back up to the parent
-        setIsEditing(false);
-    };
-
-    return (
-        <div>
-            {/* HEADER */}
-            <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
-                <h2 className="text-xl font-bold text-gray-800 tracking-tight">{title}</h2>
-                <button
-                    type="button"
-                    onClick={() => isEditing ? handleCancel() : setIsEditing(true)}
-                    className="text-[#1a6b36] text-sm font-medium hover:text-[#155a2b] transition-colors"
-                >
-                    {isEditing ? "Cancel" : "Edit"}
-                </button>
-            </div>
-
-            {/* FORM GRID */}
-            <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <AddressSelect
-                        label="Region"
-                        value={formData.region}
-                        options={regions}
-                        isEditing={isEditing}
-                        isLoading={loadingRegions}
-                        onChange={handleRegionChange}
-                        required
-                    />
-                    <AddressSelect
-                        label="Province"
-                        value={formData.province}
-                        options={provinces}
-                        isEditing={isEditing}
-                        isLoading={loadingProvinces}
-                        onChange={handleProvinceChange}
-                        disabled={provinces.length === 0}
-                        placeholder={provinces.length === 0 && formData.region ? "N/A (Metro Manila)" : "Select Province"}
-                        required
-                    />
-                    <AddressSelect
-                        label="City / Municipality"
-                        value={formData.city}
-                        options={cities}
-                        isEditing={isEditing}
-                        isLoading={loadingCities}
-                        onChange={handleCityChange}
-                        disabled={cities.length === 0}
-                        required
-                    />
-                    <AddressSelect
-                        label="Barangay"
-                        value={formData.barangay}
-                        options={barangays}
-                        isEditing={isEditing}
-                        isLoading={loadingBarangays}
-                        onChange={(e) => handleChange("barangay", e.target.value)}
-                        disabled={barangays.length === 0}
-                        required
-                    />
-                    <AddressField
-                        label="House/Block/Lot No."
-                        value={formData.house_no}
-                        isEditing={isEditing}
-                        onChange={(e) => handleChange("house_no", e.target.value)}
-                    />
-                    <AddressField
-                        label="Street Address"
-                        value={formData.street}
-                        isEditing={isEditing}
-                        onChange={(e) => handleChange("street", e.target.value)}
-                    />
-                    <AddressField
-                        label="Subdivision/Village"
-                        value={formData.subdivision}
-                        isEditing={isEditing}
-                        onChange={(e) => handleChange("subdivision", e.target.value)}
-                    />
-                    <AddressField
-                        label="Zip Code"
-                        value={formData.zip_code}
-                        isEditing={isEditing}
-                        onChange={(e) => handleChange("zip_code", e.target.value)}
-                        required
-                    />
-                </div>
-
-                {/* SAVE BUTTON */}
-                {isEditing && (
-                    <div className="flex justify-end pt-6 border-t border-gray-100 mt-6 animate-in fade-in">
+                {/* =========================================
+                    1. RESIDENTIAL ADDRESS SECTION 
+                ========================================= */}
+                <div>
+                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+                        <h2 className="text-lg font-semibold text-gray-700">Residential Address</h2>
                         <button
                             type="button"
-                            onClick={handleSaveClick}
-                            className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95"
+                            onClick={() => editMode.residential ? handleCancel("residential") : setEditMode(p => ({ ...p, residential: true }))}
+                            className="text-[#1a6b36] text-sm font-medium hover:underline"
                         >
-                            Save {title}
+                            {editMode.residential ? "Cancel" : "Edit"}
                         </button>
                     </div>
-                )}
+
+                    <AddressFormSection
+                        data={draftData.residential}
+                        isEditing={editMode.residential}
+                        onChange={(field, value) => handleLocalChange("residential", field, value)}
+                    />
+
+                    {editMode.residential && (
+                        <div className="flex justify-end mt-6">
+                            <button
+                                type="button"
+                                className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95"
+                                onClick={() => handleSaveClick("residential")}
+                            >
+                                Save Residential Address
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+
+                {/* =========================================
+                    2. PERMANENT ADDRESS SECTION 
+                ========================================= */}
+                <div>
+                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-lg font-semibold text-gray-700">Permanent Address</h2>
+                            {editMode.permanent && (
+                                <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer bg-white px-3 py-1.5 rounded-md border border-gray-200 shadow-sm">
+                                    <input
+                                        type="checkbox"
+                                        checked={isSameAsResidential}
+                                        onChange={handleSameAsResidentialToggle}
+                                        className="rounded border-gray-300 text-[#1a6b36] focus:ring-[#1a6b36]"
+                                    />
+                                    <span>Same as Residential</span>
+                                </label>
+                            )}
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => editMode.permanent ? handleCancel("permanent") : setEditMode(p => ({ ...p, permanent: true }))}
+                            className="text-[#1a6b36] text-sm font-medium hover:underline"
+                        >
+                            {editMode.permanent ? "Cancel" : "Edit"}
+                        </button>
+                    </div>
+
+                    <AddressFormSection
+                        data={draftData.permanent}
+                        isEditing={editMode.permanent}
+                        disabled={isSameAsResidential}
+                        onChange={(field, value) => handleLocalChange("permanent", field, value)}
+                    />
+
+                    {editMode.permanent && (
+                        <div className="flex justify-end mt-6">
+                            <button
+                                type="button"
+                                className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95"
+                                onClick={() => handleSaveClick("permanent")}
+                            >
+                                Save Permanent Address
+                            </button>
+                        </div>
+                    )}
+                </div>
+
             </div>
         </div>
     );
 }
 
-
 // ----------------------------------------------------------------------
-// 3. HELPER COMPONENTS
+// INTERNAL HELPER COMPONENTS
 // ----------------------------------------------------------------------
-
-// Standard Text Input
-interface AddressFieldProps {
-    label: string;
-    value: string;
+function AddressFormSection({
+    data,
+    isEditing,
+    disabled = false,
+    onChange
+}: {
+    data: AddressData;
     isEditing: boolean;
-    type?: string;
-    required?: boolean;
-    onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    disabled?: boolean;
+    onChange: (field: keyof AddressData, value: string) => void;
+}) {
+    return (
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <ProfileField label="House / Block / Lot No." value={data.house_no} isEditing={isEditing} disabled={disabled} placeholder="Blk 1 Lot 2" onChange={(e: any) => onChange("house_no", e.target.value)} />
+                <ProfileField label="Street" value={data.street} isEditing={isEditing} disabled={disabled} placeholder="Mabini St." onChange={(e: any) => onChange("street", e.target.value)} />
+                <ProfileField label="Subdivision / Village" value={data.subdivision} isEditing={isEditing} disabled={disabled} placeholder="Greenwoods" onChange={(e: any) => onChange("subdivision", e.target.value)} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <ProfileField label="Region" value={data.region} isEditing={isEditing} disabled={disabled} placeholder="NCR" required onChange={(e: any) => onChange("region", e.target.value)} />
+                <ProfileField label="Province" value={data.province} isEditing={isEditing} disabled={disabled} placeholder="Metro Manila" onChange={(e: any) => onChange("province", e.target.value)} />
+
+                <ProfileField label="City / Municipality" value={data.city} isEditing={isEditing} disabled={disabled} placeholder="Pasig City" required onChange={(e: any) => onChange("city", e.target.value)} />
+                <ProfileField label="Barangay" value={data.barangary} isEditing={isEditing} disabled={disabled} placeholder="San Miguel" required onChange={(e: any) => onChange("barangary", e.target.value)} />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <ProfileField label="Zip Code" value={data.zip_code} isEditing={isEditing} disabled={disabled} placeholder="1600" onChange={(e: any) => onChange("zip_code", e.target.value)} />
+            </div>
+        </div>
+    );
 }
 
-function AddressField({ label, value, isEditing, type = "text", required, onChange }: AddressFieldProps) {
+function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
     return (
         <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
                 {label} {required && <span className="text-red-500 ml-1">*</span>}
             </label>
-
             {isEditing ? (
                 <input
                     type={type}
-                    value={value}
+                    value={value || ""}
+                    placeholder={placeholder}
                     onChange={onChange}
                     required={required}
-                    className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm outline-none bg-white 
-                    ${required && !value
-                            ? "border-red-300 focus:border-red-500 focus:ring-1 focus:ring-red-200"
-                            : "border-gray-200 focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                    disabled={disabled}
+                    className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm outline-none
+                    ${disabled
+                            ? "bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed"
+                            : "bg-white focus:ring-1 outline-none " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
                         }`}
                 />
-            ) : (
-                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center">
-                    {value || <span className="text-gray-400 italic">Not set</span>}
-                </div>
-            )}
-        </div>
-    );
-}
-
-// Dropdown Select Input (New!)
-interface AddressSelectProps {
-    label: string;
-    value: string;
-    options: GeoEntity[];
-    isEditing: boolean;
-    onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
-    isLoading?: boolean;
-    disabled?: boolean;
-    required?: boolean;
-    placeholder?: string;
-}
-
-function AddressSelect({ label, value, options, isEditing, onChange, isLoading, disabled, required, placeholder }: AddressSelectProps) {
-    return (
-        <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
-                {label} {required && <span className="text-red-500 ml-1">*</span>}
-            </label>
-
-            {isEditing ? (
-                <div className="relative">
-                    <select
-                        value={value}
-                        onChange={onChange}
-                        disabled={disabled || isLoading}
-                        required={required}
-                        className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm appearance-none outline-none
-                        ${disabled
-                                ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                                : "bg-white text-gray-800 focus:border-green-500 focus:ring-1 focus:ring-green-500 border-gray-200"
-                            }
-                        ${required && !value && !disabled ? "border-red-300" : ""}
-                        `}
-                    >
-                        <option value="" disabled>{isLoading ? "Loading..." : (placeholder || `Select ${label}`)}</option>
-                        {options.map((opt) => (
-                            <option key={opt.code} value={opt.name}>
-                                {opt.name}
-                            </option>
-                        ))}
-                    </select>
-                    {/* Custom Arrow Icon */}
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        {isLoading ? (
-                            <div className="h-4 w-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                        )}
-                    </div>
-                </div>
             ) : (
                 <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center">
                     {value || <span className="text-gray-400 italic">Not set</span>}
