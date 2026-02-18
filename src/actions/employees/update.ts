@@ -76,3 +76,105 @@ export async function updatePersonalInformation(data: any) {
         return { success: false, error: "Failed to save changes to the database." };
     }
 }
+
+export async function updateAddress(data: any) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return { success: false, error: "Unauthorized. Please log in." };
+        }
+
+        const userId = (session.user as any).id;
+
+        // data looks like: { residential: {...}, permanent: {...} }
+        await prisma.employees.update({
+            where: {
+                id: userId
+            },
+            data: {
+                // Access the related address table
+                address: {
+                    // 1. Remove the old addresses of these specific types
+                    deleteMany: {
+                        address_type: {
+                            in: ["residential", "permanent"]
+                        }
+                    },
+                    // 2. Insert the newly updated ones
+                    create: [
+                        {
+                            address_type: "residential",
+                            region: data.residential.region,
+                            province: data.residential.province,
+                            city: data.residential.city,
+                            barangay: data.residential.barangay,
+                            house_no: data.residential.house_no,
+                            street: data.residential.street,
+                            subdivision: data.residential.subdivision,
+                            zip_code: data.residential.zip_code,
+                        },
+                        {
+                            address_type: "permanent",
+                            region: data.permanent.region,
+                            province: data.permanent.province,
+                            city: data.permanent.city,
+                            barangay: data.permanent.barangay,
+                            house_no: data.permanent.house_no,
+                            street: data.permanent.street,
+                            subdivision: data.permanent.subdivision,
+                            zip_code: data.permanent.zip_code,
+                        }
+                    ]
+                }
+            }
+        });
+
+        revalidatePath("/profile");
+        return { success: true };
+
+    } catch (error) {
+        console.error("Error updating address information:", error);
+        return { success: false, error: "Failed to save changes to the database." };
+    }
+}
+
+export async function updateFamilyBackground(data: any) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return { success: false, error: "Unauthorized. Please log in." };
+        }
+
+        const userId = (session.user as any).id;
+
+        await prisma.employees.update({
+            where: {
+                id: userId
+            },
+            data: {
+                // Access your family background relation (adjust 'family_background' to match your schema)
+                family_background: {
+                    // 1. Clear out the existing family records for these specific relationships
+                    deleteMany: {
+                        relation_type: {
+                            in: ["guardian", "father", "mother"]
+                        }
+                    },
+                    // 2. Insert the updated records
+                    create: [
+                        { relation_type: "guardian", ...data.guardian },
+                        { relation_type: "father", ...data.father },
+                        { relation_type: "mother", ...data.mother }
+                    ]
+                }
+            }
+        });
+
+        revalidatePath("/profile");
+        return { success: true };
+
+    } catch (error) {
+        console.error("Error updating family information:", error);
+        return { success: false, error: "Failed to save changes to the database." };
+    }
+}

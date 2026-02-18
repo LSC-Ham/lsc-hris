@@ -19,19 +19,19 @@ interface FamilyBackgroundProps {
         father: FamilyMemberData;
         mother: FamilyMemberData;
     };
-    onChange: (updatedData: { guardian: FamilyMemberData; father: FamilyMemberData; mother: FamilyMemberData }) => void;
-    onSave: () => void;
+    // 1. Removed onChange, updated onSave to accept the full payload
+    onSave: (data: { guardian: FamilyMemberData; father: FamilyMemberData; mother: FamilyMemberData }) => void;
 }
 
-export function FamilyBackground({ formData, onChange, onSave }: FamilyBackgroundProps) {
-    // 1. Separate edit states for each family member type
+export function FamilyBackground({ formData, onSave }: FamilyBackgroundProps) {
+    // Separate edit states for each family member type
     const [editMode, setEditMode] = useState({
         guardian: false,
         father: false,
         mother: false
     });
 
-    // 2. Draft state holding all family members
+    // Local draft state
     const [draftData, setDraftData] = useState(formData);
 
     useEffect(() => {
@@ -48,7 +48,6 @@ export function FamilyBackground({ formData, onChange, onSave }: FamilyBackgroun
         }));
     };
 
-    // 3. Independent Cancel Actions
     const handleCancel = (type: "guardian" | "father" | "mother") => {
         // Revert only the specific family member being cancelled
         setDraftData((prev) => ({
@@ -58,11 +57,11 @@ export function FamilyBackground({ formData, onChange, onSave }: FamilyBackgroun
         setEditMode((prev) => ({ ...prev, [type]: false }));
     };
 
-    // 4. Independent Save Actions
+    // 2. Updated Save Action to pass draftData directly
     const handleSaveClick = (type: "guardian" | "father" | "mother") => {
-        onChange(draftData);
         setEditMode((prev) => ({ ...prev, [type]: false }));
-        setTimeout(() => onSave(), 0);
+        // Pass the whole draft up to the parent
+        onSave(draftData);
     };
 
     return (
@@ -70,7 +69,7 @@ export function FamilyBackground({ formData, onChange, onSave }: FamilyBackgroun
             <div className="space-y-12">
 
                 {/* =========================================
-                    1. Guardian'S INFORMATION 
+                    1. GUARDIAN'S INFORMATION 
                 ========================================= */}
                 <div>
                     <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
@@ -246,7 +245,7 @@ function FamilyFormSection({
                 />
                 <ProfileField
                     label="Contact No."
-                    value={data.employer}
+                    value={data.contact_no} // FIX: Changed from data.employer to data.contact_no
                     isEditing={isEditing}
                     placeholder="09XX-XXX-XXXX"
                     onChange={(e: any) => onChange("contact_no", e.target.value)}

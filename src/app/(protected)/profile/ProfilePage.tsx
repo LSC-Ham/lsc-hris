@@ -7,7 +7,7 @@ import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
 import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
-import { updatePersonalInformation } from "@/actions/employees/update";
+import { updateAddress, updateFamilyBackground, updatePersonalInformation } from "@/actions/employees/update";
 
 interface ProfilePageProps {
     personal_information: any;
@@ -162,6 +162,44 @@ export default function ProfilePage({ personal_information, employment_details, 
             alert("An unexpected error occurred.");
         }
     };
+    const handleSaveAddress = async (updatedDraftData: any) => {
+        try {
+            // 1. Instantly update the parent's local state 
+            setAddressData(updatedDraftData);
+
+            // 2. Send the data to the Server Action
+            const result = await updateAddress(updatedDraftData);
+
+            if (result.success) {
+                alert("Address updated successfully!");
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("Failed to save address:", error);
+            alert("An unexpected error occurred.");
+        }
+    };
+
+    const handleSaveFamily = async (updatedDraftData: any) => {
+        try {
+            // 1. Instantly update the parent's local state 
+            // (Assuming your state variable is named familyData)
+            setFamilyData(updatedDraftData);
+
+            // 2. Send the data to the Server Action
+            const result = await updateFamilyBackground(updatedDraftData);
+
+            if (result.success) {
+                alert("Family background updated successfully!");
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("Failed to save family background:", error);
+            alert("An unexpected error occurred.");
+        }
+    };
 
     const handleInputChange = (fieldOrEvent: any, value?: any) => {
         if (typeof fieldOrEvent === 'string') {
@@ -178,39 +216,6 @@ export default function ProfilePage({ personal_information, employment_details, 
         }
     };
 
-    const handleAddressChange = (updatedAddressData: any) => {
-        setAddressData(updatedAddressData);
-    };
-
-    const handleFamilyChange = (updatedFamilyData: any) => {
-        setFamilyData(updatedFamilyData);
-    };
-
-    const handleSaveChanges = async () => {
-        try {
-            // Include family data in your payload based on your Prisma relation schema
-            const payload = {
-                ...formData,
-                addresses: [
-                    { address_type: "Residential Address", ...addressData.residential },
-                    { address_type: "Permanent Address", ...addressData.permanent }
-                ],
-                family_background: [
-                    { relation_type: "guardian", ...familyData.guardian },
-                    { relation_type: "father", ...familyData.father },
-                    { relation_type: "mother", ...familyData.mother }
-                ]
-            };
-
-            console.log("Submitting this to database:", payload);
-            alert("Changes saved successfully!");
-
-        } catch (error) {
-            console.error("Failed to save:", error);
-            alert("Failed to save changes.");
-        }
-    };
-
     const renderContent = () => {
         switch (activeTab) {
             case "Employment Details":
@@ -218,10 +223,9 @@ export default function ProfilePage({ personal_information, employment_details, 
             case "Personal Information":
                 return <PersonalInformation formData={formData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":
-                return <Address formData={addressData} onChange={handleAddressChange} onSave={handleSaveChanges} />;
+                return <Address formData={addressData} onSave={handleSaveAddress} />;
             case "Family Background":
-                // 4. Connect the FamilyBackground component
-                return <FamilyBackground formData={familyData} onChange={handleFamilyChange} onSave={handleSaveChanges} />;
+                return <FamilyBackground formData={familyData} onSave={handleSaveFamily} />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">

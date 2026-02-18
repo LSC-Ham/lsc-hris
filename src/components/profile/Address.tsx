@@ -18,19 +18,19 @@ interface AddressProps {
         residential: AddressData;
         permanent: AddressData;
     };
-    onChange: (updatedData: { residential: AddressData; permanent: AddressData }) => void;
-    onSave: () => void;
+    // 1. Removed onChange, updated onSave to accept the payload
+    onSave: (data: { residential: AddressData; permanent: AddressData }) => void;
 }
 
-export function Address({ formData, onChange, onSave }: AddressProps) {
-    // 1. Separate edit states for each address type
+export function Address({ formData, onSave }: AddressProps) {
+    // Separate edit states for each address type
     const [editMode, setEditMode] = useState({
         residential: false,
         permanent: false
     });
     const [isSameAsResidential, setIsSameAsResidential] = useState(false);
 
-    // 2. Draft state remains the same, holding both
+    // Local draft state
     const [draftData, setDraftData] = useState(formData);
 
     useEffect(() => {
@@ -59,7 +59,6 @@ export function Address({ formData, onChange, onSave }: AddressProps) {
         }
     };
 
-    // 3. Independent Cancel Actions
     const handleCancel = (type: "residential" | "permanent") => {
         // Revert only the specific address type being cancelled
         setDraftData((prev) => ({
@@ -74,17 +73,15 @@ export function Address({ formData, onChange, onSave }: AddressProps) {
         }
     };
 
-    // 4. Independent Save Actions
+    // 2. Updated Save Action to pass draftData directly
     const handleSaveClick = (type: "residential" | "permanent") => {
-        // Push the whole draft up (it contains the newly edited section + the untouched other section)
-        onChange(draftData);
         setEditMode((prev) => ({ ...prev, [type]: false }));
-        setTimeout(() => onSave(), 0);
+        // Pass the whole draft up to the parent
+        onSave(draftData);
     };
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-
             <div className="space-y-12">
 
                 {/* =========================================
