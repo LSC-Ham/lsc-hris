@@ -1,75 +1,78 @@
-// src\actions\employees\update.ts
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth/next";
+import { prisma } from "@/lib/prisma"; // Adjust this import to your actual Prisma client location
+import { authOptions } from "@/lib/auth"; // Make sure this path is correct
 import { revalidatePath } from "next/cache";
 
 export async function updatePersonalInformation(data: any) {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user) {
-            redirect("/login");
+            return { success: false, error: "Unauthorized. Please log in." };
         }
 
         const userId = (session.user as any).id;
+        const { id, ...updateData } = data;
 
-        // Ensure date is properly formatted for Prisma
-        const formattedBirthdate = data.birthdate ? new Date(data.birthdate) : null;
+        // --- THE FIX: Format the birthdate ---
+        // If there's a date, convert it to a true Date object. If it's "", make it null or undefined.
+        // (Note: use `undefined` instead of `null` if your Prisma schema marks birthdate as required).
+        const validBirthdate = updateData.birthdate
+            ? new Date(updateData.birthdate).toISOString()
+            : null;
 
         await prisma.employees.update({
-            where: { id: userId },
+            where: {
+                id: userId
+            },
             data: {
                 personal_information: {
                     upsert: {
-                        update: {
-                            surname: data.surname,
-                            firstname: data.firstname,
-                            middlename: data.middlename,
-                            extension: data.extension,
-                            birthdate: formattedBirthdate,
-                            birthplace: data.birthplace,
-                            sex: data.sex,
-                            civil_status: data.civil_status,
-                            telephone_no: data.telephone_no,
-                            mobile_no: data.mobile_no,
-                            email: data.email,
-                            nationality: data.nationality,
-                            height: data.height,
-                            weight: data.weight,
-                            blood_type: data.blood_type,
-                        },
                         create: {
-                            surname: data.surname || "",
-                            firstname: data.firstname || "",
-                            middlename: data.middlename || "",
-                            extension: data.extension || "",
-                            birthdate: formattedBirthdate,
-                            birthplace: data.birthplace || "",
-                            sex: data.sex || "",
-                            civil_status: data.civil_status || "",
-                            telephone_no: data.telephone_no || "",
-                            mobile_no: data.mobile_no || "",
-                            email: data.email || "",
-                            nationality: data.nationality || "",
-                            height: data.height || "",
-                            weight: data.weight || "",
-                            blood_type: data.blood_type || "",
+                            surname: updateData.surname,
+                            firstname: updateData.firstname,
+                            middlename: updateData.middlename,
+                            extension: updateData.extension,
+                            birthdate: validBirthdate, // <-- Pass the formatted date here
+                            birthplace: updateData.birthplace,
+                            sex: updateData.sex,
+                            civil_status: updateData.civil_status,
+                            telephone_no: updateData.telephone_no,
+                            mobile_no: updateData.mobile_no,
+                            email: updateData.email,
+                            nationality: updateData.nationality,
+                            height: updateData.height,
+                            weight: updateData.weight,
+                            blood_type: updateData.blood_type,
                         },
-                    },
-                },
-            },
+                        update: {
+                            surname: updateData.surname,
+                            firstname: updateData.firstname,
+                            middlename: updateData.middlename,
+                            extension: updateData.extension,
+                            birthdate: validBirthdate, // <-- And pass it here
+                            birthplace: updateData.birthplace,
+                            sex: updateData.sex,
+                            civil_status: updateData.civil_status,
+                            telephone_no: updateData.telephone_no,
+                            mobile_no: updateData.mobile_no,
+                            email: updateData.email,
+                            nationality: updateData.nationality,
+                            height: updateData.height,
+                            weight: updateData.weight,
+                            blood_type: updateData.blood_type,
+                        }
+                    }
+                }
+            }
         });
 
-        // Refreshes the current route to show the newly updated data immediately
         revalidatePath("/profile");
-
         return { success: true };
 
     } catch (error) {
-        console.error("Error updating profile:", error);
-        return { success: false, error: "Failed to update personal information" };
+        console.error("Error updating personal information:", error);
+        return { success: false, error: "Failed to save changes to the database." };
     }
 }

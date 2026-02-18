@@ -7,6 +7,7 @@ import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
 import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
+import { updatePersonalInformation } from "@/actions/employees/update";
 
 interface ProfilePageProps {
     personal_information: any;
@@ -143,6 +144,25 @@ export default function ProfilePage({ personal_information, employment_details, 
     });
 
     // --- Handlers ---
+    const handleSavePersonalInfo = async (updatedDraftData: any) => {
+        try {
+            // 1. Instantly update the parent's local state so the UI feels fast
+            setFormData((prev) => ({ ...prev, ...updatedDraftData }));
+
+            // 2. Send the data to your Next.js Server Action
+            const result = await updatePersonalInformation(updatedDraftData);
+
+            if (result.success) {
+                alert("Personal Information updated successfully in the database!");
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("Failed to save:", error);
+            alert("An unexpected error occurred.");
+        }
+    };
+
     const handleInputChange = (fieldOrEvent: any, value?: any) => {
         if (typeof fieldOrEvent === 'string') {
             setFormData((prev: any) => ({
@@ -196,7 +216,7 @@ export default function ProfilePage({ personal_information, employment_details, 
             case "Employment Details":
                 return <EmploymentDetails formData={formData} onChange={handleInputChange} />;
             case "Personal Information":
-                return <PersonalInformation formData={formData} onChange={handleInputChange} onSave={handleSaveChanges} />;
+                return <PersonalInformation formData={formData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":
                 return <Address formData={addressData} onChange={handleAddressChange} onSave={handleSaveChanges} />;
             case "Family Background":

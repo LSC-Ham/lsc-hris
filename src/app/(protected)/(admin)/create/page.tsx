@@ -114,7 +114,6 @@ export default function CreateUserPage() {
                     <PersonalInformation
                         mode="create"
                         formData={formData}
-                        onChange={handleFieldChange}
                     />
                 </div>
             </div>

@@ -8,11 +8,10 @@ const SEX = ["Male", "Female", "Non-binary", "Other/Prefer not to say"];
 interface PersonalInformationProps {
     mode?: "view" | "create";
     formData: any;
-    onChange: (field: string, value: any) => void;
     onSave?: (data: any) => void; // <--- CHANGE THIS LINE
 }
 
-export function PersonalInformation({ mode = "view", formData, onChange, onSave }: PersonalInformationProps) {
+export function PersonalInformation({ mode = "view", formData, onSave }: PersonalInformationProps) {
     const [isEditing, setIsEditing] = useState(mode === "create");
 
     // 1. Create a local draft to hold typed text safely
@@ -47,7 +46,6 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
         // Loop through the draft and update the parent only for changed fields
         Object.keys(draftData).forEach((key) => {
             if (draftData[key] !== formData[key]) {
-                onChange(key, draftData[key]);
             }
         });
 
