@@ -7,6 +7,7 @@ import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/ProfileInformation";
 import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
+import { EducationalBackground } from "@/components/profile/EducationalBackground";
 
 interface ProfilePageProps {
     personal_information: any;
@@ -202,6 +203,9 @@ export default function ProfilePage({ personal_information, employment_details, 
             case "Family Background":
                 // 4. Connect the FamilyBackground component
                 return <FamilyBackground formData={familyData} onChange={handleFamilyChange} onSave={handleSaveChanges} />;
+            case "Educational Background":
+                // 4. Connect the FamilyBackground component
+                return <EducationalBackground onChange={handleFamilyChange} onSave={handleSaveChanges} />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">
