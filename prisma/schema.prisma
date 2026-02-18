@@ -152,12 +152,12 @@ model employees_govIDs {
 }
 
 model personal_information {
-  id           String  @id @db.Uuid
+  id           String    @id @db.Uuid
   surname      String
   firstname    String
   middlename   String?
   extension    String?
-  birthdate    String?
+  birthdate    DateTime? @db.Timestamp(6)
   birthplace   String?
   sex          String
   civil_status String

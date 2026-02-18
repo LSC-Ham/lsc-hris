@@ -1,4 +1,4 @@
-import { getAddress, getFamilyBackground, getPersonalInformation, getEmployeeDetails } from "@/actions/users/employees"; // Import your fetch function
+import { getAddress, getFamilyBackground, getPersonalInformation, getEmployeeDetails } from "@/actions/employees/get"; // Import your fetch function
 import ProfilePage from "./ProfilePage";
 
 export default async function Page() {

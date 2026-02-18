@@ -9,7 +9,7 @@ interface PersonalInformationProps {
     mode?: "view" | "create";
     formData: any;
     onChange: (field: string, value: any) => void;
-    onSave?: () => void;
+    onSave?: (data: any) => void; // <--- CHANGE THIS LINE
 }
 
 export function PersonalInformation({ mode = "view", formData, onChange, onSave }: PersonalInformationProps) {
@@ -53,7 +53,7 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
 
         setIsEditing(false);
         if (onSave) {
-            setTimeout(() => onSave(), 0);
+            onSave(draftData); // <--- REMOVE setTimeout AND PASS draftData
         }
     };
 

@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react"; // 1. Import useEffect
 import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
-import { PersonalInformation } from "@/components/profile/ProfileInformation";
+import { PersonalInformation } from "@/components/profile/PersonalInformation";
 
 // 2. Import the Server Action we just created
-import { generateEmployeeID } from "@/actions/users/employees";
+import { generateEmployeeID } from "@/actions/employees/get";
 
 export default function CreateUserPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
