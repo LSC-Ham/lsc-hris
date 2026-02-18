@@ -25,10 +25,9 @@ export default function ProfilePage({ personal_information, employment_details, 
 
     // Helper to find specific address type if the server passes an array of addresses
     const getAddressByType = (type: string) => {
-        if (Array.isArray(address)) {
-            return address.find((a: any) => a.address_type === type) || {};
-        }
-        return address?.address_type === type ? address : {};
+        // Look at the nested .address array from your server action's return object
+        const addressArray = address?.address || [];
+        return addressArray.find((a: any) => a.address_type === type) || {};
     };
 
     const menuItems = [
@@ -87,7 +86,7 @@ export default function ProfilePage({ personal_information, employment_details, 
             region: getAddressByType("Residential Address").region || "",
             province: getAddressByType("Residential Address").province || "",
             city: getAddressByType("Residential Address").city || "",
-            barangary: getAddressByType("Residential Address").barangary || "",
+            barangay: getAddressByType("Residential Address").barangay || "",
             zip_code: getAddressByType("Residential Address").zip_code || "",
         },
         permanent: {
@@ -97,7 +96,7 @@ export default function ProfilePage({ personal_information, employment_details, 
             region: getAddressByType("Permanent Address").region || "",
             province: getAddressByType("Permanent Address").province || "",
             city: getAddressByType("Permanent Address").city || "",
-            barangary: getAddressByType("Permanent Address").barangary || "",
+            barangay: getAddressByType("Permanent Address").barangay || "",
             zip_code: getAddressByType("Permanent Address").zip_code || "",
         }
     });
@@ -151,7 +150,6 @@ export default function ProfilePage({ personal_information, employment_details, 
             case "Personal Information":
                 return <PersonalInformation formData={formData} onChange={handleInputChange} onSave={handleSaveChanges} />;
             case "Employee Address":
-                // Pass the nested state and dedicated handler here
                 return <Address formData={addressData} onChange={handleAddressChange} onSave={handleSaveChanges} />;
             case "Family Background":
                 return <FamilyBackground />;

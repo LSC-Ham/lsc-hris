@@ -6,7 +6,7 @@ export interface AddressData {
     region: string;
     province: string;
     city: string;
-    barangary: string;
+    barangay: string;
     house_no: string;
     street: string;
     subdivision: string;
@@ -91,8 +91,8 @@ export function Address({ formData, onChange, onSave }: AddressProps) {
                     1. RESIDENTIAL ADDRESS SECTION 
                 ========================================= */}
                 <div>
-                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                        <h2 className="text-lg font-semibold text-gray-700">Residential Address</h2>
+                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
+                        <h2 className="text-xl font-bold text-gray-800 tracking-tight">Residential Address</h2>
                         <button
                             type="button"
                             onClick={() => editMode.residential ? handleCancel("residential") : setEditMode(p => ({ ...p, residential: true }))}
@@ -126,9 +126,9 @@ export function Address({ formData, onChange, onSave }: AddressProps) {
                     2. PERMANENT ADDRESS SECTION 
                 ========================================= */}
                 <div>
-                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+                    <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
                         <div className="flex items-center gap-4">
-                            <h2 className="text-lg font-semibold text-gray-700">Permanent Address</h2>
+                            <h2 className="text-xl font-bold text-gray-800 tracking-tight">Permanent Address</h2>
                             {editMode.permanent && (
                                 <label className="flex items-center space-x-2 text-sm text-gray-600 cursor-pointer bg-white px-3 py-1.5 rounded-md border border-gray-200 shadow-sm">
                                     <input
@@ -199,10 +199,10 @@ function AddressFormSection({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ProfileField label="Region" value={data.region} isEditing={isEditing} disabled={disabled} placeholder="NCR" required onChange={(e: any) => onChange("region", e.target.value)} />
-                <ProfileField label="Province" value={data.province} isEditing={isEditing} disabled={disabled} placeholder="Metro Manila" onChange={(e: any) => onChange("province", e.target.value)} />
+                <ProfileField label="Province" value={data.province} isEditing={isEditing} disabled={disabled} placeholder="Metro Manila" required onChange={(e: any) => onChange("province", e.target.value)} />
 
                 <ProfileField label="City / Municipality" value={data.city} isEditing={isEditing} disabled={disabled} placeholder="Pasig City" required onChange={(e: any) => onChange("city", e.target.value)} />
-                <ProfileField label="Barangay" value={data.barangary} isEditing={isEditing} disabled={disabled} placeholder="San Miguel" required onChange={(e: any) => onChange("barangary", e.target.value)} />
+                <ProfileField label="Barangay" value={data.barangay} isEditing={isEditing} disabled={disabled} placeholder="San Miguel" required onChange={(e: any) => onChange("barangay", e.target.value)} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

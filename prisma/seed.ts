@@ -38,6 +38,14 @@ export async function main() {
             division: "Admininistration",
             govt_id_label: "SSS No.",
             govt_id_number: "414141",
+
+            //address
+            address_type: "Residential Address",
+            region: "Region IV-A",
+            province: "laguna",
+            city: "bukawkaw",
+            barangay: "sto. thomas",
+            zip_code: "4024",
         },
     ];
 
@@ -107,6 +115,16 @@ export async function main() {
                                 sex: 'male',
                                 civil_status: 'single',
                                 nationality: 'Philippines',
+                            }
+                        },
+                        address: {
+                            create: {
+                                address_type: data.address_type,
+                                province: data.province,
+                                city: data.city,
+                                region: data.region,
+                                barangay: data.barangay,
+                                zip_code: data.zip_code,
                             }
                         }
                     },
