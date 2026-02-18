@@ -30,14 +30,9 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
 
     // 3. Local handler: updates the draft, NOT the parent
     const handleLocalChange = (field: string, value: any) => {
-        // Force uppercase for all text fields except email and birthdate
-        const isString = typeof value === "string";
-        const skipUppercase = field === "email" || field === "birthdate";
-        const finalValue = (isString && !skipUppercase) ? value.toUpperCase() : value;
-
         setDraftData((prev: any) => ({
             ...prev,
-            [field]: finalValue
+            [field]: value
         }));
     };
 
