@@ -9,7 +9,7 @@ interface PersonalInformationProps {
     mode?: "view" | "create";
     formData: any;
     onChange: (field: string, value: any) => void;
-    onSave: () => void;
+    onSave?: () => void;
 }
 
 export function PersonalInformation({ mode = "view", formData, onChange, onSave }: PersonalInformationProps) {
@@ -57,7 +57,9 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
         });
 
         setIsEditing(false);
-        setTimeout(() => onSave(), 0);
+        if (onSave) {
+            setTimeout(() => onSave(), 0);
+        }
     };
 
     // --- Fetch Cities ---

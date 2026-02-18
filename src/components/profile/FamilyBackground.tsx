@@ -74,7 +74,7 @@ export function FamilyBackground({ formData, onChange, onSave }: FamilyBackgroun
                 ========================================= */}
                 <div>
                     <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
-                        <h2 className="text-xl font-bold text-gray-800 tracking-tight">Guadian&apos;s Information</h2>
+                        <h2 className="text-xl font-bold text-gray-800 tracking-tight">Guardian&apos;s Information</h2>
                         <button
                             type="button"
                             onClick={() => editMode.guardian ? handleCancel("guardian") : setEditMode(p => ({ ...p, guardian: true }))}

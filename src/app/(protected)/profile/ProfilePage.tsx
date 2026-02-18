@@ -226,8 +226,8 @@ export default function ProfilePage({ personal_information, employment_details, 
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                {/* === LEFT COLUMN (Sticky Navigation) === */}
-                <div className="md:col-span-4 lg:col-span-3 space-y-6 sticky top-6">
+                {/* === LEFT COLUMN (No Sticky) === */}
+                <div className="md:col-span-4 lg:col-span-3 space-y-6">
                     {/* User Card */}
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
                         <div className="w-24 h-24 rounded-full bg-green-50 border-4 border-white shadow-sm flex items-center justify-center mb-4 text-2xl font-bold text-[#1a6b36]">
@@ -238,7 +238,22 @@ export default function ProfilePage({ personal_information, employment_details, 
 
                     {/* Navigation Menu */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        <nav className="flex flex-col p-2 space-y-1">
+
+                        {/* 1. MOBILE ONLY: Select Dropdown */}
+                        <div className="block md:hidden p-4">
+                            <select
+                                value={activeTab}
+                                onChange={(e) => setActiveTab(e.target.value)}
+                                className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#1a6b36]"
+                            >
+                                {menuItems.map((item) => (
+                                    <option key={item} value={item}>{item}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* 2. DESKTOP ONLY: Vertical Sidebar Nav */}
+                        <nav className="hidden md:flex flex-col p-2 space-y-1">
                             {menuItems.map((item) => (
                                 <button
                                     key={item}

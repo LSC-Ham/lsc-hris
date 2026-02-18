@@ -13,9 +13,6 @@ export default async function Home() {
     redirect("/login");
   }
 
-  const name = "";
-  console.log(name)
-
   // This return is unreachable because of the redirects, 
   // but Typescript might want a valid component return.
   return null;
