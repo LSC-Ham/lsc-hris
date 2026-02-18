@@ -157,3 +157,43 @@ export async function getAddress() {
         return null;
     }
 }
+
+export async function getFamilyBackground() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) redirect("/login");
+
+        const userId = (session.user as any).id;
+
+        const employee = await prisma.employees.findUnique({
+            where: { id: userId },
+            include: {
+                family_background: true,
+            },
+        });
+
+        if (!employee) return null;
+
+        const formattedFam_bg = employee.family_background.map((record) => ({
+            id: record.id,
+            relation_type: record.relation_type,
+            surname: record.surname,
+            firstname: record.firstname,
+            middlename: record.middlename,
+            extension: record.extension,
+            occupation: record.occupation,
+            employer: record.employer,
+            occupation_address: record.occupation_address,
+            contact_no: record.contact_no,
+
+        }));
+        return {
+            id: employee.id,
+            family_background: formattedFam_bg,
+        };
+
+    } catch (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+    }
+}

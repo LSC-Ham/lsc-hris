@@ -256,7 +256,7 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                 </div>
 
                 {/* IDs */}
-                <div>
+                <div className="uppercase">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">
                         Government Identifiers
                     </h3>
@@ -335,7 +335,7 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
 
 function ProfileSelect({ label, value, options, isEditing, onChange, required }: any) {
     return (
-        <div>
+        <div className="uppercase">
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
                 {label} {required && <span className="text-red-500 ml-1">*</span>}
             </label>

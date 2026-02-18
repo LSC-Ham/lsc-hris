@@ -40,12 +40,13 @@ export async function main() {
             govt_id_number: "414141",
 
             //address
-            address_type: "Residential Address",
+            address_type: "residential",
             region: "Region IV-A",
             province: "laguna",
             city: "bukawkaw",
             barangay: "sto. thomas",
             zip_code: "4024",
+
         },
     ];
 
@@ -125,6 +126,15 @@ export async function main() {
                                 region: data.region,
                                 barangay: data.barangay,
                                 zip_code: data.zip_code,
+                            }
+                        },
+                        family_background: {
+                            create: {
+                                relation_type: 'guardian',
+                                surname: 'marandang',
+                                firstname: 'cristalyn joy',
+                                middlename: 'marcayda',
+                                occupation: 'CEO',
                             }
                         }
                     },

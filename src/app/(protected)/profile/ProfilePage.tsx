@@ -11,10 +11,11 @@ import { FamilyBackground } from "@/components/profile/FamilyBackground";
 interface ProfilePageProps {
     personal_information: any;
     employment_details: any;
-    address: any; // Ideally, this comes in from the server as an array of address objects
+    address: any;
+    family_background: any;
 }
 
-export default function ProfilePage({ personal_information, employment_details, address }: ProfilePageProps) {
+export default function ProfilePage({ personal_information, employment_details, address, family_background }: ProfilePageProps) {
     const [activeTab, setActiveTab] = useState("Employment Details");
 
     const findGovId = (label: string) => {
@@ -25,9 +26,15 @@ export default function ProfilePage({ personal_information, employment_details, 
 
     // Helper to find specific address type if the server passes an array of addresses
     const getAddressByType = (type: string) => {
-        // Look at the nested .address array from your server action's return object
         const addressArray = address?.address || [];
         return addressArray.find((a: any) => a.address_type === type) || {};
+    };
+
+    // Helper to find specific family member by relation_type
+    const getFamilyMemberByType = (type: string) => {
+        // Adjust this depending on how your server returns the family array.
+        const familyArray = family_background?.family_background || (Array.isArray(family_background) ? family_background : []);
+        return familyArray.find((f: any) => f.relation_type?.toLowerCase() === type.toLowerCase()) || {};
     };
 
     const menuItems = [
@@ -80,28 +87,62 @@ export default function ProfilePage({ personal_information, employment_details, 
     // --- 2. Separate Nested State for Addresses ---
     const [addressData, setAddressData] = useState({
         residential: {
-            house_no: getAddressByType("Residential Address").house_no || "",
-            street: getAddressByType("Residential Address").street || "",
-            subdivision: getAddressByType("Residential Address").subdivision || "",
-            region: getAddressByType("Residential Address").region || "",
-            province: getAddressByType("Residential Address").province || "",
-            city: getAddressByType("Residential Address").city || "",
-            barangay: getAddressByType("Residential Address").barangay || "",
-            zip_code: getAddressByType("Residential Address").zip_code || "",
+            house_no: getAddressByType("residential").house_no || "",
+            street: getAddressByType("residential").street || "",
+            subdivision: getAddressByType("residential").subdivision || "",
+            region: getAddressByType("residential").region || "",
+            province: getAddressByType("residential").province || "",
+            city: getAddressByType("residential").city || "",
+            barangay: getAddressByType("residential").barangay || "",
+            zip_code: getAddressByType("residential").zip_code || "",
         },
         permanent: {
-            house_no: getAddressByType("Permanent Address").house_no || "",
-            street: getAddressByType("Permanent Address").street || "",
-            subdivision: getAddressByType("Permanent Address").subdivision || "",
-            region: getAddressByType("Permanent Address").region || "",
-            province: getAddressByType("Permanent Address").province || "",
-            city: getAddressByType("Permanent Address").city || "",
-            barangay: getAddressByType("Permanent Address").barangay || "",
-            zip_code: getAddressByType("Permanent Address").zip_code || "",
+            house_no: getAddressByType("permanent").house_no || "",
+            street: getAddressByType("permanent").street || "",
+            subdivision: getAddressByType("permanent").subdivision || "",
+            region: getAddressByType("permanent").region || "",
+            province: getAddressByType("permanent").province || "",
+            city: getAddressByType("permanent").city || "",
+            barangay: getAddressByType("permanent").barangay || "",
+            zip_code: getAddressByType("permanent").zip_code || "",
         }
     });
 
-    // Handler for flat data (Personal/Employment)
+    // --- 3. Separate Nested State for Family Background ---
+    const [familyData, setFamilyData] = useState({
+        guardian: {
+            surname: getFamilyMemberByType("guardian").surname || "",
+            firstname: getFamilyMemberByType("guardian").firstname || "",
+            middlename: getFamilyMemberByType("guardian").middlename || "",
+            extension: getFamilyMemberByType("guardian").extension || "",
+            occupation: getFamilyMemberByType("guardian").occupation || "",
+            employer: getFamilyMemberByType("guardian").employer || "",
+            occupation_address: getFamilyMemberByType("guardian").occupation_address || "",
+            contact_no: getFamilyMemberByType("guardian").contact_no || "",
+        },
+        father: {
+            surname: getFamilyMemberByType("father").surname || "",
+            firstname: getFamilyMemberByType("father").firstname || "",
+            middlename: getFamilyMemberByType("father").middlename || "",
+            extension: getFamilyMemberByType("father").extension || "",
+            occupation: getFamilyMemberByType("father").occupation || "",
+            employer: getFamilyMemberByType("father").employer || "",
+            occupation_address: getFamilyMemberByType("father").occupation_address || "",
+            contact_no: getFamilyMemberByType("father").contact_no || "",
+        },
+        mother: {
+            surname: getFamilyMemberByType("mother").surname || "",
+            firstname: getFamilyMemberByType("mother").firstname || "",
+            middlename: getFamilyMemberByType("mother").middlename || "",
+            extension: getFamilyMemberByType("mother").extension || "",
+            occupation: getFamilyMemberByType("mother").occupation || "",
+            employer: getFamilyMemberByType("mother").employer || "",
+            occupation_address: getFamilyMemberByType("mother").occupation_address || "",
+            contact_no: getFamilyMemberByType("mother").contact_no || "",
+        }
+    });
+
+    // --- Handlers ---
     const handleInputChange = (fieldOrEvent: any, value?: any) => {
         if (typeof fieldOrEvent === 'string') {
             setFormData((prev: any) => ({
@@ -117,20 +158,27 @@ export default function ProfilePage({ personal_information, employment_details, 
         }
     };
 
-    // --- 3. Dedicated Handler for Nested Address Data ---
-    // This now receives the fully finalized draft data at once
     const handleAddressChange = (updatedAddressData: any) => {
         setAddressData(updatedAddressData);
     };
 
+    const handleFamilyChange = (updatedFamilyData: any) => {
+        setFamilyData(updatedFamilyData);
+    };
+
     const handleSaveChanges = async () => {
         try {
-            // When submitting, you now have access to both main data and address data
+            // Include family data in your payload based on your Prisma relation schema
             const payload = {
                 ...formData,
                 addresses: [
                     { address_type: "Residential Address", ...addressData.residential },
                     { address_type: "Permanent Address", ...addressData.permanent }
+                ],
+                family_background: [
+                    { relation_type: "guardian", ...familyData.guardian },
+                    { relation_type: "father", ...familyData.father },
+                    { relation_type: "mother", ...familyData.mother }
                 ]
             };
 
@@ -152,7 +200,8 @@ export default function ProfilePage({ personal_information, employment_details, 
             case "Employee Address":
                 return <Address formData={addressData} onChange={handleAddressChange} onSave={handleSaveChanges} />;
             case "Family Background":
-                return <FamilyBackground />;
+                // 4. Connect the FamilyBackground component
+                return <FamilyBackground formData={familyData} onChange={handleFamilyChange} onSave={handleSaveChanges} />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">

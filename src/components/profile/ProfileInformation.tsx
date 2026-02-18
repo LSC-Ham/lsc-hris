@@ -30,9 +30,14 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
 
     // 3. Local handler: updates the draft, NOT the parent
     const handleLocalChange = (field: string, value: any) => {
+        // Force uppercase for all text fields except email and birthdate
+        const isString = typeof value === "string";
+        const skipUppercase = field === "email" || field === "birthdate";
+        const finalValue = (isString && !skipUppercase) ? value.toUpperCase() : value;
+
         setDraftData((prev: any) => ({
             ...prev,
-            [field]: value
+            [field]: finalValue
         }));
     };
 
@@ -111,12 +116,12 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
 
             {/* Form Fields - Now wired to 'draftData' and 'handleLocalChange' */}
             <div className="space-y-6">
-                <ProfileField label="Surname" value={draftData.surname} isEditing={isEditing} placeholder="Dela Cruz" onChange={(e: any) => handleLocalChange("surname", e.target.value)} required />
-                <ProfileField label="First Name" value={draftData.firstname} isEditing={isEditing} placeholder="Juan" onChange={(e: any) => handleLocalChange("firstname", e.target.value)} required />
+                <ProfileField label="Surname" value={draftData.surname} isEditing={isEditing} placeholder="DELA CRUZ" onChange={(e: any) => handleLocalChange("surname", e.target.value)} required />
+                <ProfileField label="First Name" value={draftData.firstname} isEditing={isEditing} placeholder="JUAN" onChange={(e: any) => handleLocalChange("firstname", e.target.value)} required />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <ProfileField label="Middle Name" value={draftData.middlename} isEditing={isEditing} placeholder="Santos" onChange={(e: any) => handleLocalChange("middlename", e.target.value)} />
-                    <ProfileField label="Extension" value={draftData.extension} isEditing={isEditing} placeholder="Jr." onChange={(e: any) => handleLocalChange("extension", e.target.value)} />
+                    <ProfileField label="Middle Name" value={draftData.middlename} isEditing={isEditing} placeholder="SANTOS" onChange={(e: any) => handleLocalChange("middlename", e.target.value)} />
+                    <ProfileField label="Extension" value={draftData.extension} isEditing={isEditing} placeholder="JR." onChange={(e: any) => handleLocalChange("extension", e.target.value)} />
 
                     <ProfileField label="Date of Birth" value={draftData.birthdate} type="date" isEditing={isEditing} onChange={(e: any) => handleLocalChange("birthdate", e.target.value)} />
 
@@ -133,7 +138,7 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
                     <ProfileField label="Mobile No." value={draftData.mobile_no} isEditing={isEditing} placeholder="0999-XXX-XXXX" onChange={(e: any) => handleLocalChange("mobile_no", e.target.value)} />
                 </div>
 
-                <ProfileField label="Personal Email Address" value={draftData.email} isEditing={isEditing} placeholder="jdelacruz@lakeshore.edu.ph" onChange={(e: any) => handleLocalChange("email", e.target.value)} />
+                <ProfileField label="Personal Email Address" type="email" value={draftData.email} isEditing={isEditing} placeholder="jdelacruz@lakeshore.edu.ph" onChange={(e: any) => handleLocalChange("email", e.target.value)} />
 
                 {isLoadingNationalities ? (
                     <LoadingPlaceholder label="Nationality" />
@@ -142,8 +147,8 @@ export function PersonalInformation({ mode = "view", formData, onChange, onSave 
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <ProfileField label="Height" value={draftData.height} isEditing={isEditing} placeholder="1.79m" onChange={(e: any) => handleLocalChange("height", e.target.value)} />
-                    <ProfileField label="Weight" value={draftData.weight} isEditing={isEditing} placeholder="80kg" onChange={(e: any) => handleLocalChange("weight", e.target.value)} />
+                    <ProfileField label="Height" value={draftData.height} isEditing={isEditing} placeholder="1.79M" onChange={(e: any) => handleLocalChange("height", e.target.value)} />
+                    <ProfileField label="Weight" value={draftData.weight} isEditing={isEditing} placeholder="80KG" onChange={(e: any) => handleLocalChange("weight", e.target.value)} />
                     <ProfileField label="Blood Type" value={draftData.blood_type} isEditing={isEditing} placeholder="O+" onChange={(e: any) => handleLocalChange("blood_type", e.target.value)} />
                 </div>
             </div>
@@ -194,7 +199,8 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
                     onChange={onChange}
                     required={required}
                     disabled={disabled}
-                    className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm outline-none
+                    className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm outline-none 
+                    ${type === 'text' ? 'uppercase' : ''} 
                     ${disabled
                             ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
                             : "bg-white focus:ring-1 " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
