@@ -254,3 +254,42 @@ export async function getEligibility() {
     }
 }
 
+export async function getWorkExperience() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) redirect("/login");
+
+        const userId = (session.user as any).id;
+
+        // Query the work_experience table directly
+        const workRecords = await prisma.work_experience.findMany({
+            where: {
+                employees_id: userId
+            },
+            orderBy: {
+                date_from: 'desc' // ISO standard: show most recent experience first
+            }
+        });
+
+        // Map and format for frontend state
+        const formattedWorkExperience = workRecords.map((work: any) => ({
+            id: work.id,
+            position_title: work.position_title || "",
+            company: work.company || "",
+            // Convert Decimal to Number for frontend state
+            monthly_salary: work.monthly_salary ? Number(work.monthly_salary) : 0,
+            appointment_status: work.appointment_status || "",
+            gov_service: work.gov_service || false,
+            // Format DateTime to "YYYY-MM-DD" for <input type="date" />
+            date_from: work.date_from ? work.date_from.toISOString().split('T')[0] : "",
+            date_to: work.date_to ? work.date_to.toISOString().split('T')[0] : "",
+        }));
+
+        return formattedWorkExperience;
+
+    } catch (error) {
+        console.error("Error fetching work experience:", error);
+        return []; // Return empty array to prevent frontend .map() crashes
+    }
+}
+

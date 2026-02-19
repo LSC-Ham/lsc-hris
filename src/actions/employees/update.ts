@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "@/lib/prisma"; // Adjust this import to your actual Prisma client location
 import { authOptions } from "@/lib/auth"; // Make sure this path is correct
 import { revalidatePath } from "next/cache";
+import { Prisma } from "../../../generated/prisma/client";
 
 export async function updatePersonalInformation(data: any) {
     try {
@@ -261,5 +262,51 @@ export async function updateEligibility(data: any[]) {
     } catch (error) {
         console.error("Error updating eligibility:", error);
         return { success: false, error: "Failed to save eligibility records to the database." };
+    }
+}
+
+export async function updateWorkExperience(data: any[]) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return { success: false, error: "Unauthorized. Please log in." };
+        }
+
+        const userId = (session.user as any).id;
+
+        await prisma.employees.update({
+            where: {
+                id: userId
+            },
+            data: {
+                work_experience: {
+                    // 1. Wipe existing records to sync with the new list
+                    deleteMany: {},
+
+                    // 2. Create the new records
+                    create: data.map((record: any) => ({
+                        date_from: record.date_from ? new Date(record.date_from) : null,
+                        date_to: record.date_to ? new Date(record.date_to) : null,
+                        position_title: record.position_title || null,
+                        company: record.company || null,
+
+                        // Convert string/number to Prisma Decimal
+                        monthly_salary: record.monthly_salary
+                            ? new Prisma.Decimal(record.monthly_salary)
+                            : null,
+
+                        appointment_status: record.appointment_status || null,
+                        gov_service: Boolean(record.gov_service),
+                    }))
+                }
+            }
+        });
+
+        revalidatePath("/profile");
+        return { success: true };
+
+    } catch (error) {
+        console.error("Error updating work experience:", error);
+        return { success: false, error: "Failed to save work experience." };
     }
 }

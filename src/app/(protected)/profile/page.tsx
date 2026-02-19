@@ -1,4 +1,4 @@
-import { getAddress, getFamilyBackground, getPersonalInformation, getEmployeeDetails, getEducationalBackground, getEligibility } from "@/actions/employees/get"; // Import your fetch function
+import { getAddress, getFamilyBackground, getPersonalInformation, getEmployeeDetails, getEducationalBackground, getEligibility, getWorkExperience } from "@/actions/employees/get"; // Import your fetch function
 import ProfilePage from "./ProfilePage";
 
 export default async function Page() {
@@ -8,9 +8,10 @@ export default async function Page() {
     const family_background = await getFamilyBackground();
     const educational_background = await getEducationalBackground();
     const eligibility = await getEligibility();
+    const work_experience = await getWorkExperience();
 
 
-    if (!personal_information || !employment_details || !address || !family_background || !educational_background || !eligibility) {
+    if (!personal_information || !employment_details || !address || !family_background || !educational_background || !eligibility || !work_experience) {
         return <div>Error loading profile. Please try logging in again.</div>;
     }
 
@@ -23,5 +24,6 @@ export default async function Page() {
         family_background={family_background}
         educational_background={educational_background}
         eligibility={eligibility}
+        work_experience={work_experience}
     />;
 }

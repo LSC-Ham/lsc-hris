@@ -7,9 +7,10 @@ import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
 import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
-import { updateAddress, updateEducationalBackground, updateEligibility, updateFamilyBackground, updatePersonalInformation } from "@/actions/employees/update";
+import { updateAddress, updateEducationalBackground, updateEligibility, updateFamilyBackground, updatePersonalInformation, updateWorkExperience } from "@/actions/employees/update";
 import { EducationalBackground } from "@/components/profile/EducationalBackground";
 import { Eligibility } from "@/components/profile/Eligibility";
+import { WorkExperience } from "@/components/profile/WorkExperience";
 
 interface ProfilePageProps {
     personal_information: any;
@@ -18,6 +19,7 @@ interface ProfilePageProps {
     family_background: any;
     educational_background: any;
     eligibility: any;
+    work_experience: any;
 
 }
 
@@ -31,7 +33,7 @@ const DEFAULT_EMPLOYMENT_DATA = {
     gsis_no: "", pagibig_no: "", philhealth_no: "", sss_no: "", tin_no: "", agency_no: ""
 };
 
-export default function ProfilePage({ personal_information, employment_details, address, family_background, educational_background, eligibility }: ProfilePageProps) {
+export default function ProfilePage({ personal_information, employment_details, address, family_background, educational_background, eligibility, work_experience }: ProfilePageProps) {
     const [activeTab, setActiveTab] = useState("Employment Details");
     const [educationData, setEducationData] = useState(
         // Ensure it defaults to an empty array if the prop is undefined or null
@@ -42,6 +44,12 @@ export default function ProfilePage({ personal_information, employment_details, 
         // Ensure it defaults to an empty array if the prop is undefined or null
         Array.isArray(eligibility) ? eligibility : []
     );
+
+    const [workExperienceData, setWorkExperienceData] = useState(
+        // Ensure it defaults to an empty array if the prop is undefined or null
+        Array.isArray(work_experience) ? work_experience : []
+    );
+
     // Helper to find specific address type if the server passes an array of addresses
     const getAddressByType = (type: string) => {
         const addressArray = address?.address || [];
@@ -231,6 +239,25 @@ export default function ProfilePage({ personal_information, employment_details, 
         }
     };
 
+    const handleSaveWorkExp = async (updatedDraftData: any[]) => {
+        try {
+            // 1. Instantly update the UI
+            setWorkExperienceData(updatedDraftData);
+
+            // 2. Send the new array to your server action
+            const result = await updateWorkExperience(updatedDraftData);
+
+            if (result.success) {
+                alert("Work Experience updated successfully!");
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("Failed to save Work Experience:", error);
+            alert("An unexpected error occurred.");
+        }
+    };
+
     const renderContent = () => {
         switch (activeTab) {
             case "Employment Details":
@@ -245,6 +272,8 @@ export default function ProfilePage({ personal_information, employment_details, 
                 return <EducationalBackground formData={educationData} onSave={handleSaveEducation} />;
             case "Eligibility":
                 return <Eligibility formData={eligibilityData} onSave={handleSaveEligibility} />;
+            case "Work Experience":
+                return <WorkExperience formData={workExperienceData} onSave={handleSaveWorkExp} />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">
