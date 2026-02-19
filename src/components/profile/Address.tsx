@@ -14,6 +14,7 @@ export interface AddressData {
 }
 
 interface AddressProps {
+    mode?: "view"
     formData: {
         residential: AddressData;
         permanent: AddressData;
@@ -22,7 +23,7 @@ interface AddressProps {
     onSave: (data: { residential: AddressData; permanent: AddressData }) => void;
 }
 
-export function Address({ formData, onSave }: AddressProps) {
+export function Address({ mode = "view", formData, onSave }: AddressProps) {
     // Separate edit states for each address type
     const [editMode, setEditMode] = useState({
         residential: false,
@@ -90,13 +91,15 @@ export function Address({ formData, onSave }: AddressProps) {
                 <div>
                     <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
                         <h2 className="text-xl font-bold text-gray-800 tracking-tight">Residential Address</h2>
-                        <button
-                            type="button"
-                            onClick={() => editMode.residential ? handleCancel("residential") : setEditMode(p => ({ ...p, residential: true }))}
-                            className="text-[#1a6b36] text-sm font-medium hover:underline"
-                        >
-                            {editMode.residential ? "Cancel" : "Edit"}
-                        </button>
+                        {mode !== "view" && (
+                            <button
+                                type="button"
+                                onClick={() => editMode.residential ? handleCancel("residential") : setEditMode(p => ({ ...p, residential: true }))}
+                                className="text-[#1a6b36] text-sm font-medium hover:underline"
+                            >
+                                {editMode.residential ? "Cancel" : "Edit"}
+                            </button>
+                        )}
                     </div>
 
                     <AddressFormSection
@@ -138,13 +141,15 @@ export function Address({ formData, onSave }: AddressProps) {
                                 </label>
                             )}
                         </div>
-                        <button
-                            type="button"
-                            onClick={() => editMode.permanent ? handleCancel("permanent") : setEditMode(p => ({ ...p, permanent: true }))}
-                            className="text-[#1a6b36] text-sm font-medium hover:underline"
-                        >
-                            {editMode.permanent ? "Cancel" : "Edit"}
-                        </button>
+                        {mode !== "view" && (
+                            <button
+                                type="button"
+                                onClick={() => editMode.permanent ? handleCancel("permanent") : setEditMode(p => ({ ...p, permanent: true }))}
+                                className="text-[#1a6b36] text-sm font-medium hover:underline"
+                            >
+                                {editMode.permanent ? "Cancel" : "Edit"}
+                            </button>
+                        )}
                     </div>
 
                     <AddressFormSection

@@ -221,3 +221,45 @@ export async function updateEducationalBackground(data: any[]) { // Expecting an
         return { success: false, error: "Failed to save changes to the database." };
     }
 }
+
+export async function updateEligibility(data: any[]) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return { success: false, error: "Unauthorized. Please log in." };
+        }
+
+        const userId = (session.user as any).id;
+
+        await prisma.employees.update({
+            where: {
+                id: userId
+            },
+            data: {
+                // Nested write for the eligibility relation
+                eligibility: {
+                    // 1. Wipe existing eligibility records for this employee
+                    deleteMany: {},
+
+                    // 2. Create the new records from the array
+                    create: data.map((record: any) => ({
+                        qualification: record.qualification || null,
+                        rating: record.rating || null,
+                        // Schema uses String? for these, so we pass them directly
+                        date_examination: record.date_examination || null,
+                        place_examination: record.place_examination || null,
+                        id_number: record.id_number || null,
+                        date_validity: record.date_validity || null,
+                    }))
+                }
+            }
+        });
+
+        revalidatePath("/profile");
+        return { success: true };
+
+    } catch (error) {
+        console.error("Error updating eligibility:", error);
+        return { success: false, error: "Failed to save eligibility records to the database." };
+    }
+}

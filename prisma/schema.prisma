@@ -209,16 +209,16 @@ model family_background {
 }
 
 model eligibility {
-  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employees_id     String    @db.Uuid
-  qualification    String?
-  rating           String?
-  date_examination String?
-  plan_examination String?
-  id_number        String?
-  date_validity    String?
-  created_at       DateTime  @default(now()) @db.Timestamp(6)
-  updated_at       DateTime? @updatedAt @db.Timestamp(6)
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employees_id      String    @db.Uuid
+  qualification     String?
+  rating            String?
+  date_examination  DateTime?
+  place_examination String?
+  id_number         String?
+  date_validity     String?
+  created_at        DateTime  @default(now()) @db.Timestamp(6)
+  updated_at        DateTime? @updatedAt @db.Timestamp(6)
 
   employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }

@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 
-const POSITION_STATUSES = ["Full-Time", "Part-Time"];
+const POSITION_STATUSES = ["Full-Time", "Part-Time",];
+const EMPLOYMENT_STATUSES = ["Probationary", "Regular",];
 
 interface EmploymentDetailsProps {
-    mode?: "view-only" | "update" | "create";
+    mode?: "view" | "update" | "create";
     formData: any;
     divisions?: string[];
     departments?: string[];
@@ -14,7 +15,7 @@ interface EmploymentDetailsProps {
 }
 
 export function EmploymentDetails({
-    mode = "view-only",
+    mode = "view",
     formData,
     divisions = [],
     departments = [],
@@ -136,16 +137,26 @@ export function EmploymentDetails({
             <div className="space-y-8">
                 {/* ID & Dept */}
                 <div className="space-y-6">
+                    <ProfileField
+                        label="Employee ID Number"
+                        value={draftData.id_number}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("id_number", e.target.value)}
+                        required
+                        disabled={true}
+                    />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <ProfileField
-                            label="Employee ID Number"
-                            value={draftData.id_number}
-                            isEditing={isEditing}
-                            onChange={(e: any) => handleLocalChange("id_number", e.target.value)}
-                            required
-                            disabled={true}
-                        />
+
                         {/* THE FIX IS APPLIED HERE */}
+
+                        <ProfileSelect
+                            label="Employment Status"
+                            value={draftData.remarks}
+                            options={EMPLOYMENT_STATUSES}
+                            isEditing={isEditing}
+                            onChange={(e: any) => handleLocalChange("remarks", e.target.value)}
+                            required
+                        />
                         <ProfileField
                             label="Date Hired"
                             type="datetime-local"

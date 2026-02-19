@@ -7,8 +7,9 @@ import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
 import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
-import { updateAddress, updateEducationalBackground, updateFamilyBackground, updatePersonalInformation } from "@/actions/employees/update";
+import { updateAddress, updateEducationalBackground, updateEligibility, updateFamilyBackground, updatePersonalInformation } from "@/actions/employees/update";
 import { EducationalBackground } from "@/components/profile/EducationalBackground";
+import { Eligibility } from "@/components/profile/Eligibility";
 
 interface ProfilePageProps {
     personal_information: any;
@@ -16,22 +17,31 @@ interface ProfilePageProps {
     address: any;
     family_background: any;
     educational_background: any;
+    eligibility: any;
+
 }
 
-export default function ProfilePage({ personal_information, employment_details, address, family_background, educational_background }: ProfilePageProps) {
+const DEFAULT_PERSONAL_DATA = {
+    surname: "", firstname: "", middlename: "", extension: "", birthdate: "",
+    birthplace: "", sex: "", civil_status: "", telephone_no: "", mobile_no: "",
+    email: "", nationality: "", height: "", weight: "", blood_type: ""
+};
+const DEFAULT_EMPLOYMENT_DATA = {
+    id_number: "", remarks: "", hired_at: "", division: "", department: "", positions: [], govt_ids: [],
+    gsis_no: "", pagibig_no: "", philhealth_no: "", sss_no: "", tin_no: "", agency_no: ""
+};
+
+export default function ProfilePage({ personal_information, employment_details, address, family_background, educational_background, eligibility }: ProfilePageProps) {
     const [activeTab, setActiveTab] = useState("Employment Details");
     const [educationData, setEducationData] = useState(
         // Ensure it defaults to an empty array if the prop is undefined or null
         Array.isArray(educational_background) ? educational_background : []
     );
 
-
-    const findGovId = (label: string) => {
-        if (!employment_details?.govt_ids) return "";
-        const found = employment_details.govt_ids.find((id: any) => id.id_label === label);
-        return found ? found.id_number : "";
-    };
-
+    const [eligibilityData, setEligibilityData] = useState(
+        // Ensure it defaults to an empty array if the prop is undefined or null
+        Array.isArray(eligibility) ? eligibility : []
+    );
     // Helper to find specific address type if the server passes an array of addresses
     const getAddressByType = (type: string) => {
         const addressArray = address?.address || [];
@@ -61,37 +71,14 @@ export default function ProfilePage({ personal_information, employment_details, 
 
     // --- 1. Separated Personal Information State ---
     const [personalData, setPersonalData] = useState({
-        surname: personal_information?.surname || "",
-        firstname: personal_information?.firstname || "",
-        middlename: personal_information?.middlename || "",
-        extension: personal_information?.extension || "",
-        birthdate: personal_information?.birthdate || "",
-        birthplace: personal_information?.birthplace || "",
-        sex: personal_information?.sex || "",
-        civil_status: personal_information?.civil_status || "",
-        telephone_no: personal_information?.telephone_no || "",
-        mobile_no: personal_information?.mobile_no || "",
-        email: personal_information?.email || "",
-        nationality: personal_information?.nationality || "",
-        height: personal_information?.height || "",
-        weight: personal_information?.weight || "",
-        blood_type: personal_information?.blood_type || "",
+        ...DEFAULT_PERSONAL_DATA,
+        ...(personal_information || {})
     });
 
     // --- 2. Separated Employment Details State ---
     const [employmentData] = useState({
-        id_number: employment_details?.id_number || "",
-        hired_at: employment_details?.hired_at || "",
-        division: employment_details?.division || "",
-        department: employment_details?.department || "",
-        positions: employment_details?.positions || [],
-        gsis_no: findGovId("GSIS No."),
-        pagibig_no: findGovId("Pag-IBIG No."),
-        philhealth_no: findGovId("PhilHealth No."),
-        sss_no: findGovId("SSS No."),
-        tin_no: findGovId("TIN No."),
-        agency_no: findGovId("Agency No."),
-        govt_ids: employment_details?.govt_ids || [],
+        ...DEFAULT_EMPLOYMENT_DATA,
+        ...(employment_details || {})
     });
 
     // --- 2. Separate Nested State for Addresses ---
@@ -156,7 +143,7 @@ export default function ProfilePage({ personal_information, employment_details, 
     const handleSavePersonalInfo = async (updatedDraftData: any) => {
         try {
             // 1. Instantly update the parent's local state so the UI feels fast
-            setPersonalData((prev) => ({ ...prev, ...updatedDraftData }));
+            setPersonalData((prev: any) => ({ ...prev, ...updatedDraftData }));
 
             // 2. Send the data to your Next.js Server Action
             const result = await updatePersonalInformation(updatedDraftData);
@@ -225,10 +212,29 @@ export default function ProfilePage({ personal_information, employment_details, 
         }
     };
 
+    const handleSaveEligibility = async (updatedDraftData: any[]) => {
+        try {
+            // 1. Instantly update the UI
+            setEligibilityData(updatedDraftData);
+
+            // 2. Send the new array to your server action
+            const result = await updateEligibility(updatedDraftData);
+
+            if (result.success) {
+                alert("Eligibility updated successfully!");
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("Failed to save Eligibility:", error);
+            alert("An unexpected error occurred.");
+        }
+    };
+
     const renderContent = () => {
         switch (activeTab) {
             case "Employment Details":
-                return <EmploymentDetails mode="view-only" formData={employmentData} />;
+                return <EmploymentDetails mode="view" formData={employmentData} />;
             case "Personal Information":
                 return <PersonalInformation formData={personalData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":
@@ -237,6 +243,8 @@ export default function ProfilePage({ personal_information, employment_details, 
                 return <FamilyBackground formData={familyData} onSave={handleSaveFamily} />;
             case "Educational Background":
                 return <EducationalBackground formData={educationData} onSave={handleSaveEducation} />;
+            case "Eligibility":
+                return <Eligibility formData={eligibilityData} onSave={handleSaveEligibility} />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">

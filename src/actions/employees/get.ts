@@ -38,21 +38,9 @@ export async function getPersonalInformation() {
 
         return {
             id: employee.id,
-            surname: employee.personal_information?.surname || "",
-            firstname: employee.personal_information?.firstname || "",
-            middlename: employee.personal_information?.middlename || "",
-            extension: employee.personal_information?.extension || "",
-            birthdate: employee.personal_information?.birthdate || "",
-            birthplace: employee.personal_information?.birthplace || "",
-            sex: employee.personal_information?.sex || "",
-            civil_status: employee.personal_information?.civil_status || "",
-            telephone_no: employee.personal_information?.telephone_no || "",
-            mobile_no: employee.personal_information?.mobile_no || "",
-            email: employee.personal_information?.email || "",
-            nationality: employee.personal_information?.nationality || "",
-            height: employee.personal_information?.height || "",
-            weight: employee.personal_information?.weight || "",
-            blood_type: employee.personal_information?.blood_type || "",
+            // This grabs every property inside personal_information and attaches it 
+            // to the return object. If it's null, it just returns an empty object.
+            ...(employee.personal_information || {}),
         };
 
     } catch (error) {
@@ -66,20 +54,10 @@ export async function getEmployeeDetails() {
         const session = await getServerSession(authOptions);
         if (!session?.user) redirect("/login");
 
-        const userId = (session.user as any).id;
-
         const employee = await prisma.employees.findUnique({
-            where: { id: userId },
+            where: { id: (session.user as any).id },
             include: {
-                // 1. Fetch the pivot table (employees_positions)
-                positions: {
-                    include: {
-                        positions: true
-                    },
-                    orderBy: {
-                        start_at: 'desc'
-                    }
-                },
+                positions: { include: { positions: true }, orderBy: { start_at: 'desc' } },
                 government_ids: true,
                 divisions: true,
                 departments: true
@@ -88,34 +66,39 @@ export async function getEmployeeDetails() {
 
         if (!employee) return null;
 
-        // 3. Map the data to a clean structure for the frontend
-        const formattedGovIds = employee.government_ids.map((record) => ({
-            id: record.id,
-            id_label: record.id_label,
-            id_number: record.id_number,
-        }));
+        // 1. Map standard government ID labels to your frontend snake_case keys
+        const govIdKeys: Record<string, string> = {
+            "GSIS No.": "gsis_no", "Pag-IBIG No.": "pagibig_no",
+            "PhilHealth No.": "philhealth_no", "SSS No.": "sss_no",
+            "TIN No.": "tin_no", "Agency No.": "agency_no"
+        };
 
-        const formattedPositions = employee.positions.map((record) => ({
-            id: record.id,                       // ID of the assignment
-            position_id: record.positions.id,    // ID of the position definition
-            position: record.positions.position, // THE NAME (e.g., "Software Engineer")
-            status: record.status,               // e.g., "Active", "Probationary"
-            description: record.description,
-            start_at: record.start_at,
-            end_at: record.end_at,
-        }));
+        // 2. Transform the array of IDs into a flat object (e.g., { gsis_no: "123", tin_no: "456" })
+        const flatGovIds = employee.government_ids.reduce((acc: any, curr) => {
+            const key = govIdKeys[curr.id_label];
+            if (key) acc[key] = curr.id_number;
+            return acc;
+        }, {});
 
         return {
             id_number: employee.id_number,
+            remarks: employee.remarks,
             hired_at: employee.hired_at,
-            division: employee.divisions?.division, // or employee.divisions.name
-            department: employee.departments?.department,
-            positions: formattedPositions, // Return the formatted array
-            govt_ids: formattedGovIds,
+            division: employee.divisions?.division || "",
+            department: employee.departments?.department || "",
+            govt_ids: employee.government_ids,
+            ...flatGovIds, // <--- Spreads gsis_no, tin_no, etc., directly into the return object!
+
+            // 3. Flatten the positions array using the spread operator
+            positions: employee.positions.map(({ positions, ...record }) => ({
+                ...record, // Grabs status, description, start_at, end_at, etc.
+                position_id: positions.id,
+                position: positions.position,
+            })),
         };
 
     } catch (error) {
-        console.error("Error fetching profile:", error);
+        console.error("Error fetching employment details:", error);
         return null;
     }
 }
@@ -236,3 +219,38 @@ export async function getEducationalBackground() {
         return []; // Always return an array so your frontend .map() doesn't break
     }
 }
+
+export async function getEligibility() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) redirect("/login");
+
+        const userId = (session.user as any).id;
+
+        // Directly query the "Many" table using the employee's ID
+        const eligibilityRecords = await prisma.eligibility.findMany({
+            where: {
+                employees_id: userId
+            },
+        });
+
+        // Map the array of records to safely format the dates and nulls for your frontend state
+        const formattedEligibility = eligibilityRecords.map((eli: any) => ({
+            id: eli.id,
+            qualification: eli.qualification || "",
+            rating: eli.rating || "",
+            // Format DateTime to "YYYY-MM-DD" string for your <input type="date" />
+            date_examination: eli.date_examination ? eli.date_examination.toISOString().split('T')[0] : "",
+            place_examination: eli.place_examination || "",
+            id_number: eli.id_number || "",
+            date_validity: eli.date_validity || "",
+        }));
+
+        return formattedEligibility; // Returns an array []
+
+    } catch (error) {
+        console.error("Error fetching educational background:", error);
+        return []; // Always return an array so your frontend .map() doesn't break
+    }
+}
+

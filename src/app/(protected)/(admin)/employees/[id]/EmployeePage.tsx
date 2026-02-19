@@ -2,13 +2,24 @@
 
 import { useState } from "react";
 
-// Import your new components here
+// Components
 import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
 import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
-import { updateAddress, updateEducationalBackground, updateFamilyBackground, updatePersonalInformation } from "@/actions/employees/update";
 import { EducationalBackground } from "@/components/profile/EducationalBackground";
+
+// Actions
+// We import the new action here. 
+// Note: Even if the file is in a folder named [id], imports usually point to the file name. 
+// Adjust the path below if your action is exported from a different specific file.
+import {
+    updateAddress,
+    updateEducationalBackground,
+    updateFamilyBackground,
+    updatePersonalInformation,
+} from "@/actions/employees/update";
+import { updateEmploymentDetails } from "@/actions/employees/[id]/update";
 
 interface ProfilePageProps {
     personal_information: any;
@@ -16,84 +27,75 @@ interface ProfilePageProps {
     address: any;
     family_background: any;
     educational_background: any;
+    // Optional: dropdown data
+    divisions?: string[];
+    departments?: string[];
+    positions?: string[];
 }
 
-export default function ProfilePage({ personal_information, employment_details, address, family_background, educational_background }: ProfilePageProps) {
+const DEFAULT_PERSONAL_DATA = {
+    surname: "", firstname: "", middlename: "", extension: "", birthdate: "",
+    birthplace: "", sex: "", civil_status: "", telephone_no: "", mobile_no: "",
+    email: "", nationality: "", height: "", weight: "", blood_type: ""
+};
+const DEFAULT_EMPLOYMENT_DATA = {
+    id_number: "", remarks: "", hired_at: "", division: "", department: "", positions: [], govt_ids: [],
+    gsis_no: "", pagibig_no: "", philhealth_no: "", sss_no: "", tin_no: "", agency_no: ""
+};
+
+export default function ProfilePage({
+    personal_information,
+    employment_details,
+    address,
+    family_background,
+    educational_background,
+    divisions = [],
+    departments = [],
+    positions = []
+}: ProfilePageProps) {
+
+    // The ID from the URL corresponds to this person's ID (usually in personal_information)
+    const employeeId = personal_information?.id;
+
     const [activeTab, setActiveTab] = useState("Employment Details");
+
+    // --- 1. Educational Background State ---
     const [educationData, setEducationData] = useState(
-        // Ensure it defaults to an empty array if the prop is undefined or null
         Array.isArray(educational_background) ? educational_background : []
     );
 
-
-    const findGovId = (label: string) => {
-        if (!employment_details?.govt_ids) return "";
-        const found = employment_details.govt_ids.find((id: any) => id.id_label === label);
-        return found ? found.id_number : "";
-    };
-
-    // Helper to find specific address type if the server passes an array of addresses
+    // Helpers
     const getAddressByType = (type: string) => {
         const addressArray = address?.address || [];
         return addressArray.find((a: any) => a.address_type === type) || {};
     };
 
-    // Helper to find specific family member by relation_type
     const getFamilyMemberByType = (type: string) => {
-        // Adjust this depending on how your server returns the family array.
         const familyArray = family_background?.family_background || (Array.isArray(family_background) ? family_background : []);
         return familyArray.find((f: any) => f.relation_type?.toLowerCase() === type.toLowerCase()) || {};
     };
 
     const menuItems = [
-        "Employment Details",
-        "Personal Information",
-        "Employee Address",
-        "Family Background",
-        "Educational Background",
-        "Eligibility",
-        "Work Experience",
-        "Voluntary Works",
-        "Learning & Development",
-        "Other Information",
-        "References",
+        "Employment Details", "Personal Information", "Employee Address",
+        "Family Background", "Educational Background", "Eligibility",
+        "Work Experience", "Voluntary Works", "Learning & Development",
+        "Other Information", "References",
     ];
 
-    // --- 1. Main Flat Form Data (Personal & Employment) ---
-    const [formData, setFormData] = useState({
-        // Personal Information Fields
-        surname: personal_information?.surname || "",
-        firstname: personal_information?.firstname || "",
-        middlename: personal_information?.middlename || "",
-        extension: personal_information?.extension || "",
-        birthdate: personal_information?.birthdate || "",
-        birthplace: personal_information?.birthplace || "",
-        sex: personal_information?.sex || "",
-        civil_status: personal_information?.civil_status || "",
-        telephone_no: personal_information?.telephone_no || "",
-        mobile_no: personal_information?.mobile_no || "",
-        email: personal_information?.email || "",
-        nationality: personal_information?.nationality || "",
-        height: personal_information?.height || "",
-        weight: personal_information?.weight || "",
-        blood_type: personal_information?.blood_type || "",
-
-        // Employment Details Fields 
-        id_number: employment_details?.id_number || "",
-        hired_at: employment_details?.hired_at || "",
-        division: employment_details?.division || "",
-        department: employment_details?.department || "",
-        positions: employment_details?.positions || [],
-        gsis_no: findGovId("GSIS No."),
-        pagibig_no: findGovId("Pag-IBIG No."),
-        philhealth_no: findGovId("PhilHealth No."),
-        sss_no: findGovId("SSS No."),
-        tin_no: findGovId("TIN No."),
-        agency_no: findGovId("Agency No."),
-        govt_ids: employment_details?.govt_ids || [],
+    // --- 2. Personal Information State ---
+    const [personalData, setPersonalData] = useState({
+        ...DEFAULT_PERSONAL_DATA,
+        ...(personal_information || {})
     });
 
-    // --- 2. Separate Nested State for Addresses ---
+    // --- 3. Employment Details State ---
+    // We combine default data with DB data
+    const [employmentData, setEmploymentData] = useState({
+        ...DEFAULT_EMPLOYMENT_DATA,
+        ...(employment_details || {})
+    });
+
+    // --- 4. Address State ---
     const [addressData, setAddressData] = useState({
         residential: {
             house_no: getAddressByType("residential").house_no || "",
@@ -117,7 +119,7 @@ export default function ProfilePage({ personal_information, employment_details, 
         }
     });
 
-    // --- 3. Separate Nested State for Family Background ---
+    // --- 5. Family Background State ---
     const [familyData, setFamilyData] = useState({
         guardian: {
             surname: getFamilyMemberByType("guardian").surname || "",
@@ -151,17 +153,44 @@ export default function ProfilePage({ personal_information, employment_details, 
         }
     });
 
-    // --- Handlers ---
-    const handleSavePersonalInfo = async (updatedDraftData: any) => {
-        try {
-            // 1. Instantly update the parent's local state so the UI feels fast
-            setFormData((prev) => ({ ...prev, ...updatedDraftData }));
+    // --- HANDLERS ---
 
-            // 2. Send the data to your Next.js Server Action
-            const result = await updatePersonalInformation(updatedDraftData);
+    // === NEW: Handle Employment Save ===
+    const handleSaveEmployment = async (updatedDraftData: any) => {
+        try {
+            // 1. Update the local UI immediately
+            setEmploymentData(updatedDraftData);
+
+            // 2. Validate we have the Employee ID (from the URL/Props)
+            if (!employeeId) {
+                alert("Critical Error: Employee ID missing. Cannot save.");
+                return;
+            }
+
+            // 3. Call the Server Action
+            // We pass the employeeId explicitly to ensure the action knows which student/employee to update.
+            const result = await updateEmploymentDetails(employeeId, updatedDraftData);
 
             if (result.success) {
-                alert("Personal Information updated successfully in the database!");
+                alert("Employment details updated successfully!");
+            } else {
+                alert("Error saving: " + result.error);
+            }
+        } catch (error) {
+            console.error("Failed to save employment:", error);
+            alert("An unexpected error occurred.");
+        }
+    };
+
+    const handleSavePersonalInfo = async (updatedDraftData: any) => {
+        try {
+            setPersonalData((prev: any) => ({ ...prev, ...updatedDraftData }));
+            // Ensure ID is included if the action expects it in the payload
+            const payload = { ...updatedDraftData, id: employeeId };
+            const result = await updatePersonalInformation(payload);
+
+            if (result.success) {
+                alert("Personal Information updated successfully!");
             } else {
                 alert("Error: " + result.error);
             }
@@ -170,13 +199,13 @@ export default function ProfilePage({ personal_information, employment_details, 
             alert("An unexpected error occurred.");
         }
     };
+
     const handleSaveAddress = async (updatedDraftData: any) => {
         try {
-            // 1. Instantly update the parent's local state 
             setAddressData(updatedDraftData);
-
-            // 2. Send the data to the Server Action
-            const result = await updateAddress(updatedDraftData);
+            // Assuming the action needs the Employee ID to know whose address to update
+            const payload = { ...updatedDraftData, employee_id: employeeId };
+            const result = await updateAddress(payload);
 
             if (result.success) {
                 alert("Address updated successfully!");
@@ -191,12 +220,10 @@ export default function ProfilePage({ personal_information, employment_details, 
 
     const handleSaveFamily = async (updatedDraftData: any) => {
         try {
-            // 1. Instantly update the parent's local state 
-            // (Assuming your state variable is named familyData)
             setFamilyData(updatedDraftData);
-
-            // 2. Send the data to the Server Action
-            const result = await updateFamilyBackground(updatedDraftData);
+            // Include employeeId if required by your specific action structure
+            const payload = { ...updatedDraftData, employee_id: employeeId };
+            const result = await updateFamilyBackground(payload);
 
             if (result.success) {
                 alert("Family background updated successfully!");
@@ -211,10 +238,9 @@ export default function ProfilePage({ personal_information, employment_details, 
 
     const handleSaveEducation = async (updatedDraftData: any[]) => {
         try {
-            // 1. Instantly update the UI
             setEducationData(updatedDraftData);
-
-            // 2. Send the new array to your server action
+            // If the array doesn't implicitly carry the ID, you might need to pass it differently,
+            // but usually, nested updates handle this via the array items or a wrapper.
             const result = await updateEducationalBackground(updatedDraftData);
 
             if (result.success) {
@@ -231,11 +257,22 @@ export default function ProfilePage({ personal_information, employment_details, 
     const renderContent = () => {
         switch (activeTab) {
             case "Employment Details":
-                return <EmploymentDetails mode="update" formData={formData} />;
+                return (
+                    <EmploymentDetails
+                        mode="update"
+                        formData={employmentData}
+                        // Dropdowns
+                        divisions={divisions}
+                        departments={departments}
+                        availablePositions={positions}
+                        // Connect Save Handler
+                        onSave={handleSaveEmployment}
+                    />
+                );
             case "Personal Information":
-                return <PersonalInformation formData={formData} onSave={handleSavePersonalInfo} />;
+                return <PersonalInformation formData={personalData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":
-                return <Address formData={addressData} onSave={handleSaveAddress} />;
+                return <Address mode="view" formData={addressData} onSave={handleSaveAddress} />;
             case "Family Background":
                 return <FamilyBackground formData={familyData} onSave={handleSaveFamily} />;
             case "Educational Background":
@@ -264,20 +301,18 @@ export default function ProfilePage({ personal_information, employment_details, 
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                {/* === LEFT COLUMN (No Sticky) === */}
+                {/* LEFT COLUMN (Sidebar) */}
                 <div className="md:col-span-4 lg:col-span-3 space-y-6">
-                    {/* User Card */}
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
                         <div className="w-24 h-24 rounded-full bg-green-50 border-4 border-white shadow-sm flex items-center justify-center mb-4 text-2xl font-bold text-[#1a6b36]">
+                            {/* Initials could go here */}
                         </div>
-                        <h2 className="text-lg font-bold text-gray-800 capitalize">{formData.firstname} {formData.surname}</h2>
-                        <p className="text-xs text-gray-500 mb-1">{formData.department}</p>
+                        <h2 className="text-lg font-bold text-gray-800 capitalize">{personalData.firstname} {personalData.surname}</h2>
+                        <p className="text-xs text-gray-500 mb-1">{employmentData.department || "No Department"}</p>
                     </div>
 
-                    {/* Navigation Menu */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-
-                        {/* 1. MOBILE ONLY: Select Dropdown */}
+                        {/* Mobile Dropdown */}
                         <div className="block md:hidden p-4">
                             <select
                                 value={activeTab}
@@ -290,7 +325,7 @@ export default function ProfilePage({ personal_information, employment_details, 
                             </select>
                         </div>
 
-                        {/* 2. DESKTOP ONLY: Vertical Sidebar Nav */}
+                        {/* Desktop Menu */}
                         <nav className="hidden md:flex flex-col p-2 space-y-1">
                             {menuItems.map((item) => (
                                 <button
@@ -313,9 +348,8 @@ export default function ProfilePage({ personal_information, employment_details, 
                     </div>
                 </div>
 
-                {/* === RIGHT COLUMN (Dynamic Content) === */}
+                {/* RIGHT COLUMN (Content) */}
                 <div className="md:col-span-8 lg:col-span-9 space-y-6">
-                    {/* Notice Area */}
                     <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-4 shadow-sm">
                         <div className="p-2 bg-amber-100 rounded-full text-amber-600 shrink-0">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -330,7 +364,6 @@ export default function ProfilePage({ personal_information, employment_details, 
                         </div>
                     </div>
 
-                    {/* The Dynamic Form Container */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-6">
                         {renderContent()}
                     </div>
