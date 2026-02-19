@@ -7,17 +7,24 @@ import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
 import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
-import { updateAddress, updateFamilyBackground, updatePersonalInformation } from "@/actions/employees/update";
+import { updateAddress, updateEducationalBackground, updateFamilyBackground, updatePersonalInformation } from "@/actions/employees/update";
+import { EducationalBackground } from "@/components/profile/EducationalBackground";
 
 interface ProfilePageProps {
     personal_information: any;
     employment_details: any;
     address: any;
     family_background: any;
+    educational_background: any;
 }
 
-export default function ProfilePage({ personal_information, employment_details, address, family_background }: ProfilePageProps) {
+export default function ProfilePage({ personal_information, employment_details, address, family_background, educational_background }: ProfilePageProps) {
     const [activeTab, setActiveTab] = useState("Employment Details");
+    const [educationData, setEducationData] = useState(
+        // Ensure it defaults to an empty array if the prop is undefined or null
+        Array.isArray(educational_background) ? educational_background : []
+    );
+
 
     const findGovId = (label: string) => {
         if (!employment_details?.govt_ids) return "";
@@ -201,6 +208,25 @@ export default function ProfilePage({ personal_information, employment_details, 
         }
     };
 
+    const handleSaveEducation = async (updatedDraftData: any[]) => {
+        try {
+            // 1. Instantly update the UI
+            setEducationData(updatedDraftData);
+
+            // 2. Send the new array to your server action
+            const result = await updateEducationalBackground(updatedDraftData);
+
+            if (result.success) {
+                alert("Educational background updated successfully!");
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("Failed to save educational background:", error);
+            alert("An unexpected error occurred.");
+        }
+    };
+
     const handleInputChange = (fieldOrEvent: any, value?: any) => {
         if (typeof fieldOrEvent === 'string') {
             setFormData((prev: any) => ({
@@ -226,6 +252,8 @@ export default function ProfilePage({ personal_information, employment_details, 
                 return <Address formData={addressData} onSave={handleSaveAddress} />;
             case "Family Background":
                 return <FamilyBackground formData={familyData} onSave={handleSaveFamily} />;
+            case "Educational Background":
+                return <EducationalBackground formData={educationData} onSave={handleSaveEducation} />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">

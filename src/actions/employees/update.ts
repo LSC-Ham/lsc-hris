@@ -178,3 +178,46 @@ export async function updateFamilyBackground(data: any) {
         return { success: false, error: "Failed to save changes to the database." };
     }
 }
+
+export async function updateEducationalBackground(data: any[]) { // Expecting an array of records
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) {
+            return { success: false, error: "Unauthorized. Please log in." };
+        }
+
+        const userId = (session.user as any).id;
+
+        await prisma.employees.update({
+            where: {
+                id: userId
+            },
+            data: {
+                // This is the magic nested write block
+                educational_background: {
+                    // 1. Clear out the old records associated with this employee
+                    deleteMany: {},
+
+                    // 2. Insert the updated array of records
+                    create: data.map((record: any) => ({
+                        level: record.level || null,
+                        school: record.school || null,
+                        degree: record.degree || null,
+                        // Convert frontend string dates ("YYYY-MM-DD") to JS Date objects for PostgreSQL DateTime
+                        date_from: record.date_from ? new Date(record.date_from) : null,
+                        date_to: record.date_to ? new Date(record.date_to) : null,
+                        units_earned: record.units_earned || null,
+                        year_graduated: record.year_graduated || null,
+                    }))
+                }
+            }
+        });
+
+        revalidatePath("/profile");
+        return { success: true };
+
+    } catch (error) {
+        console.error("Error updating educational background:", error);
+        return { success: false, error: "Failed to save changes to the database." };
+    }
+}

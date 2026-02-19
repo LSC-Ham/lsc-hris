@@ -197,3 +197,41 @@ export async function getFamilyBackground() {
         return null;
     }
 }
+
+export async function getEducationalBackground() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) redirect("/login");
+
+        const userId = (session.user as any).id;
+
+        // Directly query the "Many" table using the employee's ID
+        const educationRecords = await prisma.educational_background.findMany({
+            where: {
+                employees_id: userId
+            },
+            orderBy: {
+                date_from: 'desc' // Optional: Brings their most recent education to the top
+            }
+        });
+
+        // Map the array of records to safely format the dates and nulls for your frontend state
+        const formattedEducation = educationRecords.map((edu: any) => ({
+            id: edu.id,
+            level: edu.level || "",
+            school: edu.school || "",
+            degree: edu.degree || "",
+            // Format DateTime to "YYYY-MM-DD" string for your <input type="date" />
+            date_from: edu.date_from ? edu.date_from.toISOString().split('T')[0] : "",
+            date_to: edu.date_to ? edu.date_to.toISOString().split('T')[0] : "",
+            units_earned: edu.units_earned || "",
+            year_graduated: edu.year_graduated || "",
+        }));
+
+        return formattedEducation; // Returns an array []
+
+    } catch (error) {
+        console.error("Error fetching educational background:", error);
+        return []; // Always return an array so your frontend .map() doesn't break
+    }
+}

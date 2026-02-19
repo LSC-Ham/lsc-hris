@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const EDUCATIONAL_LEVELS = [
     "Elementary",
-    "Secondary",
+    "Junior High School",
+    "Senior High School",
     "Vocational / Trade Course",
-    "College",
-    "Graduate Studies"
+    "College / Bachelor's Degree",
+    "Graduate Studies / Post-Graduate"
 ];
 
 export interface EducationRecord {
@@ -22,9 +23,8 @@ export interface EducationRecord {
 }
 
 interface EducationalBackgroundProps {
-    formData?: EducationRecord[];
-    onChange: (updatedData: EducationRecord[]) => void;
-    onSave?: () => void;
+    formData: EducationRecord[];
+    onSave: (updatedData: EducationRecord[]) => Promise<void>; // Changed to onSave and made async
 }
 
 const emptyRecord: EducationRecord = {
@@ -37,26 +37,16 @@ const emptyRecord: EducationRecord = {
     year_graduated: "",
 };
 
-export function EducationalBackground({ formData, onChange, onSave }: EducationalBackgroundProps) {
-    // 1. Hold the complete list of records
-    const [records, setRecords] = useState<EducationRecord[]>(formData || []);
-
-    // 2. State for the form toggle and draft data
+export function EducationalBackground({ formData = [], onSave }: EducationalBackgroundProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [draftData, setDraftData] = useState<EducationRecord>(emptyRecord);
 
-    // Keep records synced if parent data updates
-    useEffect(() => {
-        setRecords(formData || []);
-    }, [formData]);
+    // NEW: Loading state for better UX
+    const [isSaving, setIsSaving] = useState(false);
 
-    // --- Local Form Handlers ---
     const handleLocalChange = (field: string, value: any) => {
-        setDraftData((prev) => ({
-            ...prev,
-            [field]: value
-        }));
+        setDraftData((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleAddNew = () => {
@@ -66,22 +56,19 @@ export function EducationalBackground({ formData, onChange, onSave }: Educationa
     };
 
     const handleEditClick = (index: number) => {
-        setDraftData({ ...records[index] });
+        setDraftData({ ...formData[index] });
         setEditingIndex(index);
         setIsFormOpen(true);
     };
 
-    const handleDeleteClick = (index: number) => {
+    const handleDeleteClick = async (index: number) => {
         if (!window.confirm("Are you sure you want to remove this record?")) return;
 
-        const updatedRecords = [...records];
+        const updatedRecords = [...formData];
         updatedRecords.splice(index, 1);
 
-        setRecords(updatedRecords);
-        onChange(updatedRecords);
-        if (onSave) {
-            setTimeout(() => onSave(), 0);
-        }
+        // Await the parent's save function
+        await onSave(updatedRecords);
     };
 
     const handleCancel = () => {
@@ -90,25 +77,32 @@ export function EducationalBackground({ formData, onChange, onSave }: Educationa
         setIsFormOpen(false);
     };
 
-    const handleSaveClick = () => {
-        const updatedRecords = [...records];
+    const handleSaveClick = async () => {
+        // Validation check
+        if (!draftData.level || !draftData.school) {
+            alert("Please fill in the required fields: Level and School.");
+            return;
+        }
+
+        setIsSaving(true); // Start loading spinner/state
+
+        const updatedRecords = [...formData];
 
         if (editingIndex !== null) {
-            // Update existing row
             updatedRecords[editingIndex] = draftData;
         } else {
-            // Insert new row (assign a temporary ID for React keys if needed)
+            // Assign a temporary ID if inserting a new record (the database will assign the real one)
             updatedRecords.push({ ...draftData, id: draftData.id || crypto.randomUUID() });
         }
 
-        setRecords(updatedRecords);
-        onChange(updatedRecords); // Push entire array up to parent
+        // Await the parent's server action to finish
+        await onSave(updatedRecords);
+
+        // Reset UI
+        setIsSaving(false);
         setIsFormOpen(false);
         setEditingIndex(null);
-
-        if (onSave) {
-            setTimeout(() => onSave(), 0);
-        }
+        setDraftData(emptyRecord);
     };
 
     return (
@@ -131,14 +125,14 @@ export function EducationalBackground({ formData, onChange, onSave }: Educationa
                 )}
             </div>
 
-            {/* FORM VIEW (Shows only when inserting or editing) */}
+            {/* FORM VIEW */}
             {isFormOpen ? (
-                <div className="space-y-6 bg-gray-50/50 p-6 border border-gray-100 rounded-xl">
+                <div className="space-y-6 bg-gray-50/50 p-6 border border-gray-200 rounded-xl shadow-sm">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wider">
                             {editingIndex !== null ? "Edit Educational Record" : "New Educational Record"}
                         </h2>
-                        <button type="button" onClick={handleCancel} className="text-gray-500 hover:text-gray-700 text-sm font-medium">
+                        <button type="button" onClick={handleCancel} disabled={isSaving} className="text-gray-500 hover:text-gray-700 text-sm font-medium disabled:opacity-50">
                             Close
                         </button>
                     </div>
@@ -164,73 +158,93 @@ export function EducationalBackground({ formData, onChange, onSave }: Educationa
                         <button
                             type="button"
                             onClick={handleCancel}
-                            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all"
+                            disabled={isSaving}
+                            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all disabled:opacity-50"
                         >
                             Cancel
                         </button>
                         <button
                             type="button"
-                            className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95"
+                            className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
                             onClick={handleSaveClick}
+                            disabled={isSaving}
                         >
-                            Save Record
+                            {isSaving ? "Saving..." : "Confirm Record"}
                         </button>
                     </div>
                 </div>
             ) : (
-                /* TABLE VIEW (Shows when not editing) */
-                <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
-                    {records.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500 text-sm">
+                /* CARD VIEW */
+                <div className="space-y-4">
+                    {formData.length === 0 ? (
+                        <div className="p-8 text-center border border-dashed border-gray-300 rounded-xl bg-gray-50 text-gray-500 text-sm">
                             No educational background added yet. Click "Add New Record" to begin.
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left whitespace-nowrap">
-                                <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
-                                    <tr>
-                                        <th className="px-6 py-4 font-semibold">Level</th>
-                                        <th className="px-6 py-4 font-semibold">School</th>
-                                        <th className="px-6 py-4 font-semibold">Degree / Certificate</th>
-                                        <th className="px-6 py-4 font-semibold">Date From</th>
-                                        <th className="px-6 py-4 font-semibold">Date To</th>
-                                        <th className="px-6 py-4 font-semibold">Units Earned</th>
-                                        <th className="px-6 py-4 font-semibold">Year Graduated</th>
-                                        <th className="px-6 py-4 font-semibold text-right sticky right-0 bg-gray-50">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                    {records.map((record, index) => (
-                                        <tr key={record.id || index} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 text-gray-800 font-medium">{record.level || "-"}</td>
-                                            <td className="px-6 py-4 text-gray-600">{record.school || "-"}</td>
-                                            <td className="px-6 py-4 text-gray-600">{record.degree || "-"}</td>
-                                            <td className="px-6 py-4 text-gray-600">{record.date_from || "-"}</td>
-                                            <td className="px-6 py-4 text-gray-600">{record.date_to || "-"}</td>
-                                            <td className="px-6 py-4 text-gray-600">{record.units_earned || "-"}</td>
-                                            <td className="px-6 py-4 text-gray-600">{record.year_graduated || "-"}</td>
-                                            <td className="px-6 py-4 text-right sticky right-0 bg-white/90 backdrop-blur-sm shadow-[-10px_0_15px_-10px_rgba(0,0,0,0.05)]">
-                                                <div className="flex items-center justify-end gap-3">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleEditClick(index)}
-                                                        className="text-[#1a6b36] hover:underline font-medium text-xs"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleDeleteClick(index)}
-                                                        className="text-red-600 hover:underline font-medium text-xs"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {formData.map((record, index) => (
+                                <div
+                                    key={record.id || index}
+                                    className="relative bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between"
+                                >
+                                    <div className="flex justify-between items-start mb-3">
+                                        <span className="inline-block px-3 py-1 bg-green-50 text-[#1a6b36] text-xs font-semibold rounded-full uppercase tracking-wider">
+                                            {record.level || "Unknown Level"}
+                                        </span>
+
+                                        <div className="flex items-center gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleEditClick(index)}
+                                                className="p-1.5 text-gray-500 hover:text-[#1a6b36] hover:bg-green-50 rounded-md transition-colors"
+                                                title="Edit"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDeleteClick(index)}
+                                                className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                                title="Delete"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1 uppercase">
+                                            {record.school || "Unnamed School"}
+                                        </h3>
+                                        <p className="text-sm text-gray-600 font-medium uppercase">
+                                            {record.degree || "No Degree/Certificate Provided"}
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs mt-auto pt-4 border-t border-gray-100">
+                                        <div>
+                                            <span className="block text-gray-400 font-medium uppercase mb-0.5">Duration</span>
+                                            <span className="text-gray-800 font-semibold">
+                                                {record.date_from || "?"} - {record.date_to || "?"}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <span className="block text-gray-400 font-medium uppercase mb-0.5">Year Graduated</span>
+                                            <span className="text-gray-800 font-semibold">{record.year_graduated || "N/A"}</span>
+                                        </div>
+                                        {record.units_earned && (
+                                            <div className="col-span-2">
+                                                <span className="block text-gray-400 font-medium uppercase mb-0.5">Units Earned</span>
+                                                <span className="text-gray-800 font-semibold">{record.units_earned}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
@@ -239,9 +253,6 @@ export function EducationalBackground({ formData, onChange, onSave }: Educationa
     );
 }
 
-// ----------------------------------------------------------------------
-// HELPER COMPONENTS (Copied exactly from your ProfileInformation)
-// ----------------------------------------------------------------------
 
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
     return (
