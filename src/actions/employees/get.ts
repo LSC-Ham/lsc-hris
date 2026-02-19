@@ -107,6 +107,7 @@ export async function getEmployeeDetails() {
 
         return {
             id_number: employee.id_number,
+            hired_at: employee.hired_at,
             division: employee.divisions?.division, // or employee.divisions.name
             department: employee.departments?.department,
             positions: formattedPositions, // Return the formatted array

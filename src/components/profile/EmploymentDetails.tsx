@@ -294,6 +294,8 @@ export function EmploymentDetails({
     );
 }
 
+// ... (ProfileField and ProfileSelect remain exactly the same)
+
 // --- Reusable Helper Components ---
 
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {

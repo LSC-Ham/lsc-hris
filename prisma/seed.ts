@@ -31,7 +31,7 @@ export async function main() {
             // employee details
             id_number: "ad03069",
             department: "Information Technology",
-            hired_at: "",
+            hired_at: new Date("1/22/2026"),
             position: "IT Personnel",
             status: "Full-Time",
             start_at: new Date("1/22/2026"),
@@ -94,6 +94,7 @@ export async function main() {
                 employees: {
                     create: {
                         id_number: data.id_number,
+                        hired_at: data.hired_at,
                         departments_id: department.id,
                         divisions_id: division.id,
                         positions: {

@@ -80,6 +80,7 @@ export default function ProfilePage({ personal_information, employment_details, 
 
         // Employment Details Fields 
         id_number: employment_details?.id_number || "",
+        hired_at: employment_details?.hired_at || "",
         division: employment_details?.division || "",
         department: employment_details?.department || "",
         positions: employment_details?.positions || [],
@@ -230,7 +231,7 @@ export default function ProfilePage({ personal_information, employment_details, 
     const renderContent = () => {
         switch (activeTab) {
             case "Employment Details":
-                return <EmploymentDetails mode="view-only" formData={formData}  />;
+                return <EmploymentDetails mode="view-only" formData={formData} />;
             case "Personal Information":
                 return <PersonalInformation formData={formData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":
