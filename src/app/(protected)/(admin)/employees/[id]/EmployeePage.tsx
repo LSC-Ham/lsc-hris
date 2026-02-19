@@ -59,8 +59,9 @@ export default function ProfilePage({ personal_information, employment_details, 
         "References",
     ];
 
-    // --- 1. Separated Personal Information State ---
-    const [personalData, setPersonalData] = useState({
+    // --- 1. Main Flat Form Data (Personal & Employment) ---
+    const [formData, setFormData] = useState({
+        // Personal Information Fields
         surname: personal_information?.surname || "",
         firstname: personal_information?.firstname || "",
         middlename: personal_information?.middlename || "",
@@ -76,10 +77,8 @@ export default function ProfilePage({ personal_information, employment_details, 
         height: personal_information?.height || "",
         weight: personal_information?.weight || "",
         blood_type: personal_information?.blood_type || "",
-    });
 
-    // --- 2. Separated Employment Details State ---
-    const [employmentData] = useState({
+        // Employment Details Fields 
         id_number: employment_details?.id_number || "",
         hired_at: employment_details?.hired_at || "",
         division: employment_details?.division || "",
@@ -156,7 +155,7 @@ export default function ProfilePage({ personal_information, employment_details, 
     const handleSavePersonalInfo = async (updatedDraftData: any) => {
         try {
             // 1. Instantly update the parent's local state so the UI feels fast
-            setPersonalData((prev) => ({ ...prev, ...updatedDraftData }));
+            setFormData((prev) => ({ ...prev, ...updatedDraftData }));
 
             // 2. Send the data to your Next.js Server Action
             const result = await updatePersonalInformation(updatedDraftData);
@@ -192,7 +191,11 @@ export default function ProfilePage({ personal_information, employment_details, 
 
     const handleSaveFamily = async (updatedDraftData: any) => {
         try {
+            // 1. Instantly update the parent's local state 
+            // (Assuming your state variable is named familyData)
             setFamilyData(updatedDraftData);
+
+            // 2. Send the data to the Server Action
             const result = await updateFamilyBackground(updatedDraftData);
 
             if (result.success) {
@@ -228,9 +231,9 @@ export default function ProfilePage({ personal_information, employment_details, 
     const renderContent = () => {
         switch (activeTab) {
             case "Employment Details":
-                return <EmploymentDetails mode="view-only" formData={employmentData} />;
+                return <EmploymentDetails mode="update" formData={formData} />;
             case "Personal Information":
-                return <PersonalInformation formData={personalData} onSave={handleSavePersonalInfo} />;
+                return <PersonalInformation formData={formData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":
                 return <Address formData={addressData} onSave={handleSaveAddress} />;
             case "Family Background":
@@ -267,8 +270,8 @@ export default function ProfilePage({ personal_information, employment_details, 
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
                         <div className="w-24 h-24 rounded-full bg-green-50 border-4 border-white shadow-sm flex items-center justify-center mb-4 text-2xl font-bold text-[#1a6b36]">
                         </div>
-                        <h2 className="text-lg font-bold text-gray-800 capitalize">{personalData.firstname} {personalData.surname}</h2>
-                        <p className="text-xs text-gray-500 mb-1">{employmentData.department}</p>
+                        <h2 className="text-lg font-bold text-gray-800 capitalize">{formData.firstname} {formData.surname}</h2>
+                        <p className="text-xs text-gray-500 mb-1">{formData.department}</p>
                     </div>
 
                     {/* Navigation Menu */}

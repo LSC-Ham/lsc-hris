@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const POSITION_STATUSES = ["Full-Time", "Part-Time"];
 
 interface EmploymentDetailsProps {
-    // 3 distinct modes controlled by the Server Component
     mode?: "view-only" | "update" | "create";
     formData: any;
     divisions?: string[];
     departments?: string[];
     availablePositions?: string[];
-    onChange?: (field: string, value: any) => void; // Optional since view-only won't use it
+    onSave?: (updatedData: any) => void;
 }
 
 export function EmploymentDetails({
@@ -20,17 +19,44 @@ export function EmploymentDetails({
     divisions = [],
     departments = [],
     availablePositions = [],
-    onChange
+    onSave
 }: EmploymentDetailsProps) {
-
-    // --- UI State ---
-    // If it's create mode, it's always editing. Otherwise, it starts as false.
     const [isEditing, setIsEditing] = useState(mode === "create");
-
-    // --- Local UI State for "Add Position" Draft ---
+    const [draftData, setDraftData] = useState<any>({});
     const [assignedPosition, setAssignedPosition] = useState({
         position: "", status: "", description: "", start_at: "", end_at: ""
     });
+
+    // --- Formatters ---
+    // 1. Formats the date EXACTLY ONCE for the input field
+    const formatDateForInput = (dateVal: any) => {
+        if (!dateVal) return "";
+        // If it's already formatted as YYYY-MM-DDTHH:mm, leave it alone
+        if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dateVal)) {
+            return dateVal.slice(0, 16);
+        }
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime())) return "";
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const hours = String(d.getHours()).padStart(2, '0');
+        const minutes = String(d.getMinutes()).padStart(2, '0');
+
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
+    // 2. Formats the date for human-readable View Mode
+    const formatHiredDateView = (dateVal: any) => {
+        if (!dateVal) return "";
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime())) return "";
+        return d.toLocaleString('en-US', {
+            month: 'short', day: 'numeric', year: 'numeric',
+            hour: 'numeric', minute: '2-digit', hour12: true
+        });
+    };
 
     const formatDate = (dateString: string | Date) => {
         if (!dateString) return "Present";
@@ -39,38 +65,67 @@ export function EmploymentDetails({
         });
     };
 
+    // --- State Sync ---
+    useEffect(() => {
+        const initialData = formData || {};
+        setDraftData({
+            ...initialData,
+            // Pre-format the date when loading so we don't do it on every keystroke
+            hired_at: formatDateForInput(initialData.hired_at)
+        });
+    }, [formData]);
+
+
     // --- Handlers ---
+    const handleLocalChange = (field: string, value: any) => {
+        setDraftData((prev: any) => ({ ...prev, [field]: value }));
+    };
+
     const handleAssignedChange = (field: string, value: string) => {
         setAssignedPosition((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleAddPositionObj = () => {
-        if (!onChange || !assignedPosition.position || !assignedPosition.status) return;
+        if (!assignedPosition.position || !assignedPosition.status) return;
 
-        const updatedPositions = [...(formData.positions || []), assignedPosition];
-        onChange("positions", updatedPositions);
-
-        // Reset draft state
+        const updatedPositions = [...(draftData.positions || []), assignedPosition];
+        handleLocalChange("positions", updatedPositions);
         setAssignedPosition({ position: "", status: "", description: "", start_at: "", end_at: "" });
     };
 
     const handleRemovePosition = (indexToRemove: number) => {
-        if (!onChange) return;
-        const updatedPositions = formData.positions.filter((_: any, index: number) => index !== indexToRemove);
-        onChange("positions", updatedPositions);
+        const updatedPositions = (draftData.positions || []).filter((_: any, index: number) => index !== indexToRemove);
+        handleLocalChange("positions", updatedPositions);
+    };
+
+    // --- Save & Cancel Logic ---
+    const handleCancel = () => {
+        const initialData = formData || {};
+        setDraftData({
+            ...initialData,
+            hired_at: formatDateForInput(initialData.hired_at) // Reset formatting on cancel
+        });
+        setIsEditing(false);
+        setAssignedPosition({ position: "", status: "", description: "", start_at: "", end_at: "" });
+    };
+
+    const handleSaveClick = () => {
+        setIsEditing(false);
+        if (onSave) {
+            onSave(draftData);
+        }
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                 <h1 className="text-xl font-bold text-gray-800 tracking-tight">Employment Details</h1>
 
-                {/* ONLY show the Edit/Cancel button in "update" mode */}
                 {mode === "update" && (
                     <button
                         type="button"
-                        onClick={() => setIsEditing(!isEditing)}
+                        onClick={isEditing ? handleCancel : () => setIsEditing(true)}
                         className="text-[#1a6b36] text-sm font-medium hover:underline"
                     >
                         {isEditing ? "Cancel" : "Edit"}
@@ -81,31 +136,38 @@ export function EmploymentDetails({
             <div className="space-y-8">
                 {/* ID & Dept */}
                 <div className="space-y-6">
-                    <ProfileField
-                        label="Employee ID Number"
-                        value={formData.id_number}
-                        isEditing={isEditing}
-                        onChange={(e: any) => onChange?.("id_number", e.target.value)}
-                        required
-                        disabled={true}
-                    />
-
-                    {/* Division & Department Dropdowns */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <ProfileField
+                            label="Employee ID Number"
+                            value={draftData.id_number}
+                            isEditing={isEditing}
+                            onChange={(e: any) => handleLocalChange("id_number", e.target.value)}
+                            required
+                            disabled={true}
+                        />
+                        {/* THE FIX IS APPLIED HERE */}
+                        <ProfileField
+                            label="Date Hired"
+                            type="datetime-local"
+                            value={isEditing ? draftData.hired_at : formatHiredDateView(draftData.hired_at)}
+                            isEditing={isEditing}
+                            onChange={(e: any) => handleLocalChange("hired_at", e.target.value)}
+                            required
+                        />
                         <ProfileSelect
                             label="Division"
-                            value={formData.division}
+                            value={draftData.division}
                             options={divisions}
                             isEditing={isEditing}
-                            onChange={(e: any) => onChange?.("division", e.target.value)}
+                            onChange={(e: any) => handleLocalChange("division", e.target.value)}
                             required
                         />
                         <ProfileSelect
                             label="Department"
-                            value={formData.department}
+                            value={draftData.department}
                             options={departments}
                             isEditing={isEditing}
-                            onChange={(e: any) => onChange?.("department", e.target.value)}
+                            onChange={(e: any) => handleLocalChange("department", e.target.value)}
                             required
                         />
                     </div>
@@ -118,8 +180,8 @@ export function EmploymentDetails({
 
                         {/* List */}
                         <div className="space-y-3 mb-4">
-                            {formData.positions && formData.positions.length > 0 ? (
-                                formData.positions.map((pos: any, index: number) => (
+                            {draftData.positions && draftData.positions.length > 0 ? (
+                                draftData.positions.map((pos: any, index: number) => (
                                     <div
                                         key={pos.id || index}
                                         className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-lg border transition-colors ${pos.status === 'Active'
@@ -133,8 +195,6 @@ export function EmploymentDetails({
                                                 <h4 className="font-bold text-gray-800 text-sm">
                                                     {pos.position}
                                                 </h4>
-
-                                                {/* Status Badge */}
                                                 <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border ${pos.status === 'Active'
                                                     ? 'bg-green-50 text-green-700 border-green-200'
                                                     : 'bg-gray-200 text-gray-600 border-gray-300'
@@ -143,14 +203,12 @@ export function EmploymentDetails({
                                                 </span>
                                             </div>
 
-                                            {/* Description (if exists) */}
                                             {pos.description && (
                                                 <p className="text-xs text-gray-500 line-clamp-1">
                                                     {pos.description}
                                                 </p>
                                             )}
 
-                                            {/* Date Range */}
                                             <div className="flex items-center gap-1 text-xs text-gray-400 font-medium mt-1">
                                                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -161,7 +219,7 @@ export function EmploymentDetails({
                                             </div>
                                         </div>
 
-                                        {/* Right Side: Actions (Only show in Edit Mode) */}
+                                        {/* Right Side: Actions */}
                                         {isEditing && (
                                             <button
                                                 type="button"
@@ -177,7 +235,6 @@ export function EmploymentDetails({
                                     </div>
                                 ))
                             ) : (
-                                // Empty State
                                 <div className="text-center py-6 border-2 border-dashed border-gray-100 rounded-lg">
                                     <p className="text-sm text-gray-400 italic">No position history found.</p>
                                 </div>
@@ -245,60 +302,45 @@ export function EmploymentDetails({
                     </div>
                 </div>
 
-                {/* IDs */}
-                <div className="uppercase">
+                {/* Government IDs */}
+                <div>
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">
                         Government Identifiers
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <ProfileField
-                            label="GSIS No."
-                            value={formData.gsis_no}
-                            isEditing={isEditing}
-                            onChange={(e: any) => onChange?.("gsis_no", e.target.value)}
-                        />
-                        <ProfileField
-                            label="Pag-IBIG No."
-                            value={formData.pagibig_no}
-                            isEditing={isEditing}
-                            onChange={(e: any) => onChange?.("pagibig_no", e.target.value)}
-                        />
-                        <ProfileField
-                            label="PhilHealth No."
-                            value={formData.philhealth_no}
-                            isEditing={isEditing}
-                            onChange={(e: any) => onChange?.("philhealth_no", e.target.value)}
-                        />
-                        <ProfileField
-                            label="SSS No."
-                            value={formData.sss_no}
-                            isEditing={isEditing}
-                            onChange={(e: any) => onChange?.("sss_no", e.target.value)}
-                        />
-                        <ProfileField
-                            label="TIN No."
-                            value={formData.tin_no}
-                            isEditing={isEditing}
-                            onChange={(e: any) => onChange?.("tin_no", e.target.value)}
-                        />
-                        <ProfileField
-                            label="Agency No."
-                            value={formData.agency_no}
-                            isEditing={isEditing}
-                            onChange={(e: any) => onChange?.("agency_no", e.target.value)}
-                        />
+                        <ProfileField label="GSIS No." value={draftData.gsis_no} isEditing={isEditing} onChange={(e: any) => handleLocalChange("gsis_no", e.target.value)} />
+                        <ProfileField label="Pag-IBIG No." value={draftData.pagibig_no} isEditing={isEditing} onChange={(e: any) => handleLocalChange("pagibig_no", e.target.value)} />
+                        <ProfileField label="PhilHealth No." value={draftData.philhealth_no} isEditing={isEditing} onChange={(e: any) => handleLocalChange("philhealth_no", e.target.value)} />
+                        <ProfileField label="SSS No." value={draftData.sss_no} isEditing={isEditing} onChange={(e: any) => handleLocalChange("sss_no", e.target.value)} />
+                        <ProfileField label="TIN No." value={draftData.tin_no} isEditing={isEditing} onChange={(e: any) => handleLocalChange("tin_no", e.target.value)} />
+                        <ProfileField label="Agency No." value={draftData.agency_no} isEditing={isEditing} onChange={(e: any) => handleLocalChange("agency_no", e.target.value)} />
                     </div>
                 </div>
             </div>
+
+            {/* Save Button */}
+            {mode !== "create" && isEditing && (
+                <div className="flex justify-end pt-6 border-t border-gray-100 mt-6">
+                    <button
+                        type="button"
+                        className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95"
+                        onClick={handleSaveClick}
+                    >
+                        Save Changes
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
 
-// ... (ProfileField and ProfileSelect remain exactly the same)
-
-// --- Reusable Helper Components ---
+// ----------------------------------------------------------------------
+// HELPER COMPONENTS
+// ----------------------------------------------------------------------
 
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
+    const displayValue = value instanceof Date ? value.toLocaleDateString() : value;
+
     return (
         <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
@@ -307,38 +349,45 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
             {isEditing ? (
                 <input
                     type={type}
-                    value={value}
+                    value={displayValue || ""}
                     placeholder={placeholder}
                     onChange={onChange}
                     required={required}
                     disabled={disabled}
-                    className={`w-full p-2.5 border rounded-lg text-sm bg-white focus:ring-1 outline-none transition-all shadow-sm
-                    ${required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}
-                    ${disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}`}
+                    className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm outline-none 
+                    ${type === 'text' ? 'uppercase' : ''} 
+                    ${disabled
+                            ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
+                            : "bg-white focus:ring-1 " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
+                        }`}
                 />
             ) : (
                 <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center">
-                    {value || <span className="text-gray-400 italic">Not set</span>}
+                    {displayValue || <span className="text-gray-400 italic">Not set</span>}
                 </div>
             )}
         </div>
     );
 }
 
-function ProfileSelect({ label, value, options, isEditing, onChange, required }: any) {
+function ProfileSelect({ label, value, options, isEditing, onChange, required, disabled }: any) {
     return (
-        <div className="uppercase">
+        <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
                 {label} {required && <span className="text-red-500 ml-1">*</span>}
             </label>
             {isEditing ? (
                 <div className="relative">
                     <select
-                        value={value}
+                        value={value || ""}
                         onChange={onChange}
                         required={required}
-                        className={`w-full p-2.5 border rounded-lg text-sm bg-white focus:ring-1 outline-none transition-all shadow-sm appearance-none
-                        ${required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500"}`}
+                        disabled={disabled}
+                        className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm appearance-none
+                        ${disabled
+                                ? "bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed"
+                                : "bg-white focus:ring-1 outline-none " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
+                            }`}
                     >
                         <option value="" disabled>Select {label}</option>
                         {options.map((opt: string) => (

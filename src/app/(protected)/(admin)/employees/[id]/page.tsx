@@ -1,28 +1,19 @@
-import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { getAddress, getFamilyBackground, getPersonalInformation, getEmployeeDetails, getEducationalBackground } from "@/actions/employees/get"; // Import your fetch function
+import EmployeePage from "./EmployeePage";
 
-// 1. Update the Interface: params is now a Promise
-interface PageProps {
-    params: Promise<{ id: string }>;
-}
+export default async function Page() {
+    const employment_details = await getEmployeeDetails();
+    const personal_information = await getPersonalInformation();
+    const address = await getAddress();
+    const family_background = await getFamilyBackground();
+    const educational_background = await getEducationalBackground();
 
-export default async function EmployeeDetailPage(props: PageProps) {
-    const params = await props.params;
-    const userId = params.id;
 
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
-    });
-
-    if (!user) {
-        notFound();
+    if (!personal_information || !employment_details || !address || !family_background || !educational_background) {
+        return <div>Error loading profile. Please try logging in again.</div>;
     }
 
-    return (
-        <div className="max-w-4xl mx-auto mt-10 p-6">
-            <h1 className="text-3xl font-bold text-gray-800">
-                User: {user.email}
-            </h1>
-        </div>
-    );
+
+    // 3. Pass the fetched data to the Client Component
+    return <EmployeePage personal_information={personal_information} employment_details={employment_details} address={address} family_background={family_background} educational_background={educational_background} />;
 }

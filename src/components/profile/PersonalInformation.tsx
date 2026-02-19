@@ -27,6 +27,15 @@ export function PersonalInformation({ mode = "view", formData, onSave }: Persona
         setDraftData(formData);
     }, [formData]);
 
+
+    // --- Formatters ---
+    const formatDate = (dateString: Date) => {
+        if (!dateString) return "Present";
+        return new Date(dateString).toLocaleDateString('en-US', {
+            day: '2-digit', month: 'long', year: 'numeric'
+        });
+    };
+
     // 3. Local handler: updates the draft, NOT the parent
     const handleLocalChange = (field: string, value: any) => {
         setDraftData((prev: any) => ({
@@ -118,8 +127,17 @@ export function PersonalInformation({ mode = "view", formData, onSave }: Persona
                     <ProfileField label="Middle Name" value={draftData.middlename} isEditing={isEditing} placeholder="SANTOS" onChange={(e: any) => handleLocalChange("middlename", e.target.value)} />
                     <ProfileField label="Extension" value={draftData.extension} isEditing={isEditing} placeholder="JR." onChange={(e: any) => handleLocalChange("extension", e.target.value)} />
 
-                    <ProfileField label="Date of Birth" value={draftData.birthdate} type="date" isEditing={isEditing} onChange={(e: any) => handleLocalChange("birthdate", e.target.value)} />
-
+                    <ProfileField
+                        label="Date of Birth"
+                        value={
+                            isEditing
+                                ? (draftData.birthdate ? String(draftData.birthdate).substring(0, 10) : "")
+                                : formatDate(draftData.birthdate)
+                        }
+                        type="date"
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("birthdate", e.target.value)}
+                    />
                     {isLoadingCities ? (
                         <LoadingPlaceholder label="Place of Birth" />
                     ) : (
