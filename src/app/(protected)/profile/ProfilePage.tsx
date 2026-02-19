@@ -227,25 +227,10 @@ export default function ProfilePage({ personal_information, employment_details, 
         }
     };
 
-    const handleInputChange = (fieldOrEvent: any, value?: any) => {
-        if (typeof fieldOrEvent === 'string') {
-            setFormData((prev: any) => ({
-                ...prev,
-                [fieldOrEvent]: value
-            }));
-        } else {
-            const { name, value } = fieldOrEvent.target;
-            setFormData((prev: any) => ({
-                ...prev,
-                [name]: value
-            }));
-        }
-    };
-
     const renderContent = () => {
         switch (activeTab) {
             case "Employment Details":
-                return <EmploymentDetails formData={formData} onChange={handleInputChange} />;
+                return <EmploymentDetails mode="view-only" formData={formData}  />;
             case "Personal Information":
                 return <PersonalInformation formData={formData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":

@@ -1,25 +1,33 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getSystemData } from "@/actions/settings";
+import { useState } from "react";
 
 const POSITION_STATUSES = ["Full-Time", "Part-Time"];
 
 interface EmploymentDetailsProps {
-    mode?: "view" | "create";
+    // 3 distinct modes controlled by the Server Component
+    mode?: "view-only" | "update" | "create";
     formData: any;
-    onChange: (field: string, value: any) => void;
+    divisions?: string[];
+    departments?: string[];
+    availablePositions?: string[];
+    onChange?: (field: string, value: any) => void; // Optional since view-only won't use it
 }
 
-export function EmploymentDetails({ mode = "view", formData, onChange }: EmploymentDetailsProps) {
-    // --- Data Options State ---
-    const [divisions, setDivisions] = useState<string[]>([]);
-    const [departments, setDepartments] = useState<string[]>([]);
-    const [positions, setPositions] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+export function EmploymentDetails({
+    mode = "view-only",
+    formData,
+    divisions = [],
+    departments = [],
+    availablePositions = [],
+    onChange
+}: EmploymentDetailsProps) {
 
     // --- UI State ---
+    // If it's create mode, it's always editing. Otherwise, it starts as false.
     const [isEditing, setIsEditing] = useState(mode === "create");
+
+    // --- Local UI State for "Add Position" Draft ---
     const [assignedPosition, setAssignedPosition] = useState({
         position: "", status: "", description: "", start_at: "", end_at: ""
     });
@@ -31,37 +39,23 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
         });
     };
 
-    // --- Fetch System Options ---
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const data = await getSystemData();
-                setDivisions(data.divisions.map((d: any) => d.division));
-                setDepartments(data.departments.map((d: any) => d.department));
-                setPositions(data.positions.map((d: any) => d.position));
-            } catch (error) {
-                console.error("Failed to fetch options:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
-
     // --- Handlers ---
     const handleAssignedChange = (field: string, value: string) => {
         setAssignedPosition((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleAddPositionObj = () => {
-        if (!assignedPosition.position || !assignedPosition.status) return;
+        if (!onChange || !assignedPosition.position || !assignedPosition.status) return;
+
         const updatedPositions = [...(formData.positions || []), assignedPosition];
         onChange("positions", updatedPositions);
+
+        // Reset draft state
         setAssignedPosition({ position: "", status: "", description: "", start_at: "", end_at: "" });
     };
 
     const handleRemovePosition = (indexToRemove: number) => {
+        if (!onChange) return;
         const updatedPositions = formData.positions.filter((_: any, index: number) => index !== indexToRemove);
         onChange("positions", updatedPositions);
     };
@@ -71,7 +65,9 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
             {/* Header */}
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                 <h1 className="text-xl font-bold text-gray-800 tracking-tight">Employment Details</h1>
-                {mode !== "create" && (
+
+                {/* ONLY show the Edit/Cancel button in "update" mode */}
+                {mode === "update" && (
                     <button
                         type="button"
                         onClick={() => setIsEditing(!isEditing)}
@@ -89,35 +85,29 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                         label="Employee ID Number"
                         value={formData.id_number}
                         isEditing={isEditing}
-                        onChange={(e: any) => onChange("id_number", e.target.value)}
+                        onChange={(e: any) => onChange?.("id_number", e.target.value)}
                         required
                         disabled={true}
                     />
 
                     {/* Division & Department Dropdowns */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {isLoading ? (
-                            <div className="col-span-2 text-xs text-gray-400 animate-pulse">Loading system options...</div>
-                        ) : (
-                            <>
-                                <ProfileSelect
-                                    label="Division"
-                                    value={formData.division}
-                                    options={divisions}
-                                    isEditing={isEditing}
-                                    onChange={(e: any) => onChange("division", e.target.value)}
-                                    required
-                                />
-                                <ProfileSelect
-                                    label="Department"
-                                    value={formData.department}
-                                    options={departments}
-                                    isEditing={isEditing}
-                                    onChange={(e: any) => onChange("department", e.target.value)}
-                                    required
-                                />
-                            </>
-                        )}
+                        <ProfileSelect
+                            label="Division"
+                            value={formData.division}
+                            options={divisions}
+                            isEditing={isEditing}
+                            onChange={(e: any) => onChange?.("division", e.target.value)}
+                            required
+                        />
+                        <ProfileSelect
+                            label="Department"
+                            value={formData.department}
+                            options={departments}
+                            isEditing={isEditing}
+                            onChange={(e: any) => onChange?.("department", e.target.value)}
+                            required
+                        />
                     </div>
 
                     {/* Positions Logic */}
@@ -202,7 +192,7 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                                     <ProfileSelect
                                         label="Position Title"
                                         value={assignedPosition.position}
-                                        options={positions}
+                                        options={availablePositions}
                                         isEditing={true}
                                         onChange={(e: any) => handleAssignedChange("position", e.target.value)}
                                         required
@@ -263,39 +253,39 @@ export function EmploymentDetails({ mode = "view", formData, onChange }: Employm
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <ProfileField
                             label="GSIS No."
-                            value={formData.gsis_no} // This now has the data from the array
+                            value={formData.gsis_no}
                             isEditing={isEditing}
-                            onChange={(e: any) => onChange("gsis_no", e.target.value)}
+                            onChange={(e: any) => onChange?.("gsis_no", e.target.value)}
                         />
                         <ProfileField
                             label="Pag-IBIG No."
                             value={formData.pagibig_no}
                             isEditing={isEditing}
-                            onChange={(e: any) => onChange("pagibig_no", e.target.value)}
+                            onChange={(e: any) => onChange?.("pagibig_no", e.target.value)}
                         />
                         <ProfileField
                             label="PhilHealth No."
                             value={formData.philhealth_no}
                             isEditing={isEditing}
-                            onChange={(e: any) => onChange("philhealth_no", e.target.value)}
+                            onChange={(e: any) => onChange?.("philhealth_no", e.target.value)}
                         />
                         <ProfileField
                             label="SSS No."
                             value={formData.sss_no}
                             isEditing={isEditing}
-                            onChange={(e: any) => onChange("sss_no", e.target.value)}
+                            onChange={(e: any) => onChange?.("sss_no", e.target.value)}
                         />
                         <ProfileField
                             label="TIN No."
                             value={formData.tin_no}
                             isEditing={isEditing}
-                            onChange={(e: any) => onChange("tin_no", e.target.value)}
+                            onChange={(e: any) => onChange?.("tin_no", e.target.value)}
                         />
                         <ProfileField
                             label="Agency No."
                             value={formData.agency_no}
                             isEditing={isEditing}
-                            onChange={(e: any) => onChange("agency_no", e.target.value)}
+                            onChange={(e: any) => onChange?.("agency_no", e.target.value)}
                         />
                     </div>
                 </div>

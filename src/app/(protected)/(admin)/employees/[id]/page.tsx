@@ -6,7 +6,7 @@ interface PageProps {
     params: Promise<{ id: string }>;
 }
 
-export default async function UserDetailPage(props: PageProps) {
+export default async function EmployeeDetailPage(props: PageProps) {
     const params = await props.params;
     const userId = params.id;
 

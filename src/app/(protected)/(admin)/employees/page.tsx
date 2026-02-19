@@ -1,4 +1,4 @@
-export default function UsersLists() {
+export default function EmployeesLists() {
     return (
         <div className="space-y-6">
             {/* 1. PAGE HEADER */}
