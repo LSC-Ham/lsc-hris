@@ -4,17 +4,8 @@ import { getDivisions } from "@/actions/admin/settings/divisions/get";
 import { getPositions } from "@/actions/admin/settings/positions/get";
 import { getAddress, getEducationalBackground, getEligibility, getEmployeeDetails, getFamilyBackground, getPersonalInformation, getWorkExperience } from "@/actions/employees/id/get";
 import ProfilePage from "@/components/profile/ProfilePage";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // Make sure this path is correct
-import { redirect } from "next/navigation";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-        redirect("/login");
-    }
-    const userRole = (session.user as any).role;
 
     const { id: employeeId } = await params;
     const employment_details = await getEmployeeDetails(employeeId);
@@ -36,5 +27,5 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
 
     // 3. Pass the fetched data to the Client Component
-    return <ProfilePage role={userRole} personal_information={personal_information} employment_details={employment_details} address={address} family_background={family_background} educational_background={educational_background} eligibility={eligibility} work_experience={work_experience} divisions={divisions} departments={departments} positions={positions} />;
+    return <ProfilePage role="moderator" personal_information={personal_information} employment_details={employment_details} address={address} family_background={family_background} educational_background={educational_background} eligibility={eligibility} work_experience={work_experience} divisions={divisions} departments={departments} positions={positions} />;
 }
