@@ -11,7 +11,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
         redirect("/login");
     }
 
-    const userRole = (session.user as any).role || "EMPLOYEE";
+    const userRole = (session.user as any).role || "";
     const userEmail = session.user.email;
 
     if (!session) {

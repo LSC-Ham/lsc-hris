@@ -113,7 +113,7 @@ export default async function EmployeesLists() {
                                         {/* Actions */}
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link
-                                                href={`/employees/${emp.id}`}
+                                                href={`/employees/${emp.id_number}`}
                                                 className="text-[#1a6b36] hover:text-[#155a2b] hover:underline"
                                             >
                                                 View / Edit

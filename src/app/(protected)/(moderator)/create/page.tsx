@@ -14,7 +14,6 @@ import { getPositions } from "@/actions/admin/settings/positions/get";
 export default function CreateUserPage() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-
     const [departments, setDepartments] = useState<string[]>([]);
     const [divisions, setDivisions] = useState<string[]>([]);
     const [positions, setPositions] = useState<string[]>([]);
