@@ -11,7 +11,7 @@ const formatDateTime = (date: Date | null) => {
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
-        hour12: true, // e.g., "Feb 19, 2026, 2:30 PM"
+        hour12: true,
     }).format(date);
 };
 
@@ -20,10 +20,8 @@ export default async function UsersLists() {
     const usersLists = await prisma.user.findMany({
         include: {
             employees: {
-                // Use ONLY 'select' here
                 select: {
                     id_number: true,
-                    // Put the relation directly inside the select!
                     personal_information: {
                         select: {
                             surname: true,
@@ -35,16 +33,16 @@ export default async function UsersLists() {
             }
         },
         orderBy: {
-            created_at: "desc", // Show newest first
+            created_at: "desc",
         },
     });
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="flex justify-between items-center">
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Users Directory</h1>
-                    <p className="text-sm text-gray-500 mt-1">Manage and view all users records.</p>
+                    <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Users Directory</h1>
+                    <p className="text-sm text-gray-500">Manage and view all users records.</p>
                 </div>
             </div>
 
@@ -60,16 +58,17 @@ export default async function UsersLists() {
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Full Name
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                {/* Hidden on Mobile */}
+                                <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Role
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Created At
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Updated At
                                 </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th scope="col" className="hidden md:table-cell px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Logged In
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -91,24 +90,27 @@ export default async function UsersLists() {
                                             {user.employees?.personal_information?.surname}, {user.employees?.personal_information?.firstname} {user.employees?.personal_information?.middlename}
                                         </td>
 
-                                        {/* Role */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        {/* Role - Hidden on Mobile */}
+                                        <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                             {user.role}
                                         </td>
 
-                                        {/* Created At */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        {/* Created At - Hidden on Mobile */}
+                                        <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                             {formatDateTime(user.created_at)}
                                         </td>
 
-                                        {/* Updated At (Now includes time) */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        {/* Updated At - Hidden on Mobile */}
+                                        <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                             {formatDateTime(user.updated_at)}
                                         </td>
 
-                                        {/* Logged In */}
-                                        <td className="px-6 py-4 text-sm text-gray-600 max-w-[200px] truncate">
-                                            {user.password_changed ? "Yes" : "No"}
+                                        {/* Logged In - Hidden on Mobile */}
+                                        <td className="hidden md:table-cell px-6 py-4 text-sm text-gray-600">
+                                            {user.password_changed ? 
+                                                <span className="text-green-600 font-medium">Yes</span> : 
+                                                <span className="text-gray-400">No</span>
+                                            }
                                         </td>
 
                                         {/* Actions */}
@@ -125,7 +127,7 @@ export default async function UsersLists() {
                             ) : (
                                 <tr>
                                     <td colSpan={7} className="px-6 py-12 text-center text-gray-500 text-sm">
-                                        No employees found. Click "Add Employee" to create one.
+                                        No users found.
                                     </td>
                                 </tr>
                             )}
