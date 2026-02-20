@@ -3,8 +3,8 @@
 import { prisma } from "@/lib/prisma"; // Adjust path if needed
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt"; // Requires: npm install bcryptjs
+import fs from 'fs/promises';
 import path from 'path';
-import { writeFile } from 'fs/promises';
 
 export async function createEmployee(data: any) {
     try {
@@ -130,27 +130,51 @@ export async function uploadProfilePicture(formData: FormData) {
     const userId = formData.get('userId') as string;
 
     if (!file || !userId) {
-        throw new Error('Missing file or user ID');
+        return { success: false, error: 'File and User ID are required' };
     }
 
-    // 1. Convert the file into a buffer so Node.js can save it
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    try {
+        // 1. ✨ NEW: Check if the user already has a picture and delete the old file
+        const existingUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { profile_picture: true }
+        });
 
-    // 2. Create a unique filename and save it to your public/uploads folder
-    const filename = `user-${userId}-${Date.now()}.jpg`;
-    const filepath = path.join(process.cwd(), 'public/uploads', filename);
+        if (existingUser?.profile_picture) {
+            const oldFilePath = path.join(process.cwd(), 'public', existingUser.profile_picture);
+            try {
+                await fs.unlink(oldFilePath);
+                console.log("Old profile picture deleted successfully.");
+            } catch (err) {
+                // Ignore errors if the file was already missing
+                console.warn("Could not delete old file (it may not exist):", err);
+            }
+        }
 
-    // Write the file to the local filesystem
-    await writeFile(filepath, buffer);
+        // 2. Save the NEW file to the filesystem
+        const buffer = Buffer.from(await file.arrayBuffer());
+        // Create a unique filename so browsers don't cache the old image
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+        const filename = `profile-${userId}-${uniqueSuffix}.jpg`;
 
-    // 3. Update the database with the new URL path
-    const dbImagePath = `/uploads/${filename}`;
+        // Ensure your uploads directory exists
+        const uploadDir = path.join(process.cwd(), 'public/uploads');
+        await fs.mkdir(uploadDir, { recursive: true });
 
-    await prisma.user.update({
-        where: { id: userId },
-        data: { profile_picture: dbImagePath }
-    });
+        const newFilePath = path.join(uploadDir, filename);
+        await fs.writeFile(newFilePath, buffer);
 
-    return { success: true, imagePath: dbImagePath };
+        // 3. Update the database with the new path
+        const dbImagePath = `/uploads/${filename}`;
+        await prisma.user.update({
+            where: { id: userId },
+            data: { profile_picture: dbImagePath }
+        });
+
+        return { success: true, imagePath: dbImagePath };
+
+    } catch (error) {
+        console.error("Upload Error:", error);
+        return { success: false, error: 'Failed to upload profile picture' };
+    }
 }
