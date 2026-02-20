@@ -2,24 +2,15 @@
 
 import { useState } from "react";
 
-// Components
+// Import your new components here
 import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
 import { Address } from "@/components/profile/Address";
 import { FamilyBackground } from "@/components/profile/FamilyBackground";
+import { updatePersonalInformation } from "@/actions/employees/update";
 import { EducationalBackground } from "@/components/profile/EducationalBackground";
-
-// Actions
-// We import the new action here. 
-// Note: Even if the file is in a folder named [id], imports usually point to the file name. 
-// Adjust the path below if your action is exported from a different specific file.
-import {
-    updateAddress,
-    updateEducationalBackground,
-    updateFamilyBackground,
-    updatePersonalInformation,
-} from "@/actions/employees/update";
-import { updateEmploymentDetails } from "@/actions/employees/[id]/update";
+import { Eligibility } from "@/components/profile/Eligibility";
+import { WorkExperience } from "@/components/profile/WorkExperience";
 
 interface ProfilePageProps {
     personal_information: any;
@@ -27,10 +18,12 @@ interface ProfilePageProps {
     address: any;
     family_background: any;
     educational_background: any;
-    // Optional: dropdown data
-    divisions?: string[];
-    departments?: string[];
-    positions?: string[];
+    eligibility: any;
+    work_experience: any;
+    departments: string[];
+    divisions: string[];
+    positions: string[];
+
 }
 
 const DEFAULT_PERSONAL_DATA = {
@@ -43,59 +36,68 @@ const DEFAULT_EMPLOYMENT_DATA = {
     gsis_no: "", pagibig_no: "", philhealth_no: "", sss_no: "", tin_no: "", agency_no: ""
 };
 
-export default function ProfilePage({
-    personal_information,
-    employment_details,
-    address,
-    family_background,
-    educational_background,
+export default function EmployeePage({ personal_information, employment_details, address, family_background, educational_background, eligibility, work_experience,
+
     divisions = [],
     departments = [],
     positions = []
 }: ProfilePageProps) {
-
-    // The ID from the URL corresponds to this person's ID (usually in personal_information)
-    const employeeId = personal_information?.id;
-
     const [activeTab, setActiveTab] = useState("Employment Details");
-
-    // --- 1. Educational Background State ---
     const [educationData, setEducationData] = useState(
+        // Ensure it defaults to an empty array if the prop is undefined or null
         Array.isArray(educational_background) ? educational_background : []
     );
 
-    // Helpers
+    const [eligibilityData, setEligibilityData] = useState(
+        // Ensure it defaults to an empty array if the prop is undefined or null
+        Array.isArray(eligibility) ? eligibility : []
+    );
+
+    const [workExperienceData, setWorkExperienceData] = useState(
+        // Ensure it defaults to an empty array if the prop is undefined or null
+        Array.isArray(work_experience) ? work_experience : []
+    );
+
+    // Helper to find specific address type if the server passes an array of addresses
     const getAddressByType = (type: string) => {
         const addressArray = address?.address || [];
         return addressArray.find((a: any) => a.address_type === type) || {};
     };
 
+    // Helper to find specific family member by relation_type
     const getFamilyMemberByType = (type: string) => {
+        // Adjust this depending on how your server returns the family array.
         const familyArray = family_background?.family_background || (Array.isArray(family_background) ? family_background : []);
         return familyArray.find((f: any) => f.relation_type?.toLowerCase() === type.toLowerCase()) || {};
     };
 
     const menuItems = [
-        "Employment Details", "Personal Information", "Employee Address",
-        "Family Background", "Educational Background", "Eligibility",
-        "Work Experience", "Voluntary Works", "Learning & Development",
-        "Other Information", "References",
+        "Employment Details",
+        "Personal Information",
+        "Employee Address",
+        "Family Background",
+        "Educational Background",
+        "Eligibility",
+        "Work Experience",
+        "Voluntary Works",
+        "Learning & Development",
+        "Other Information",
+        "References",
     ];
 
-    // --- 2. Personal Information State ---
+    // --- 1. Separated Personal Information State ---
     const [personalData, setPersonalData] = useState({
         ...DEFAULT_PERSONAL_DATA,
         ...(personal_information || {})
     });
 
-    // --- 3. Employment Details State ---
-    // We combine default data with DB data
-    const [employmentData, setEmploymentData] = useState({
+    // --- 2. Separated Employment Details State ---
+    const [employmentData] = useState({
         ...DEFAULT_EMPLOYMENT_DATA,
         ...(employment_details || {})
     });
 
-    // --- 4. Address State ---
+    // --- 2. Separate Nested State for Addresses ---
     const [addressData, setAddressData] = useState({
         residential: {
             house_no: getAddressByType("residential").house_no || "",
@@ -119,7 +121,7 @@ export default function ProfilePage({
         }
     });
 
-    // --- 5. Family Background State ---
+    // --- 3. Separate Nested State for Family Background ---
     const [familyData, setFamilyData] = useState({
         guardian: {
             surname: getFamilyMemberByType("guardian").surname || "",
@@ -153,44 +155,17 @@ export default function ProfilePage({
         }
     });
 
-    // --- HANDLERS ---
-
-    // === NEW: Handle Employment Save ===
-    const handleSaveEmployment = async (updatedDraftData: any) => {
-        try {
-            // 1. Update the local UI immediately
-            setEmploymentData(updatedDraftData);
-
-            // 2. Validate we have the Employee ID (from the URL/Props)
-            if (!employeeId) {
-                alert("Critical Error: Employee ID missing. Cannot save.");
-                return;
-            }
-
-            // 3. Call the Server Action
-            // We pass the employeeId explicitly to ensure the action knows which student/employee to update.
-            const result = await updateEmploymentDetails(employeeId, updatedDraftData);
-
-            if (result.success) {
-                alert("Employment details updated successfully!");
-            } else {
-                alert("Error saving: " + result.error);
-            }
-        } catch (error) {
-            console.error("Failed to save employment:", error);
-            alert("An unexpected error occurred.");
-        }
-    };
-
+    // --- Handlers ---
     const handleSavePersonalInfo = async (updatedDraftData: any) => {
         try {
+            // 1. Instantly update the parent's local state so the UI feels fast
             setPersonalData((prev: any) => ({ ...prev, ...updatedDraftData }));
-            // Ensure ID is included if the action expects it in the payload
-            const payload = { ...updatedDraftData, id: employeeId };
-            const result = await updatePersonalInformation(payload);
+
+            // 2. Send the data to your Next.js Server Action
+            const result = await updatePersonalInformation(updatedDraftData);
 
             if (result.success) {
-                alert("Personal Information updated successfully!");
+                alert("Personal Information updated successfully in the database!");
             } else {
                 alert("Error: " + result.error);
             }
@@ -200,83 +175,22 @@ export default function ProfilePage({
         }
     };
 
-    const handleSaveAddress = async (updatedDraftData: any) => {
-        try {
-            setAddressData(updatedDraftData);
-            // Assuming the action needs the Employee ID to know whose address to update
-            const payload = { ...updatedDraftData, employee_id: employeeId };
-            const result = await updateAddress(payload);
-
-            if (result.success) {
-                alert("Address updated successfully!");
-            } else {
-                alert("Error: " + result.error);
-            }
-        } catch (error) {
-            console.error("Failed to save address:", error);
-            alert("An unexpected error occurred.");
-        }
-    };
-
-    const handleSaveFamily = async (updatedDraftData: any) => {
-        try {
-            setFamilyData(updatedDraftData);
-            // Include employeeId if required by your specific action structure
-            const payload = { ...updatedDraftData, employee_id: employeeId };
-            const result = await updateFamilyBackground(payload);
-
-            if (result.success) {
-                alert("Family background updated successfully!");
-            } else {
-                alert("Error: " + result.error);
-            }
-        } catch (error) {
-            console.error("Failed to save family background:", error);
-            alert("An unexpected error occurred.");
-        }
-    };
-
-    const handleSaveEducation = async (updatedDraftData: any[]) => {
-        try {
-            setEducationData(updatedDraftData);
-            // If the array doesn't implicitly carry the ID, you might need to pass it differently,
-            // but usually, nested updates handle this via the array items or a wrapper.
-            const result = await updateEducationalBackground(updatedDraftData);
-
-            if (result.success) {
-                alert("Educational background updated successfully!");
-            } else {
-                alert("Error: " + result.error);
-            }
-        } catch (error) {
-            console.error("Failed to save educational background:", error);
-            alert("An unexpected error occurred.");
-        }
-    };
-
     const renderContent = () => {
         switch (activeTab) {
             case "Employment Details":
-                return (
-                    <EmploymentDetails
-                        mode="update"
-                        formData={employmentData}
-                        // Dropdowns
-                        divisions={divisions}
-                        departments={departments}
-                        availablePositions={positions}
-                        // Connect Save Handler
-                        onSave={handleSaveEmployment}
-                    />
-                );
+                return <EmploymentDetails mode="update" formData={employmentData} />;
             case "Personal Information":
                 return <PersonalInformation formData={personalData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":
-                return <Address mode="view" formData={addressData} onSave={handleSaveAddress} />;
+                return <Address mode="view" formData={addressData} />;
             case "Family Background":
-                return <FamilyBackground formData={familyData} onSave={handleSaveFamily} />;
+                return <FamilyBackground mode="view" formData={familyData} />;
             case "Educational Background":
-                return <EducationalBackground formData={educationData} onSave={handleSaveEducation} />;
+                return <EducationalBackground mode="view" formData={educationData} />;
+            case "Eligibility":
+                return <Eligibility mode="view" formData={eligibilityData} />;
+            case "Work Experience":
+                return <WorkExperience mode="view" formData={workExperienceData} />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">
@@ -301,18 +215,20 @@ export default function ProfilePage({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                {/* LEFT COLUMN (Sidebar) */}
+                {/* === LEFT COLUMN (No Sticky) === */}
                 <div className="md:col-span-4 lg:col-span-3 space-y-6">
+                    {/* User Card */}
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
                         <div className="w-24 h-24 rounded-full bg-green-50 border-4 border-white shadow-sm flex items-center justify-center mb-4 text-2xl font-bold text-[#1a6b36]">
-                            {/* Initials could go here */}
                         </div>
                         <h2 className="text-lg font-bold text-gray-800 capitalize">{personalData.firstname} {personalData.surname}</h2>
-                        <p className="text-xs text-gray-500 mb-1">{employmentData.department || "No Department"}</p>
+                        <p className="text-xs text-gray-500 mb-1">{employmentData.department}</p>
                     </div>
 
+                    {/* Navigation Menu */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        {/* Mobile Dropdown */}
+
+                        {/* 1. MOBILE ONLY: Select Dropdown */}
                         <div className="block md:hidden p-4">
                             <select
                                 value={activeTab}
@@ -325,7 +241,7 @@ export default function ProfilePage({
                             </select>
                         </div>
 
-                        {/* Desktop Menu */}
+                        {/* 2. DESKTOP ONLY: Vertical Sidebar Nav */}
                         <nav className="hidden md:flex flex-col p-2 space-y-1">
                             {menuItems.map((item) => (
                                 <button
@@ -348,8 +264,9 @@ export default function ProfilePage({
                     </div>
                 </div>
 
-                {/* RIGHT COLUMN (Content) */}
+                {/* === RIGHT COLUMN (Dynamic Content) === */}
                 <div className="md:col-span-8 lg:col-span-9 space-y-6">
+                    {/* Notice Area */}
                     <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-4 shadow-sm">
                         <div className="p-2 bg-amber-100 rounded-full text-amber-600 shrink-0">
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -364,6 +281,7 @@ export default function ProfilePage({
                         </div>
                     </div>
 
+                    {/* The Dynamic Form Container */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-6">
                         {renderContent()}
                     </div>

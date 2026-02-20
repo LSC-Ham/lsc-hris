@@ -20,10 +20,10 @@ interface AddressProps {
         permanent: AddressData;
     };
     // 1. Removed onChange, updated onSave to accept the payload
-    onSave: (data: { residential: AddressData; permanent: AddressData }) => void;
+    onSave?: (data: { residential: AddressData; permanent: AddressData }) => void;
 }
 
-export function Address({ mode = "view", formData, onSave }: AddressProps) {
+export function Address({ mode, formData, onSave }: AddressProps) {
     // Separate edit states for each address type
     const [editMode, setEditMode] = useState({
         residential: false,
@@ -78,7 +78,9 @@ export function Address({ mode = "view", formData, onSave }: AddressProps) {
     const handleSaveClick = (type: "residential" | "permanent") => {
         setEditMode((prev) => ({ ...prev, [type]: false }));
         // Pass the whole draft up to the parent
-        onSave(draftData);
+        if (onSave) {
+            onSave(draftData);
+        }
     };
 
     return (

@@ -14,8 +14,9 @@ export interface WorkExperienceRecord {
 }
 
 interface WorkExperienceProps {
+    mode?: "view",
     formData: WorkExperienceRecord[];
-    onSave: (updatedData: WorkExperienceRecord[]) => Promise<void>;
+    onSave?: (updatedData: WorkExperienceRecord[]) => Promise<void>;
 }
 
 const emptyRecord: WorkExperienceRecord = {
@@ -28,7 +29,7 @@ const emptyRecord: WorkExperienceRecord = {
     gov_service: false,
 };
 
-export function WorkExperience({ formData = [], onSave }: WorkExperienceProps) {
+export function WorkExperience({ mode, formData = [], onSave }: WorkExperienceProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [draftData, setDraftData] = useState<WorkExperienceRecord>(emptyRecord);
@@ -55,7 +56,10 @@ export function WorkExperience({ formData = [], onSave }: WorkExperienceProps) {
         if (!window.confirm("Are you sure you want to remove this work experience record?")) return;
         const updatedRecords = [...formData];
         updatedRecords.splice(index, 1);
-        await onSave(updatedRecords);
+
+        if (onSave) {
+            await onSave(updatedRecords);
+        }
     };
 
     const handleCancel = () => {
@@ -81,8 +85,9 @@ export function WorkExperience({ formData = [], onSave }: WorkExperienceProps) {
                 id: draftData.id || crypto.randomUUID()
             });
         }
-
-        await onSave(updatedRecords);
+        if (onSave) {
+            await onSave(updatedRecords);
+        }
         setIsSaving(false);
         setIsFormOpen(false);
         setEditingIndex(null);
@@ -94,7 +99,7 @@ export function WorkExperience({ formData = [], onSave }: WorkExperienceProps) {
             {/* Header */}
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                 <h1 className="text-xl font-bold text-gray-800 tracking-tight">Work Experience</h1>
-                {!isFormOpen && (
+                {mode !== "view" && !isFormOpen && (
                     <button
                         type="button"
                         onClick={handleAddNew}

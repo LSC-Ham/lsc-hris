@@ -23,8 +23,9 @@ export interface EducationRecord {
 }
 
 interface EducationalBackgroundProps {
+    mode?: "view",
     formData: EducationRecord[];
-    onSave: (updatedData: EducationRecord[]) => Promise<void>; // Changed to onSave and made async
+    onSave?: (updatedData: EducationRecord[]) => Promise<void>; // Changed to onSave and made async
 }
 
 const emptyRecord: EducationRecord = {
@@ -37,7 +38,7 @@ const emptyRecord: EducationRecord = {
     year_graduated: "",
 };
 
-export function EducationalBackground({ formData = [], onSave }: EducationalBackgroundProps) {
+export function EducationalBackground({ mode, formData = [], onSave }: EducationalBackgroundProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [draftData, setDraftData] = useState<EducationRecord>(emptyRecord);
@@ -68,7 +69,9 @@ export function EducationalBackground({ formData = [], onSave }: EducationalBack
         updatedRecords.splice(index, 1);
 
         // Await the parent's save function
-        await onSave(updatedRecords);
+        if (onSave) {
+            await onSave(updatedRecords);
+        }
     };
 
     const handleCancel = () => {
@@ -96,7 +99,10 @@ export function EducationalBackground({ formData = [], onSave }: EducationalBack
         }
 
         // Await the parent's server action to finish
-        await onSave(updatedRecords);
+        if (onSave) {
+
+            await onSave(updatedRecords);
+        }
 
         // Reset UI
         setIsSaving(false);
@@ -111,7 +117,7 @@ export function EducationalBackground({ formData = [], onSave }: EducationalBack
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                 <h1 className="text-xl font-bold text-gray-800 tracking-tight">Educational Background</h1>
 
-                {!isFormOpen && (
+                {mode !== "view" && !isFormOpen && (
                     <button
                         type="button"
                         onClick={handleAddNew}

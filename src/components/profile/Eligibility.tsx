@@ -13,8 +13,9 @@ export interface EligibilityRecord {
 }
 
 interface EligibilityProps {
+    mode?: "view",
     formData: EligibilityRecord[];
-    onSave: (updatedData: EligibilityRecord[]) => Promise<void>;
+    onSave?: (updatedData: EligibilityRecord[]) => Promise<void>;
 }
 
 const emptyRecord: EligibilityRecord = {
@@ -26,7 +27,7 @@ const emptyRecord: EligibilityRecord = {
     date_validity: "",
 };
 
-export function Eligibility({ formData = [], onSave }: EligibilityProps) {
+export function Eligibility({ mode, formData = [], onSave }: EligibilityProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [draftData, setDraftData] = useState<EligibilityRecord>(emptyRecord);
@@ -52,7 +53,9 @@ export function Eligibility({ formData = [], onSave }: EligibilityProps) {
         if (!window.confirm("Are you sure you want to remove this eligibility record?")) return;
         const updatedRecords = [...formData];
         updatedRecords.splice(index, 1);
-        await onSave(updatedRecords);
+        if (onSave) {
+            await onSave(updatedRecords);
+        }
     };
 
     const handleCancel = () => {
@@ -78,8 +81,9 @@ export function Eligibility({ formData = [], onSave }: EligibilityProps) {
                 id: draftData.id || crypto.randomUUID()
             });
         }
-
-        await onSave(updatedRecords);
+        if (onSave) {
+            await onSave(updatedRecords);
+        }
 
         setIsSaving(false);
         setIsFormOpen(false);
@@ -93,7 +97,7 @@ export function Eligibility({ formData = [], onSave }: EligibilityProps) {
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                 <h1 className="text-xl font-bold text-gray-800 tracking-tight">Eligibility</h1>
 
-                {!isFormOpen && (
+                {mode !== "view" && !isFormOpen && (
                     <button
                         type="button"
                         onClick={handleAddNew}

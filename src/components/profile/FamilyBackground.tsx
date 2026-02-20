@@ -14,16 +14,17 @@ export interface FamilyMemberData {
 }
 
 interface FamilyBackgroundProps {
+    mode?: "view",
     formData: {
         guardian: FamilyMemberData;
         father: FamilyMemberData;
         mother: FamilyMemberData;
     };
     // 1. Removed onChange, updated onSave to accept the full payload
-    onSave: (data: { guardian: FamilyMemberData; father: FamilyMemberData; mother: FamilyMemberData }) => void;
+    onSave?: (data: { guardian: FamilyMemberData; father: FamilyMemberData; mother: FamilyMemberData }) => void;
 }
 
-export function FamilyBackground({ formData, onSave }: FamilyBackgroundProps) {
+export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundProps) {
     // Separate edit states for each family member type
     const [editMode, setEditMode] = useState({
         guardian: false,
@@ -61,7 +62,9 @@ export function FamilyBackground({ formData, onSave }: FamilyBackgroundProps) {
     const handleSaveClick = (type: "guardian" | "father" | "mother") => {
         setEditMode((prev) => ({ ...prev, [type]: false }));
         // Pass the whole draft up to the parent
-        onSave(draftData);
+        if (onSave) {
+            onSave(draftData);
+        }
     };
 
     return (
@@ -74,13 +77,15 @@ export function FamilyBackground({ formData, onSave }: FamilyBackgroundProps) {
                 <div>
                     <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
                         <h2 className="text-xl font-bold text-gray-800 tracking-tight">Guardian&apos;s Information</h2>
-                        <button
-                            type="button"
-                            onClick={() => editMode.guardian ? handleCancel("guardian") : setEditMode(p => ({ ...p, guardian: true }))}
-                            className="text-[#1a6b36] text-sm font-medium hover:underline"
-                        >
-                            {editMode.guardian ? "Cancel" : "Edit"}
-                        </button>
+                        {mode !== "view" && (
+                            <button
+                                type="button"
+                                onClick={() => editMode.guardian ? handleCancel("guardian") : setEditMode(p => ({ ...p, guardian: true }))}
+                                className="text-[#1a6b36] text-sm font-medium hover:underline"
+                            >
+                                {editMode.guardian ? "Cancel" : "Edit"}
+                            </button>
+                        )}
                     </div>
 
                     <FamilyFormSection
