@@ -12,6 +12,7 @@ interface EmploymentDetailsProps {
     departments?: string[];
     availablePositions?: string[];
     onSave?: (updatedData: any) => void;
+    onChange?: (updatedFields: any) => void; // 👈 ADD THIS
 }
 
 export function EmploymentDetails({
@@ -20,7 +21,8 @@ export function EmploymentDetails({
     divisions = [],
     departments = [],
     availablePositions = [],
-    onSave
+    onSave,
+    onChange
 }: EmploymentDetailsProps) {
     const [isEditing, setIsEditing] = useState(mode === "create");
     const [draftData, setDraftData] = useState<any>({});
@@ -80,6 +82,10 @@ export function EmploymentDetails({
     // --- Handlers ---
     const handleLocalChange = (field: string, value: any) => {
         setDraftData((prev: any) => ({ ...prev, [field]: value }));
+
+        if (onChange) {
+            onChange({ [field]: value });
+        }
     };
 
     const handleAssignedChange = (field: string, value: string) => {

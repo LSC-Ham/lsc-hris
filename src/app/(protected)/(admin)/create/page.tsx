@@ -1,14 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react"; // 1. Import useEffect
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // Added router for redirection
 import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
 
-// 2. Import the Server Action we just created
 import { generateEmployeeID } from "@/actions/employees/get";
+import { createEmployee } from "@/actions/employees/post";
+import { getDepartments } from "@/actions/admin/settings/departments/get";
+import { getDivisions } from "@/actions/admin/settings/divisions/get";
+import { getPositions } from "@/actions/admin/settings/positions/get";
 
 export default function CreateUserPage() {
+    const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [departments, setDepartments] = useState<string[]>([]);
+    const [divisions, setDivisions] = useState<string[]>([]);
+    const [positions, setPositions] = useState<string[]>([]);
 
     const [formData, setFormData] = useState({
         id_number: "",
@@ -40,6 +49,34 @@ export default function CreateUserPage() {
     });
 
     useEffect(() => {
+        const loadInitialData = async () => {
+            // Fetch the ID
+            const autoId = await generateEmployeeID();
+            if (autoId) {
+                setFormData(prev => ({ ...prev, id_number: autoId }));
+            }
+
+            // 2. Fetch all dropdown data at the same time
+            try {
+                const [fetchedDepts, fetchedDivs, fetchedPos] = await Promise.all([
+                    getDepartments(),
+                    getDivisions(),
+                    getPositions()
+                ]);
+
+                // Update the state (make sure your getter functions return simple arrays of strings!)
+                setDepartments(fetchedDepts || []);
+                setDivisions(fetchedDivs || []);
+                setPositions(fetchedPos || []);
+            } catch (error) {
+                console.error("Failed to load dropdown options:", error);
+            }
+        };
+
+        loadInitialData();
+    }, []);
+
+    useEffect(() => {
         const fetchAutoId = async () => {
             const autoId = await generateEmployeeID();
             if (autoId) {
@@ -49,11 +86,14 @@ export default function CreateUserPage() {
 
         fetchAutoId();
     }, []);
-    const handleFieldChange = (field: string, value: any) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+
+    // Add this helper function to let child components update the form data
+    const handleFormUpdate = (newData: any) => {
+        setFormData(prev => ({ ...prev, ...newData }));
     };
 
     const handleCreateAccount = async () => {
+        // Basic validation
         if (!formData.id_number || !formData.surname || !formData.firstname) {
             alert("Please fill in the required fields (ID, Surname, First Name).");
             return;
@@ -63,8 +103,15 @@ export default function CreateUserPage() {
         console.log("Creating Account with FINAL Data:", formData);
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            alert("Employee Created Successfully!");
+            // Call your actual server action instead of the timeout
+            const result = await createEmployee(formData);
+
+            if (result?.error) {
+                alert(result.error);
+            } else {
+                alert("Employee Created Successfully!");
+                router.push("/employees"); // Redirect to employee list or profile
+            }
         } catch (error) {
             console.error("Error creating employee:", error);
             alert("Failed to create employee.");
@@ -106,7 +153,10 @@ export default function CreateUserPage() {
                     <EmploymentDetails
                         mode="create"
                         formData={formData}
-                        onChange={handleFieldChange}
+                        onChange={handleFormUpdate}
+                        divisions={divisions}
+                        departments={departments}
+                        availablePositions={positions}
                     />
                 </div>
 
@@ -114,6 +164,7 @@ export default function CreateUserPage() {
                     <PersonalInformation
                         mode="create"
                         formData={formData}
+                        onChange={handleFormUpdate}
                     />
                 </div>
             </div>

@@ -79,7 +79,7 @@ model divisions {
   created_at  DateTime  @default(now()) @db.Timestamp(6)
   updated_at  DateTime? @updatedAt @db.Timestamp(6)
 
-  employees employees?
+  employees employees[]
 }
 
 model departments {
@@ -89,7 +89,7 @@ model departments {
   created_at  DateTime  @default(now()) @db.Timestamp(6)
   updated_at  DateTime? @updatedAt @db.Timestamp(6)
 
-  employees employees?
+  employees employees[]
 }
 
 model positions {
@@ -124,8 +124,8 @@ model employees {
   remarks                String?
   created_at             DateTime                 @default(now()) @db.Timestamp(6)
   updated_at             DateTime?                @updatedAt @db.Timestamp(6)
-  divisions_id           String                   @unique @db.Uuid
-  departments_id         String                   @unique @db.Uuid
+  divisions_id           String                   @db.Uuid
+  departments_id         String                   @db.Uuid
   personal_information   personal_information?
   government_ids         employees_govIDs[]
   address                address[]

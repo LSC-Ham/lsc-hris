@@ -9,9 +9,10 @@ interface PersonalInformationProps {
     mode?: "view" | "create";
     formData: any;
     onSave?: (data: any) => void; // <--- CHANGE THIS LINE
+    onChange?: (updatedFields: any) => void; // 👈 ADD THIS
 }
 
-export function PersonalInformation({ mode = "view", formData, onSave }: PersonalInformationProps) {
+export function PersonalInformation({ mode = "view", formData, onSave, onChange }: PersonalInformationProps) {
     const [isEditing, setIsEditing] = useState(mode === "create");
 
     // 1. Create a local draft to hold typed text safely
@@ -38,10 +39,11 @@ export function PersonalInformation({ mode = "view", formData, onSave }: Persona
 
     // 3. Local handler: updates the draft, NOT the parent
     const handleLocalChange = (field: string, value: any) => {
-        setDraftData((prev: any) => ({
-            ...prev,
-            [field]: value
-        }));
+        setDraftData((prev: any) => ({ ...prev, [field]: value }));
+
+        if (onChange) {
+            onChange({ [field]: value });
+        }
     };
 
     // 4. Cancel: Throw away the typed text and reset to original
