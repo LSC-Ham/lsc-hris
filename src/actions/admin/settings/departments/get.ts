@@ -1,3 +1,4 @@
+//src\actions\admin\settings\departments\get.ts
 "use server";
 
 import { prisma } from "@/lib/prisma"; // Adjust your prisma import path

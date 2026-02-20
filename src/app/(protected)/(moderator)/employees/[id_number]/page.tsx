@@ -4,17 +4,31 @@ import { getDivisions } from "@/actions/admin/settings/divisions/get";
 import { getPositions } from "@/actions/admin/settings/positions/get";
 import { getAddress, getEducationalBackground, getEligibility, getEmployeeDetails, getFamilyBackground, getPersonalInformation, getWorkExperience } from "@/actions/employees/id/get";
 import ProfilePage from "@/components/profile/ProfilePage";
+import { prisma } from "@/lib/prisma";
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+export default async function Page({ params }: { params: Promise<{ id_number: string }> }) {
 
-    const { id: employeeId } = await params;
-    const employment_details = await getEmployeeDetails(employeeId);
-    const personal_information = await getPersonalInformation(employeeId);
-    const address = await getAddress(employeeId);
-    const family_background = await getFamilyBackground(employeeId);
-    const educational_background = await getEducationalBackground(employeeId);
-    const eligibility = await getEligibility(employeeId);
-    const work_experience = await getWorkExperience(employeeId);
+    const { id_number: id_number } = await params;
+
+    const employeeId = await prisma.employees.findUnique({
+        where: {
+            id_number: id_number,
+        }, select: {
+            id: true,
+        }
+    })
+
+    if (!employeeId) {
+        return null
+    }
+
+    const employment_details = await getEmployeeDetails(employeeId?.id);
+    const personal_information = await getPersonalInformation(employeeId?.id);
+    const address = await getAddress(employeeId?.id);
+    const family_background = await getFamilyBackground(employeeId?.id);
+    const educational_background = await getEducationalBackground(employeeId?.id);
+    const eligibility = await getEligibility(employeeId?.id);
+    const work_experience = await getWorkExperience(employeeId?.id);
 
     const departments = await getDepartments();
     const divisions = await getDivisions();

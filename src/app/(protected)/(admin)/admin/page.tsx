@@ -19,23 +19,8 @@ export default async function EmployeesLists() {
     // Fetch employees and include related division/department data
     const employeesList = await prisma.employees.findMany({
         include: {
-            personal_information: {
-                select: {
-                    firstname: true,
-                    middlename: true,
-                    surname: true,
-                }
-            },
-            divisions: {
-                select: {
-                    division: true,
-                }
-            },
-            departments: {
-                select: {
-                    department: true,
-                }
-            }
+            divisions: true, // Allows us to access employee.divisions.name
+            departments: true, // Allows us to access employee.departments.name
         },
         orderBy: {
             created_at: "desc", // Show newest first
@@ -67,9 +52,6 @@ export default async function EmployeesLists() {
                                     ID Number
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Full Name
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Division / Dept
                                 </th>
                                 <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
@@ -98,20 +80,13 @@ export default async function EmployeesLists() {
                                             {emp.id_number}
                                         </td>
 
-                                        {/* Fullname */}
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-900 font-medium">
-                                                {emp.personal_information?.surname}, {emp.personal_information?.firstname} {emp.personal_information?.middlename}
-                                            </div>
-                                        </td>
-
                                         {/* Division & Department */}
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900 font-medium">
-                                                {emp.divisions.division}
+                                                {(emp.divisions as any)?.name || emp.divisions_id}
                                             </div>
                                             <div className="text-xs text-gray-500">
-                                                {emp.departments.department}
+                                                {(emp.departments as any)?.name || emp.departments_id}
                                             </div>
                                         </td>
 
