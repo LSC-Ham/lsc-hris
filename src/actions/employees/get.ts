@@ -293,3 +293,32 @@ export async function getWorkExperience() {
     }
 }
 
+export async function getUsers() {
+    try {
+
+        const session = await getServerSession(authOptions);
+        if (!session?.user) redirect("/login");
+
+        const userId = (session.user as any).id;
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                id: true, profile_picture: true,
+            }
+        });
+
+        if (!user) return null
+
+        return {
+            id: user.id,
+            profile_picture: user.profile_picture,
+        };
+
+    } catch (error) {
+        console.error("Failed to fetch profile picture:", error);
+        return null;
+    }
+}
+
+
+

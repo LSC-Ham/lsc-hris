@@ -14,9 +14,11 @@ import {
     updateAddress, updateEducationalBackground, updateEligibility,
     updateFamilyBackground, updatePersonalInformation, updateWorkExperience
 } from "@/actions/employees/update";
+import ProfilePictureUpload from "./ProfilePictureUpload";
 
 interface ProfilePageProps {
     role: null | "moderator";
+    user: any;
     personal_information: any;
     employment_details: any;
     address: any;
@@ -27,6 +29,10 @@ interface ProfilePageProps {
     departments?: any[];
     divisions?: any[];
     positions?: any[];
+}
+
+const DEFAULT_USER_DATA = {
+    id: "", profile_picture: ""
 }
 
 const DEFAULT_PERSONAL_DATA = {
@@ -41,7 +47,7 @@ const DEFAULT_EMPLOYMENT_DATA = {
 };
 
 export default function ProfilePage({
-    role,
+    role, user,
     personal_information, employment_details, address, family_background,
     educational_background, eligibility, work_experience,
     departments = [], divisions = [], positions = []
@@ -54,24 +60,30 @@ export default function ProfilePage({
     const [eligibilityData, setEligibilityData] = useState(Array.isArray(eligibility) ? eligibility : []);
     const [workExperienceData, setWorkExperienceData] = useState(Array.isArray(work_experience) ? work_experience : []);
 
+
+    const [userData, setUserData] = useState({ ...DEFAULT_USER_DATA, ...(user || {}) });
     const [personalData, setPersonalData] = useState({ ...DEFAULT_PERSONAL_DATA, ...(personal_information || {}) });
     const [employmentData] = useState({ ...DEFAULT_EMPLOYMENT_DATA, ...(employment_details || {}) });
 
+    // CLEANUP: Extract helpers to build the complex state objects cleanly
     const buildAddressState = () => {
         const addrArray = address?.address || [];
         const getAddr = (type: string) => addrArray.find((a: any) => a.address_type === type) || {};
+
+        // We only call getAddr once per type now!
         const res = getAddr("residential");
         const perm = getAddr("permanent");
 
         return {
             residential: { house_no: res.house_no || "", street: res.street || "", subdivision: res.subdivision || "", region: res.region || "", province: res.province || "", city: res.city || "", barangay: res.barangay || "", zip_code: res.zip_code || "" },
-            permanent: { house_no: perm.house_no || "", street: perm.street || "", subdivision: perm.subdivision || "", region: perm.region || "", province: perm.province || "", city: perm.city || "", barangay: perm.barangay || "" , zip_code: perm.zip_code || "" }
+            permanent: { house_no: perm.house_no || "", street: perm.street || "", subdivision: perm.subdivision || "", region: perm.region || "", province: perm.province || "", city: perm.city || "", barangay: perm.barangay || "", zip_code: perm.zip_code || "" }
         };
     };
 
     const buildFamilyState = () => {
         const famArray = family_background?.family_background || (Array.isArray(family_background) ? family_background : []);
         const getFam = (type: string) => famArray.find((f: any) => f.relation_type?.toLowerCase() === type.toLowerCase()) || {};
+
         const g = getFam("guardian");
         const f = getFam("father");
         const m = getFam("mother");
@@ -88,10 +100,12 @@ export default function ProfilePage({
     const [addressData, setAddressData] = useState(buildAddressState());
     const [familyData, setFamilyData] = useState(buildFamilyState());
 
+
     // --- 2. HANDLERS ---
+    // CLEANUP: Use a generic helper to reduce the repetitive try/catch blocks
     const handleAction = async (actionFn: Function, stateSetter: Function, data: any, successMsg: string) => {
         try {
-            stateSetter(data); 
+            stateSetter(data); // Optimistic UI update
             const result = await actionFn(data);
             if (result.success) alert(successMsg);
             else alert("Error: " + result.error);
@@ -107,6 +121,7 @@ export default function ProfilePage({
     const handleSaveEducation = (data: any[]) => handleAction(updateEducationalBackground, setEducationData, data, "Educational background updated successfully!");
     const handleSaveEligibility = (data: any[]) => handleAction(updateEligibility, setEligibilityData, data, "Eligibility updated successfully!");
     const handleSaveWorkExp = (data: any[]) => handleAction(updateWorkExperience, setWorkExperienceData, data, "Work Experience updated successfully!");
+
 
     // --- 3. DYNAMIC RENDERING LOGIC ---
     const renderContent = () => {
@@ -142,6 +157,7 @@ export default function ProfilePage({
 
     return (
         <div className="space-y-6">
+            {/* PAGE HEADER */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
                     {role === null ? "My Profile" : "Employee Profile"}
@@ -152,32 +168,15 @@ export default function ProfilePage({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+                {/* === LEFT COLUMN (Sidebar) === */}
                 <div className="md:col-span-4 lg:col-span-3 space-y-6">
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
-                        <div className="w-24 h-24 rounded-full bg-green-50 border-4 border-white shadow-sm flex items-center justify-center mb-4 text-2xl font-bold text-[#1a6b36]" />
+                        <ProfilePictureUpload userId={personalData.id} initialImage={userData.profile_picture} />
                         <h2 className="text-lg font-bold text-gray-800 capitalize">{personalData.firstname} {personalData.surname}</h2>
                         <p className="text-xs text-gray-500 mb-1">{employmentData.department || "No Department Set"}</p>
                     </div>
 
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                        {/* MOBILE DROPDOWN */}
-                        <div className="md:hidden p-4 border-b border-gray-100">
-                            <label htmlFor="mobile-menu" className="block text-xs font-semibold text-gray-400 uppercase mb-2">Select Section</label>
-                            <select
-                                id="mobile-menu"
-                                value={activeTab}
-                                onChange={(e) => setActiveTab(e.target.value)}
-                                className="w-full p-2.5 text-sm font-medium border border-gray-200 rounded-lg bg-gray-50 text-gray-700 focus:ring-2 focus:ring-[#1a6b36] focus:border-transparent outline-none"
-                            >
-                                {menuItems.map((item) => (
-                                    <option key={item} value={item}>
-                                        {item}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* DESKTOP SIDEBAR */}
                         <nav className="hidden md:flex flex-col p-2 space-y-1">
                             {menuItems.map((item) => (
                                 <button
@@ -192,6 +191,7 @@ export default function ProfilePage({
                     </div>
                 </div>
 
+                {/* === RIGHT COLUMN (Dynamic Content) === */}
                 <div className="md:col-span-8 lg:col-span-9 space-y-6">
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-6">
                         {renderContent()}

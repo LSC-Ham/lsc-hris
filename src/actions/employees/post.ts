@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma"; // Adjust path if needed
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt"; // Requires: npm install bcryptjs
+import path from 'path';
+import { writeFile } from 'fs/promises';
 
 export async function createEmployee(data: any) {
     try {
@@ -121,4 +123,34 @@ export async function createEmployee(data: any) {
         console.error("Create Employee Error:", error);
         return { error: "Failed to create employee account. Please check your inputs and try again." };
     }
+}
+
+export async function uploadProfilePicture(formData: FormData) {
+    const file = formData.get('file') as File;
+    const userId = formData.get('userId') as string;
+
+    if (!file || !userId) {
+        throw new Error('Missing file or user ID');
+    }
+
+    // 1. Convert the file into a buffer so Node.js can save it
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // 2. Create a unique filename and save it to your public/uploads folder
+    const filename = `user-${userId}-${Date.now()}.jpg`;
+    const filepath = path.join(process.cwd(), 'public/uploads', filename);
+
+    // Write the file to the local filesystem
+    await writeFile(filepath, buffer);
+
+    // 3. Update the database with the new URL path
+    const dbImagePath = `/uploads/${filename}`;
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: { profile_picture: dbImagePath }
+    });
+
+    return { success: true, imagePath: dbImagePath };
 }

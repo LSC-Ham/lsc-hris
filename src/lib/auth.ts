@@ -31,9 +31,7 @@ export const authOptions: NextAuthOptions = {
                             // (Assuming your User model has a relation to employees)
                             {
                                 employees: {
-                                    some: {
-                                        id_number: credentials?.username,
-                                    }
+                                    id_number: credentials?.username,
                                 }
                             }
                         ]
