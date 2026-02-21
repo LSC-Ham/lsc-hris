@@ -4,16 +4,10 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "@/lib/prisma"; // Adjust this import to your actual Prisma client location
 import { authOptions } from "@/lib/auth"; // Make sure this path is correct
 import { revalidatePath } from "next/cache";
-import { Prisma } from "../../../generated/prisma/client";
+import { Prisma } from "../../../../generated/prisma/client";
 
 export async function updatePersonalInformation(data: any) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) {
-            return { success: false, error: "Unauthorized. Please log in." };
-        }
-
-        const userId = (session.user as any).id;
         const { id, ...updateData } = data;
 
         // --- THE FIX: Format the birthdate ---
@@ -25,7 +19,7 @@ export async function updatePersonalInformation(data: any) {
 
         await prisma.employees.update({
             where: {
-                users_id: userId
+                id: data.employees_id
             },
             data: {
                 personal_information: {

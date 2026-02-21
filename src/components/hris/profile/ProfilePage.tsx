@@ -13,7 +13,7 @@ import { WorkExperience } from "@/components/hris/profile/WorkExperience";
 import {
     updateAddress, updateEducationalBackground, updateEligibility,
     updateFamilyBackground, updatePersonalInformation, updateWorkExperience
-} from "@/actions/employees/update";
+} from "@/actions/employees/profile/update";
 import ProfilePictureUpload from "./ProfilePictureUpload";
 import { updateEmploymentDetails } from "@/actions/employees/id/update";
 

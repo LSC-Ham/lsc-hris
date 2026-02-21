@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation"; // Added router for redirection
 import { EmploymentDetails } from "@/components/hris/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/hris/profile/PersonalInformation";
 
-import { generateEmployeeID } from "@/actions/employees/get";
-import { createEmployee } from "@/actions/employees/post";
+import { generateEmployeeID } from "@/actions/employees/profile/get";
+import { createEmployee } from "@/actions/employees/profile/post";
 import { getDepartments } from "@/actions/admin/settings/departments/get";
 import { getDivisions } from "@/actions/admin/settings/divisions/get";
 import { getPositions } from "@/actions/admin/settings/positions/get";
