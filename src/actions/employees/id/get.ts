@@ -236,8 +236,6 @@ export async function getEligibility(employeeId: string) {
 
 export async function getWorkExperience(employeeId: string) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) redirect("/login");
 
         // Query the work_experience table directly
         const workRecords = await prisma.work_experience.findMany({
@@ -268,5 +266,27 @@ export async function getWorkExperience(employeeId: string) {
     } catch (error) {
         console.error("Error fetching work experience:", error);
         return []; // Return empty array to prevent frontend .map() crashes
+    }
+}
+
+export async function getUsers(employeeId: string) {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: employeeId },
+            select: {
+                id: true, profile_picture: true,
+            }
+        });
+
+        if (!user) return null
+
+        return {
+            id: user.id,
+            profile_picture: user.profile_picture,
+        };
+
+    } catch (error) {
+        console.error("Failed to fetch profile picture:", error);
+        return null;
     }
 }

@@ -4,11 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
-// ... (Your existing navItems array stays here) ...
 const navItems = [
     {
         name: "Dashboard",
-        href: "/dashboard",
+        href: "/hris/dashboard", // ✨ Changed from ./dashboard
         icon: (isActive: boolean) => (
             <svg className={`w-5 h-5 ${isActive ? "text-[#1a6b36]" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -17,7 +16,8 @@ const navItems = [
     },
     {
         name: "Employees",
-        href: "/employees",
+        href: "/hris/employees", // ✨ Changed from ./employees
+        adminOnly: true,
         icon: (isActive: boolean) => (
             <svg className={`w-5 h-5 ${isActive ? "text-[#1a6b36]" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -26,7 +26,7 @@ const navItems = [
     },
     {
         name: "Profile",
-        href: "/profile",
+        href: "/hris/profile", // ✨ Changed from ./profile
         icon: (isActive: boolean) => (
             <svg className={`w-5 h-5 ${isActive ? "text-[#1a6b36]" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -35,7 +35,7 @@ const navItems = [
     },
     {
         name: "Admin Panel",
-        href: "/admin",
+        href: "/hris/admin", // ✨ Changed from ./admin
         adminOnly: true,
         icon: (isActive: boolean) => (
             <svg className={`w-5 h-5 ${isActive ? "text-[#1a6b36]" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -109,7 +109,7 @@ export function Sidebar({ userRole }: { userRole: string }) {
                 {/* Navigation Links */}
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {navItems.map((item) => {
-                        if (item.adminOnly && !["admin", "SUPER_ADMIN", "HR_ADMIN"].includes(userRole)) {
+                        if (item.adminOnly && !["admin"].includes(userRole)) {
                             return null;
                         }
                         const isActive = pathname.startsWith(item.href);

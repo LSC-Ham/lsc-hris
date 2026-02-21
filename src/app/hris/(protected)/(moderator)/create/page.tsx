@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; // Added router for redirection
-import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
-import { PersonalInformation } from "@/components/profile/PersonalInformation";
+import { EmploymentDetails } from "@/components/hris/profile/EmploymentDetails";
+import { PersonalInformation } from "@/components/hris/profile/PersonalInformation";
 
 import { generateEmployeeID } from "@/actions/employees/get";
 import { createEmployee } from "@/actions/employees/post";
@@ -109,7 +109,7 @@ export default function CreateUserPage() {
                 alert(result.error);
             } else {
                 alert("Employee Created Successfully!");
-                router.push("/employees"); // Redirect to employee list or profile
+                router.push("./employees"); // Redirect to employee list or profile
             }
         } catch (error) {
             console.error("Error creating employee:", error);

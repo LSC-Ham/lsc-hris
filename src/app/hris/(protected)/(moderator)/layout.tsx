@@ -9,7 +9,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-        redirect("/login");
+        redirect("/hris/login");
     }
 
     const userRole = (session.user as any).role;
@@ -17,7 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     const role = ALLOWED_ROLES.includes(userRole)
 
     if (!role) {
-        redirect("/dashboard");
+        redirect("/hris/dashboard");
     }
 
     return (

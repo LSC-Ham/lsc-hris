@@ -1,6 +1,6 @@
 //src\app\(protected)\profile\page.tsx
 import { getAddress, getFamilyBackground, getPersonalInformation, getEmployeeDetails, getEducationalBackground, getEligibility, getWorkExperience, getUsers } from "@/actions/employees/get"; // Import your fetch function
-import ProfilePage from "@/components/profile/ProfilePage";
+import ProfilePage from "@/components/hris/profile/ProfilePage";
 
 export default async function Page() {
     const user = await getUsers();

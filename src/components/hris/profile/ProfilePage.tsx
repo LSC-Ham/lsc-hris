@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
-import { PersonalInformation } from "@/components/profile/PersonalInformation";
-import { Address } from "@/components/profile/Address";
-import { FamilyBackground } from "@/components/profile/FamilyBackground";
-import { EducationalBackground } from "@/components/profile/EducationalBackground";
-import { Eligibility } from "@/components/profile/Eligibility";
-import { WorkExperience } from "@/components/profile/WorkExperience";
+import { EmploymentDetails } from "@/components/hris/profile/EmploymentDetails";
+import { PersonalInformation } from "@/components/hris/profile/PersonalInformation";
+import { Address } from "@/components/hris/profile/Address";
+import { FamilyBackground } from "@/components/hris/profile/FamilyBackground";
+import { EducationalBackground } from "@/components/hris/profile/EducationalBackground";
+import { Eligibility } from "@/components/hris/profile/Eligibility";
+import { WorkExperience } from "@/components/hris/profile/WorkExperience";
 
 // Import ALL update actions here
 import {

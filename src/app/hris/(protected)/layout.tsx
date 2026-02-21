@@ -1,21 +1,21 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Sidebar } from "@/components/Sidebar";
-import { LogoutButton } from "@/components/auth/LogoutButton";
+import { Sidebar } from "@/components/hris/Sidebar";
+import { LogoutButton } from "@/components/hris/auth/LogoutButton";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-        redirect("/login");
+        redirect("/hris/login");
     }
 
     const userRole = (session.user as any).role || "";
     const userEmail = session.user.email;
 
     if (!session) {
-        redirect("/login");
+        redirect("/hris/login");
     }
 
     return (

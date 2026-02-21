@@ -48,7 +48,7 @@ export default async function EmployeesLists() {
                     <p className="text-sm text-gray-500">Manage and view all employee records.</p>
                 </div>
                 <Link
-                    href="/create"
+                    href="./create"
                     className="bg-[#1a6b36] hover:bg-[#155a2b] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm text-center"
                 >
                     + Add Employee
@@ -131,7 +131,7 @@ export default async function EmployeesLists() {
 
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link
-                                                href={`/employees/${emp.id_number}`}
+                                                href={`./employees/${emp.id_number}`}
                                                 className="text-[#1a6b36] hover:text-[#155a2b] hover:underline"
                                             >
                                                 View / Edit
