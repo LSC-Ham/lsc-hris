@@ -7,9 +7,9 @@ import { LogoutButton } from "@/components/hris/auth/LogoutButton";
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user) {
-        redirect("/hris/login");
-    }
+    if (!session || !session.user) { 
+    redirect("/hris/login");
+}
 
     const userRole = (session.user as any).role || "";
     const userEmail = session.user.email;

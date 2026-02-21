@@ -74,8 +74,9 @@ export const authOptions: NextAuthOptions = {
 
             // 3. IF NOT IN DATABASE, INVALIDATE THE SESSION (Kicks user out)
             if (!dbSession) {
-                // Returning null or an empty object effectively "logs out" the user on the next check
-                return null as any;
+                // FIX: Do not return null. NextAuth needs an object.
+                // Returning a session with no user gracefully tells NextAuth the user is logged out.
+                return { ...session, user: undefined } as any;
             }
 
             if (session.user) {

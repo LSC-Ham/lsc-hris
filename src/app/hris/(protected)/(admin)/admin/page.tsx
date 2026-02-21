@@ -1,4 +1,5 @@
 // src/app/(protected)/(admin)/employees/page.tsx
+import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -15,27 +16,47 @@ const formatDateTime = (date: Date | null) => {
     }).format(date);
 };
 
-export default async function UsersLists() {
-    // Fetch employees and include related division/department data
-    const usersLists = await prisma.user.findMany({
-        include: {
-            employees: {
-                select: {
-                    id_number: true,
-                    personal_information: {
-                        select: {
-                            surname: true,
-                            firstname: true,
-                            middlename: true,
+export default async function UsersLists({
+    searchParams,
+}: {
+    searchParams: Promise<{ page?: string }>;
+}) {
+    // 1. Await the searchParams Promise
+    const resolvedSearchParams = await searchParams;
+
+    // 2. Pagination Setup
+    const ITEMS_PER_PAGE = 10;
+    const currentPage = Number(resolvedSearchParams?.page) || 1;
+    const skip = (currentPage - 1) * ITEMS_PER_PAGE;
+
+    // 3. Fetch employees with pagination and total count in parallel
+    const [usersLists, totalUsers] = await Promise.all([
+        prisma.user.findMany({
+            skip,
+            take: ITEMS_PER_PAGE,
+            include: {
+                employees: {
+                    select: {
+                        id_number: true,
+                        personal_information: {
+                            select: {
+                                surname: true,
+                                firstname: true,
+                                middlename: true,
+                            }
                         }
                     }
                 }
-            }
-        },
-        orderBy: {
-            created_at: "desc",
-        },
-    });
+            },
+            orderBy: {
+                created_at: "desc",
+            },
+        }),
+        prisma.user.count()
+    ]);
+
+    // 4. Calculate total pages
+    const totalPages = Math.ceil(totalUsers / ITEMS_PER_PAGE);
 
     return (
         <div className="space-y-6">
@@ -107,8 +128,8 @@ export default async function UsersLists() {
 
                                         {/* Logged In - Hidden on Mobile */}
                                         <td className="hidden md:table-cell px-6 py-4 text-sm text-gray-600">
-                                            {user.password_changed ? 
-                                                <span className="text-green-600 font-medium">Yes</span> : 
+                                            {user.password_changed ?
+                                                <span className="text-green-600 font-medium">Yes</span> :
                                                 <span className="text-gray-400">No</span>
                                             }
                                         </td>
@@ -134,6 +155,14 @@ export default async function UsersLists() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination rendered at the bottom of the table container */}
+                <Pagination
+                    totalPages={totalPages}
+                    currentPage={currentPage}
+                    totalItems={totalUsers}
+                    itemName="users"
+                />
             </div>
         </div>
     );
