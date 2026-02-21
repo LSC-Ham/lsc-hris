@@ -90,7 +90,7 @@ export async function updateAddress(data: any) {
         // data looks like: { residential: {...}, permanent: {...} }
         await prisma.employees.update({
             where: {
-                id: userId
+                users_id: userId
             },
             data: {
                 // Access the related address table
@@ -150,7 +150,7 @@ export async function updateFamilyBackground(data: any) {
 
         await prisma.employees.update({
             where: {
-                id: userId
+                users_id: userId
             },
             data: {
                 // Access your family background relation (adjust 'family_background' to match your schema)
@@ -191,7 +191,7 @@ export async function updateEducationalBackground(data: any[]) { // Expecting an
 
         await prisma.employees.update({
             where: {
-                id: userId
+                users_id: userId
             },
             data: {
                 // This is the magic nested write block
@@ -234,7 +234,7 @@ export async function updateEligibility(data: any[]) {
 
         await prisma.employees.update({
             where: {
-                id: userId
+                users_id: userId
             },
             data: {
                 // Nested write for the eligibility relation
@@ -276,7 +276,7 @@ export async function updateWorkExperience(data: any[]) {
 
         await prisma.employees.update({
             where: {
-                id: userId
+                users_id: userId
             },
             data: {
                 work_experience: {

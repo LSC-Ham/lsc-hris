@@ -28,7 +28,7 @@ export async function getPersonalInformation() {
         const userId = (session.user as any).id;
 
         const employee = await prisma.employees.findUnique({
-            where: { id: userId },
+            where: { users_id: userId },
             include: {
                 personal_information: true,
             },
@@ -55,7 +55,7 @@ export async function getEmployeeDetails() {
         if (!session?.user) redirect("/login");
 
         const employee = await prisma.employees.findUnique({
-            where: { id: (session.user as any).id },
+            where: { users_id: (session.user as any).id },
             include: {
                 positions: { include: { positions: true }, orderBy: { start_at: 'desc' } },
                 government_ids: true,
@@ -111,7 +111,7 @@ export async function getAddress() {
         const userId = (session.user as any).id;
 
         const employee = await prisma.employees.findUnique({
-            where: { id: userId },
+            where: { users_id: userId },
             include: {
                 address: true,
             },
@@ -150,7 +150,7 @@ export async function getFamilyBackground() {
         const userId = (session.user as any).id;
 
         const employee = await prisma.employees.findUnique({
-            where: { id: userId },
+            where: { users_id: userId },
             include: {
                 family_background: true,
             },
@@ -192,7 +192,9 @@ export async function getEducationalBackground() {
         // Directly query the "Many" table using the employee's ID
         const educationRecords = await prisma.educational_background.findMany({
             where: {
-                employees_id: userId
+                employees: {
+                    users_id: userId
+                }
             },
             orderBy: {
                 date_from: 'desc' // Optional: Brings their most recent education to the top
@@ -230,7 +232,9 @@ export async function getEligibility() {
         // Directly query the "Many" table using the employee's ID
         const eligibilityRecords = await prisma.eligibility.findMany({
             where: {
-                employees_id: userId
+                employees: {
+                    users_id: userId
+                }
             },
         });
 
@@ -264,7 +268,9 @@ export async function getWorkExperience() {
         // Query the work_experience table directly
         const workRecords = await prisma.work_experience.findMany({
             where: {
-                employees_id: userId
+                employees: {
+                    users_id: userId
+                }
             },
             orderBy: {
                 date_from: 'desc' // ISO standard: show most recent experience first

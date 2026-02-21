@@ -15,7 +15,7 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
         where: {
             id_number: id_number,
         }, select: {
-            id: true,
+            users_id: true,
         }
     })
 
@@ -23,24 +23,19 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
         return null
     }
 
-
-    const user = await getUsers(employeeId?.id);
-    const employment_details = await getEmployeeDetails(employeeId?.id);
-    const personal_information = await getPersonalInformation(employeeId?.id);
-    const address = await getAddress(employeeId?.id);
-    const family_background = await getFamilyBackground(employeeId?.id);
-    const educational_background = await getEducationalBackground(employeeId?.id);
-    const eligibility = await getEligibility(employeeId?.id);
-    const work_experience = await getWorkExperience(employeeId?.id);
+    const user = await getUsers(employeeId?.users_id || "");
+    const employment_details = await getEmployeeDetails(employeeId?.users_id || "");
+    const personal_information = await getPersonalInformation(employeeId?.users_id || "");
+    const address = await getAddress(employeeId?.users_id || "");
+    const family_background = await getFamilyBackground(employeeId?.users_id || "");
+    const educational_background = await getEducationalBackground(employeeId?.users_id || "");
+    const eligibility = await getEligibility(employeeId?.users_id || "");
+    const work_experience = await getWorkExperience(employeeId?.users_id || "");
 
     const departments = await getDepartments();
     const divisions = await getDivisions();
     const positions = await getPositions();
 
-
-    if (!user || !personal_information || !employment_details || !address || !family_background || !educational_background || !eligibility || !work_experience) {
-        return <div>Error loading profile. Please try logging in again.</div>;
-    }
 
 
     // 3. Pass the fetched data to the Client Component

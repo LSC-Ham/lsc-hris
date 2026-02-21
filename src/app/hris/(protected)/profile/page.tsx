@@ -13,11 +13,6 @@ export default async function Page() {
     const work_experience = await getWorkExperience();
 
 
-    if (!user || !personal_information || !employment_details || !address || !family_background || !educational_background || !eligibility || !work_experience) {
-        return <div>Error loading profile. Please try logging in again.</div>;
-    }
-
-
     // 3. Pass the fetched data to the Client Component
     return <ProfilePage
         role={null}
