@@ -15,6 +15,7 @@ import {
     updateFamilyBackground, updatePersonalInformation, updateWorkExperience
 } from "@/actions/employees/update";
 import ProfilePictureUpload from "./ProfilePictureUpload";
+import { updateEmploymentDetails } from "@/actions/employees/id/update";
 
 interface ProfilePageProps {
     role: null | "moderator";
@@ -63,7 +64,7 @@ export default function ProfilePage({
 
     const [userData, setUserData] = useState({ ...DEFAULT_USER_DATA, ...(user || {}) });
     const [personalData, setPersonalData] = useState({ ...DEFAULT_PERSONAL_DATA, ...(personal_information || {}) });
-    const [employmentData] = useState({ ...DEFAULT_EMPLOYMENT_DATA, ...(employment_details || {}) });
+    const [employmentData, setEmploymentData] = useState({ ...DEFAULT_EMPLOYMENT_DATA, ...(employment_details || {}) });
 
     // CLEANUP: Extract helpers to build the complex state objects cleanly
     const buildAddressState = () => {
@@ -121,7 +122,17 @@ export default function ProfilePage({
     const handleSaveEducation = (data: any[]) => handleAction(updateEducationalBackground, setEducationData, data, "Educational background updated successfully!");
     const handleSaveEligibility = (data: any[]) => handleAction(updateEligibility, setEligibilityData, data, "Eligibility updated successfully!");
     const handleSaveWorkExp = (data: any[]) => handleAction(updateWorkExperience, setWorkExperienceData, data, "Work Experience updated successfully!");
+    const handleSaveEmploymentDetails = (data: any) => {
+        handleAction(
+            // 1. Extract the ID from the data and pass it as the first argument
+            // 2. Pass the rest of the form data as the second argument
+            (formData: any) => updateEmploymentDetails(formData.id, formData),
 
+            (d: any) => setEmploymentData((prev: any) => ({ ...prev, ...d })),
+            data,
+            "Employment details updated successfully!"
+        );
+    };
 
     // --- 3. DYNAMIC RENDERING LOGIC ---
     const renderContent = () => {
@@ -130,7 +141,7 @@ export default function ProfilePage({
 
         switch (activeTab) {
             case "Employment Details":
-                return <EmploymentDetails mode={isMod ? "update" : "view"} formData={employmentData} departments={departments} divisions={divisions} availablePositions={positions} />;
+                return <EmploymentDetails mode={isMod ? "update" : "view"} formData={employmentData} onSave={handleSaveEmploymentDetails} departments={departments} divisions={divisions} availablePositions={positions} />;
             case "Personal Information":
                 return <PersonalInformation formData={personalData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":

@@ -25,7 +25,7 @@ export async function updatePersonalInformation(data: any) {
 
         await prisma.employees.update({
             where: {
-                id: userId
+                users_id: userId
             },
             data: {
                 personal_information: {

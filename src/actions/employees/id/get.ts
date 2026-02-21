@@ -38,6 +38,7 @@ export async function getEmployeeDetails(employeeId: string) {
         }, {});
 
         return {
+            id: employee.id,
             id_number: employee.id_number,
             remarks: employee.remarks,
             hired_at: employee.hired_at,
