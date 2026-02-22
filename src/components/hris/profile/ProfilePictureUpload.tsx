@@ -10,9 +10,10 @@ import { deleteProfilePicture } from '@/actions/employees/profile/delete';
 interface ProfilePictureProps {
     userId: string;
     initialImage?: string | null;
+    size?: 'sm' | 'lg'; // ✨ Added size prop
 }
 
-export default function ProfilePictureUpload({ userId, initialImage }: ProfilePictureProps) {
+export default function ProfilePictureUpload({ userId, initialImage, size = 'lg' }: ProfilePictureProps) {
     const [imagePreview, setImagePreview] = useState<string | null>(initialImage || null);
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -24,6 +25,14 @@ export default function ProfilePictureUpload({ userId, initialImage }: ProfilePi
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+
+    // ✨ Dynamic styling based on the size prop
+    const containerClasses = size === 'sm'
+        ? 'w-10 h-10 border border-gray-200'
+        : 'w-24 h-24 border-4 border-white mb-4';
+
+    const iconClasses = size === 'sm' ? 'w-5 h-5' : 'w-8 h-8';
+    const overlayTextClasses = size === 'sm' ? 'text-[8px]' : 'text-xs';
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -89,28 +98,23 @@ export default function ProfilePictureUpload({ userId, initialImage }: ProfilePi
         }
     };
 
-    // ✨ NEW: Function to safely download the current profile picture
     const handleDownload = async () => {
         if (!imagePreview) return;
-        
+
         try {
-            // Fetch the image and convert it to a blob to force download (prevents opening in new tab)
             const response = await fetch(imagePreview);
             const blob = await response.blob();
             const blobUrl = URL.createObjectURL(blob);
-            
-            // Create a temporary link element and click it
+
             const link = document.createElement('a');
             link.href = blobUrl;
-            link.download = `profile_picture_${userId}.jpg`; // Name the file
+            link.download = `profile_picture_${userId}.jpg`;
             document.body.appendChild(link);
             link.click();
-            
-            // Clean up
+
             document.body.removeChild(link);
             URL.revokeObjectURL(blobUrl);
-            
-            // Optionally close the menu after downloading
+
             setShowOptions(false);
         } catch (error) {
             console.error("Failed to download image", error);
@@ -125,17 +129,17 @@ export default function ProfilePictureUpload({ userId, initialImage }: ProfilePi
             <button
                 onClick={() => setShowOptions(true)}
                 disabled={isUploading || isDeleting}
-                className="relative w-24 h-24 rounded-full bg-green-50 border-4 border-white shadow-sm flex items-center justify-center mb-4 text-[#1a6b36] overflow-hidden group hover:bg-green-100 transition-colors disabled:opacity-50"
+                className={`relative rounded-full bg-green-50 shadow-sm flex items-center justify-center text-[#1a6b36] overflow-hidden group hover:bg-green-100 transition-colors disabled:opacity-50 ${containerClasses}`}
             >
                 {imagePreview ? (
                     <Image src={imagePreview} alt="Profile Preview" fill className="object-cover" unoptimized />
                 ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 opacity-70 group-hover:opacity-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`${iconClasses} opacity-70 group-hover:opacity-100`}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
                     </svg>
                 )}
-                <div className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white text-xs font-semibold">
+                <div className={`absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white font-semibold ${overlayTextClasses}`}>
                     {isDeleting ? "Removing..." : "Edit"}
                 </div>
             </button>
@@ -184,7 +188,6 @@ export default function ProfilePictureUpload({ userId, initialImage }: ProfilePi
                             Upload Photo
                         </button>
 
-                        {/* ✨ NEW: DOWNLOAD BUTTON */}
                         {imagePreview && (
                             <button
                                 onClick={handleDownload}
@@ -216,7 +219,7 @@ export default function ProfilePictureUpload({ userId, initialImage }: ProfilePi
                 </div>
             )}
 
-            {/* 2. THE CROPPER MODAL (Remains unchanged) */}
+            {/* 2. THE CROPPER MODAL */}
             {rawImage && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 p-4">
                     <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md flex flex-col items-center">

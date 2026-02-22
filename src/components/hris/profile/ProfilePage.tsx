@@ -182,7 +182,7 @@ export default function ProfilePage({
                 {/* === LEFT COLUMN (Sidebar) === */}
                 <div className="md:col-span-4 lg:col-span-3 space-y-6">
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
-                        <ProfilePictureUpload userId={userData.id} initialImage={userData.profile_picture} />
+                        <ProfilePictureUpload userId={userData.id} initialImage={userData.profile_picture} size="lg" />
                         <h2 className="text-lg font-bold text-gray-800 capitalize">{personalData.firstname} {personalData.surname}</h2>
                         <p className="text-xs text-gray-500 mb-1">{employmentData.department || "No Department Set"}</p>
                     </div>

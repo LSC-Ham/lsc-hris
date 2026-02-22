@@ -3,24 +3,35 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/hris/Sidebar";
 import { LogoutButton } from "@/components/hris/auth/LogoutButton";
+import { prisma } from "@/lib/prisma"; // ✨ Added Prisma import
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const session = await getServerSession(authOptions);
 
-    if (!session || !session.user) { 
-    redirect("/hris/login");
-}
-
-    const userRole = (session.user as any).role || "";
-    const userEmail = session.user.email;
-
-    if (!session) {
+    // Single, clean check for session existence
+    if (!session || !session.user) {
         redirect("/hris/login");
     }
 
+    const userId = (session.user as any).id || "";
+    const userRole = (session.user as any).role || "";
+    const userEmail = session.user.email;
+
+    // ✨ Fetch the user's data from the database to get their profile picture
+    // Note: Adjust "user" to match your actual Prisma model name (e.g., User, user)
+    const userData = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { profile_picture: true } // Only grab what we need for performance
+    });
+
     return (
         <div className="flex min-h-screen bg-slate-50">
-            <Sidebar userRole={userRole} />
+            {/* ✨ Pass the fetched profile picture to the Sidebar */}
+            <Sidebar
+                userRole={userRole}
+                userId={userId}
+                profilePicture={userData?.profile_picture || ""}
+            />
 
             <div className="flex-1 flex flex-col">
 
