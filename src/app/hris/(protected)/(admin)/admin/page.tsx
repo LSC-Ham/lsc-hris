@@ -102,12 +102,12 @@ export default async function UsersLists({
                                 usersLists.map((user) => (
                                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                                         {/* ID Number */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 uppercase">
                                             {user.employees?.id_number}
                                         </td>
 
                                         {/* Full Name */}
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 capitalize">
                                             {user.employees?.personal_information?.surname}, {user.employees?.personal_information?.firstname} {user.employees?.personal_information?.middlename}
                                         </td>
 

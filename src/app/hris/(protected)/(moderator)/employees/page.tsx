@@ -145,9 +145,9 @@ export default async function EmployeesLists({
                             {employeesList.length > 0 ? (
                                 employeesList.map((emp) => (
                                     <tr key={emp.id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{emp.id_number}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 uppercase">{emp.id_number}</td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-gray-900 font-medium">
+                                            <div className="text-sm text-gray-900 font-medium capitalize">
                                                 {emp.personal_information?.surname}, {emp.personal_information?.firstname} {emp.personal_information?.middlename}
                                             </div>
                                         </td>

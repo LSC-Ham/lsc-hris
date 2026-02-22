@@ -134,7 +134,7 @@ export function Sidebar({ userRole, userId, profilePicture }: { userRole: string
                 <div className="p-4 border-t border-gray-100">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold border border-gray-200">
-                            <ProfilePictureUpload userId={userId} initialImage={profilePicture} size="sm" />
+                            <ProfilePictureUpload userId={userId} initialImage={profilePicture} size="sm" isEditable={false}/>
                         </div>
                         <div className="flex flex-col">
                             <span className="text-xs font-bold text-gray-700 uppercase">My Account</span>
