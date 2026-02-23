@@ -15,7 +15,7 @@ const formatDateTime = (date: Date | null) => {
     }).format(date);
 };
 
-export default async function EmployeesLists({
+export default async function Page({
     searchParams,
 }: {
     searchParams: Promise<{ page?: string }>;

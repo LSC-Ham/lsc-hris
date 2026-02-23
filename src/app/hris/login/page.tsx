@@ -5,7 +5,7 @@ import { signIn, useSession } from "next-auth/react"; // ✨ Added useSession
 import { useState, useEffect } from "react"; // ✨ Added useEffect
 import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function Page() {
     const { status } = useSession(); // ✨ Grab the auth status
     const router = useRouter();
 

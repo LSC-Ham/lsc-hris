@@ -11,7 +11,7 @@ import { getDepartments } from "@/actions/admin/settings/departments/get";
 import { getDivisions } from "@/actions/admin/settings/divisions/get";
 import { getPositions } from "@/actions/admin/settings/positions/get";
 
-export default function CreateUserPage() {
+export default function Page() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [departments, setDepartments] = useState<string[]>([]);
