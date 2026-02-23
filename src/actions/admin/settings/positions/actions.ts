@@ -60,10 +60,15 @@ export async function deletePosition(id: string) {
 // src/actions/admin/settings/positions/actions.ts
 
 export async function getExistingStatuses() {
-    const statuses = await prisma.employees_positions.findMany({
-        select: { status: true },
-        distinct: ['status'],
-        where: { NOT: { status: null } }
-    });
-    return statuses.map(s => s.status);
+    try {
+        return await prisma.employees_positions.findMany({
+            select: { status: true },
+            distinct: ['status'],
+            where: { NOT: { status: null } }
+        });
+    } catch (error) {
+        console.error("Error fetching statuses:", error);
+        return []; 
+    }
+
 }
