@@ -7,7 +7,7 @@ import { PersonalInformation } from "@/components/hris/profile/PersonalInformati
 
 import { generateEmployeeID } from "@/actions/employees/profile/get";
 import { createEmployee } from "@/actions/employees/profile/post";
-import { getDepartments } from "@/actions/admin/settings/departments/get";
+import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/get";
 import { getPositions } from "@/actions/admin/settings/positions/get";
 

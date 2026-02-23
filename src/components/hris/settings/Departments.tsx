@@ -1,4 +1,5 @@
-export default async function Departments() {
+"use client"
+export default function Departments() {
 
     return (
         <div className="space-y-6">
@@ -17,6 +18,7 @@ export default async function Departments() {
             {/* 2. PAGE CONTENT - Stats Grid */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-6">
                 <div className="flex flex-col justify-center">
+                    
                 </div>
             </div>
         </div>

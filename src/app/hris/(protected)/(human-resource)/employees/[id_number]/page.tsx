@@ -1,5 +1,5 @@
 //src\app\(protected)\(admin)\employees\[id]\page.tsx
-import { getDepartments } from "@/actions/admin/settings/departments/get";
+import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/get";
 import { getPositions } from "@/actions/admin/settings/positions/get";
 import { getAddress, getEducationalBackground, getEligibility, getEmployeeDetails, getFamilyBackground, getPersonalInformation, getUsers, getWorkExperience } from "@/actions/employees/id/get";
