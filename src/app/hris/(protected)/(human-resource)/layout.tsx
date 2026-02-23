@@ -1,0 +1,43 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth"; // Make sure this path is correct
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+
+// Define which roles are allowed to enter this zone
+const ALLOWED_DEPARTMENTS = ["human resource"];
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user) {
+        redirect("/hris/login");
+    }
+    const userId = (session.user as any).id;
+
+    const userData = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+            employees: {
+                select: {
+                    departments: {
+                        select: {
+                            department: true,
+                        }
+                    }
+                }
+            }
+        } // Only grab what we need for performance
+    });
+
+    const role = ALLOWED_DEPARTMENTS.includes(userData?.employees?.departments.department.toLowerCase() || "")
+
+    if (!role) {
+        redirect("/hris/dashboard");
+    }
+
+    return (
+        <main>
+            {children}
+        </main>
+    );
+}

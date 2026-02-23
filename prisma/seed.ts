@@ -18,8 +18,8 @@ export async function main() {
             government_ids: [],
         },
         {
-            username: "rasino", email: "rasino@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04001", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
+            username: "rasino", email: "rasino@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
+            id_number: "CL04001", department: "Human Resource", position: "Faculty", division: "Academics", hired_at: new Date(),
             surname: "asiño", firstname: "roman", contact_number: "961 096 8091", birthdate: new Date("09/27/1960"),
             sex: "male", civil_status: "single", nationality: "Philippines",
             government_ids: [

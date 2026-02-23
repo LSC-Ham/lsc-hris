@@ -11,7 +11,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     if (!session?.user) {
         redirect("/hris/login");
     }
-
     const userRole = (session.user as any).role;
 
     const role = ALLOWED_ROLES.includes(userRole)
