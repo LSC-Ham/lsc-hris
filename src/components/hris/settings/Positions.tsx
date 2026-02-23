@@ -1,7 +1,7 @@
 // src/components/hris/settings/Positions.tsx
 "use client";
 
-import { addPosition, deletePosition, updatePosition } from "@/actions/admin/settings/positions/actions";
+import { addPosition, deletePosition, updatePosition } from "@/actions/admin/settings/positions/action";
 import { useState } from "react";
 // Import your server actions (adjust the path if necessary)
 

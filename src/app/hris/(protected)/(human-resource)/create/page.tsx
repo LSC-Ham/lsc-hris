@@ -9,7 +9,7 @@ import { generateEmployeeID } from "@/actions/employees/profile/get";
 import { createEmployee } from "@/actions/employees/profile/post";
 import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";
-import { getPositions } from "@/actions/admin/settings/positions/actions";
+import { getPositions } from "@/actions/admin/settings/positions/action";
 
 export default function Page() {
     const router = useRouter();

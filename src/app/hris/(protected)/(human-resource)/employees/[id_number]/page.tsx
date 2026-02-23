@@ -1,7 +1,7 @@
 //src\app\(protected)\(admin)\employees\[id]\page.tsx
 import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";
-import { getPositions } from "@/actions/admin/settings/positions/actions";
+import { getPositions } from "@/actions/admin/settings/positions/action";
 import { getAddress, getEducationalBackground, getEligibility, getEmployeeDetails, getFamilyBackground, getPersonalInformation, getUsers, getWorkExperience } from "@/actions/employees/id/get";
 import ProfilePage from "@/components/hris/profile/ProfilePage";
 

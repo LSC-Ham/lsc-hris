@@ -2,7 +2,7 @@
 
 import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";
-import { getPositions } from "@/actions/admin/settings/positions/actions";
+import { getPositions } from "@/actions/admin/settings/positions/action";
 import SettingsPage from "@/components/hris/settings/SettingsPage";
 
 

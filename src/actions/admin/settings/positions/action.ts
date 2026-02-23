@@ -68,7 +68,7 @@ export async function getExistingStatuses() {
         });
     } catch (error) {
         console.error("Error fetching statuses:", error);
-        return []; 
+        return [];
     }
 
 }
