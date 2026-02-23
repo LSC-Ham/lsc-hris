@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import ProfilePictureUpload from "./profile/ProfilePictureUpload";
+import Image from "next/image";
 
 const navItems = [
     {
@@ -46,7 +47,7 @@ const navItems = [
     }
 ];
 
-export function Sidebar({ userRole, userId, profilePicture }: { userRole: string; userId: string, profilePicture: string }) {
+export function Sidebar({ userRole, userId, profilePicture, surname }: { userRole: string; userId: string, profilePicture: string, surname: string }) {
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
 
@@ -59,8 +60,7 @@ export function Sidebar({ userRole, userId, profilePicture }: { userRole: string
         <>
             {/* 1. MOBILE HEADER & HAMBURGER BUTTON */}
             {/* Only visible on Mobile (md:hidden) */}
-            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-40 flex items-center px-4 justify-between">
-                <span className="font-bold text-lg text-gray-800">LSC HRIS</span>
+            <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-40 flex items-center px-4 gap-2">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     className="p-2 rounded-md hover:bg-gray-100 focus:outline-none"
@@ -70,6 +70,9 @@ export function Sidebar({ userRole, userId, profilePicture }: { userRole: string
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
                     </svg>
                 </button>
+                <h2 className="text-sm font-semibold text-gray-500">
+                    Welcome back, <span className="text-gray-900 capitalize">{surname}</span>
+                </h2>
             </div>
 
             {/* 2. OVERLAY (Backdrop) */}
@@ -95,14 +98,22 @@ export function Sidebar({ userRole, userId, profilePicture }: { userRole: string
         md:sticky        /* Was md:static */
         md:top-0         /* Pins it to the top */
         md:h-screen      /* Forces it to be full height of the viewport */
-
+        md:min-w-64
         flex flex-col
       `}>
 
                 {/* Header / Logo (Visible on Desktop) */}
                 <div className="h-16 flex items-center px-6 border-b border-gray-100">
-                    <div className="w-8 h-8 bg-[#1a6b36] rounded-lg flex items-center justify-center mr-3">
-                        <span className="text-white font-bold text-lg">L</span>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3">
+                        <div className="relative w-8 h-8"> {/* Container to control size */}
+                            <Image
+                                src="/logo-sidebar.png"
+                                alt="HRIS Logo"
+                                fill
+                                className="object-contain"
+                                priority // Ensures the logo loads immediately
+                            />
+                        </div>
                     </div>
                     <span className="font-bold text-xl text-gray-800 tracking-tight">LSC HRIS</span>
                 </div>
@@ -134,7 +145,7 @@ export function Sidebar({ userRole, userId, profilePicture }: { userRole: string
                 <div className="p-4 border-t border-gray-100">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold border border-gray-200">
-                            <ProfilePictureUpload userId={userId} initialImage={profilePicture} size="sm" isEditable={false}/>
+                            <ProfilePictureUpload userId={userId} initialImage={profilePicture} size="sm" isEditable={false} />
                         </div>
                         <div className="flex flex-col">
                             <span className="text-xs font-bold text-gray-700 uppercase">My Account</span>

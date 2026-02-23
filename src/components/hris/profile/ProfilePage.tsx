@@ -181,24 +181,47 @@ export default function ProfilePage({
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                 {/* === LEFT COLUMN (Sidebar) === */}
                 <div className="md:col-span-4 lg:col-span-3 space-y-6">
+                    {/* Profile Picture & Name Card */}
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
                         <ProfilePictureUpload userId={userData.id} initialImage={userData.profile_picture} size="lg" />
                         <h2 className="text-lg font-bold text-gray-800 capitalize">{personalData.firstname} {personalData.surname}</h2>
                         <p className="text-xs text-gray-500 mb-1">{employmentData.department || "No Department Set"}</p>
                     </div>
 
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    {/* Navigation Menu */}
+                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden md:p-0">
+
+                        {/* 📱 MOBILE DROPDOWN (Visible only on small screens) */}
+                        <div className="md:hidden">
+                            <select
+                                value={activeTab}
+                                onChange={(e) => setActiveTab(e.target.value)}
+                                className="block w-full rounded-lg border-gray-200 bg-gray-50 py-3 pl-4 pr-10 text-sm font-medium text-gray-700 focus:border-[#1a6b36] focus:outline-none focus:ring-1 focus:ring-[#1a6b36]"
+                            >
+                                {menuItems.map((item) => (
+                                    <option key={item} value={item}>
+                                        {item}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* 💻 DESKTOP SIDEBAR (Visible only on medium screens and up) */}
                         <nav className="hidden md:flex flex-col p-2 space-y-1">
                             {menuItems.map((item) => (
                                 <button
                                     key={item}
                                     onClick={() => setActiveTab(item)}
-                                    className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 ${activeTab === item ? "bg-[#1a6b36] text-white shadow-sm" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
+                                    className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 ${activeTab === item
+                                        ? "bg-[#1a6b36] text-white shadow-sm"
+                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                        }`}
                                 >
                                     {item}
                                 </button>
                             ))}
                         </nav>
+
                     </div>
                 </div>
 

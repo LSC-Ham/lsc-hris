@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-export default async function Home() {
+export default async function Dashboard() {
     // Fetch all counts simultaneously for maximum performance
     const [totalEmployees, adminEmployees, academicEmployees] = await Promise.all([
         // 1. Total Employees
