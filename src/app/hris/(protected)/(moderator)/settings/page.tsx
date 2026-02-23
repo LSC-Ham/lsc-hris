@@ -1,44 +1,19 @@
-// src/components/hris/settings/SettingsPage.tsx
-import CollapsibleSection from "@/components/hris/settings/CollapsibleSection";
-import Departments from "@/components/hris/settings/Departments";
-import Divisions from "@/components/hris/settings/Divisions";
-import Positions from "@/components/hris/settings/Positions";
+// src/app/hris/(protected)/(moderator)/settings/page.tsx
 
-// ✨ Notice there is no "use client" here anymore!
-export default function SettingsPage() {
+import { getDepartments } from "@/actions/admin/settings/departments/action";
+import { getDivisions } from "@/actions/admin/settings/divisions/action";
+import { getPositions } from "@/actions/admin/settings/positions/actions";
+import SettingsPage from "@/components/hris/settings/SettingsPage";
+
+
+export default async function Page() {
+    // 1. Fetch the data securely on the server
+    const divisionsData = await getDivisions();
+    const departmentsData = await getDepartments();
+    const positionsData = await getPositions();
+
+    // 2. Pass the fetched data down to your Client Component orchestrator
     return (
-        <div className="space-y-6">
-            {/* 1. PAGE HEADER */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
-                        HRIS Settings
-                    </h1>
-                    <p className="text-sm text-gray-500">
-                        Modify your System Settings
-                    </p>
-                </div>
-            </div>
-
-            {/* 2. PAGE CONTENT */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                <div className="flex flex-col gap-4">
-
-                    {/* By passing Server Components as 'children' to a Client Component, Next.js stays happy! */}
-                    <CollapsibleSection title="Divisions">
-                        <Divisions />
-                    </CollapsibleSection>
-
-                    <CollapsibleSection title="Departments">
-                        <Departments />
-                    </CollapsibleSection>
-
-                    <CollapsibleSection title="Positions">
-                        <Positions />
-                    </CollapsibleSection>
-
-                </div>
-            </div>
-        </div>
+        <SettingsPage divisions={divisionsData} departments={departmentsData} positions={positionsData} />
     );
 }

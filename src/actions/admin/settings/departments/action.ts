@@ -2,28 +2,31 @@
 "use server";
 
 import { prisma } from "@/lib/prisma"; // Adjust your prisma import path
+import { revalidatePath } from "next/cache";
 
 export async function getDepartments() {
     try {
         const departmentsData = await prisma.departments.findMany({
-            select: { department: true }, // We only need the name for the dropdown
+            // We select id, department, and description so the table has all the info
+            select: {
+                id: true,
+                department: true,
+                description: true
+            },
             orderBy: { department: 'asc' },
         });
 
-        // Transform the array of objects into a simple array of strings
-        // Result: ["Academics", "Finance", "HR", "IT"]
-        const departments = departmentsData.map((d) => d.department);
+        // ✅ Return the full array of objects
+        return departmentsData;
 
-        return departments;
     } catch (error) {
         console.error("Failed to fetch departments:", error);
-        return []; // Return an empty array as a fallback so your UI doesn't break
+        return [];
     }
 }
-import { revalidatePath } from "next/cache";
 
 // CREATE
-export async function addDepartmentAction(formData: FormData) {
+export async function addDepartment(formData: FormData) {
     const department = formData.get("department") as string;
     const description = formData.get("description") as string;
 
@@ -35,7 +38,7 @@ export async function addDepartmentAction(formData: FormData) {
 }
 
 // UPDATE
-export async function updateDepartmentAction(id: string, formData: FormData) {
+export async function updateDepartment(id: string, formData: FormData) {
     const department = formData.get("department") as string;
     const description = formData.get("description") as string;
 
@@ -48,7 +51,7 @@ export async function updateDepartmentAction(id: string, formData: FormData) {
 }
 
 // DELETE
-export async function deleteDepartmentAction(id: string) {
+export async function deleteDepartment(id: string) {
     await prisma.departments.delete({
         where: { id },
     });

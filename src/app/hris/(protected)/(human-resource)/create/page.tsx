@@ -8,8 +8,8 @@ import { PersonalInformation } from "@/components/hris/profile/PersonalInformati
 import { generateEmployeeID } from "@/actions/employees/profile/get";
 import { createEmployee } from "@/actions/employees/profile/post";
 import { getDepartments } from "@/actions/admin/settings/departments/action";
-import { getDivisions } from "@/actions/admin/settings/divisions/get";
-import { getPositions } from "@/actions/admin/settings/positions/get";
+import { getDivisions } from "@/actions/admin/settings/divisions/action";
+import { getPositions } from "@/actions/admin/settings/positions/actions";
 
 export default function Page() {
     const router = useRouter();
@@ -58,9 +58,9 @@ export default function Page() {
             // 2. Fetch all dropdown data at the same time
             try {
                 const [fetchedDepts, fetchedDivs, fetchedPos] = await Promise.all([
-                    getDepartments(),
-                    getDivisions(),
-                    getPositions()
+                    (await getDepartments()).map((dept) => dept.department),
+                    (await getDivisions()).map((div) => div.division),
+                    (await getPositions()).map((pos) => pos.position),
                 ]);
 
                 // Update the state (make sure your getter functions return simple arrays of strings!)

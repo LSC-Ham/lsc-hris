@@ -1,7 +1,7 @@
 //src\app\(protected)\(admin)\employees\[id]\page.tsx
 import { getDepartments } from "@/actions/admin/settings/departments/action";
-import { getDivisions } from "@/actions/admin/settings/divisions/get";
-import { getPositions } from "@/actions/admin/settings/positions/get";
+import { getDivisions } from "@/actions/admin/settings/divisions/action";
+import { getPositions } from "@/actions/admin/settings/positions/actions";
 import { getAddress, getEducationalBackground, getEligibility, getEmployeeDetails, getFamilyBackground, getPersonalInformation, getUsers, getWorkExperience } from "@/actions/employees/id/get";
 import ProfilePage from "@/components/hris/profile/ProfilePage";
 
@@ -34,11 +34,21 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const work_experience = await getWorkExperience(employeeId?.id || "");
 
     const departments = await getDepartments();
-    const divisions = await getDivisions();
-    const positions = await getPositions();
+    const departmentNames = departments.map((dept) => dept.department);
 
+    const divisions = await getDivisions();
+    const divisionNames = divisions.map((div) => div.division);
+
+    const positions = await getPositions();
+    const positionNames = positions.map((pos) => pos.position);
 
 
     // 3. Pass the fetched data to the Client Component
-    return <ProfilePage role="moderator" user={user} personal_information={personal_information} employment_details={employment_details} address={address} family_background={family_background} educational_background={educational_background} eligibility={eligibility} work_experience={work_experience} divisions={divisions} departments={departments} positions={positions} />;
+    return <ProfilePage role="moderator"
+        user={user} personal_information={personal_information}
+        employment_details={employment_details} address={address}
+        family_background={family_background}
+        educational_background={educational_background}
+        eligibility={eligibility} work_experience={work_experience}
+        divisions={divisionNames} departments={departmentNames} positions={positionNames} />;
 }
