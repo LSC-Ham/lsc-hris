@@ -24,6 +24,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
             profile_picture: true,
             employees: {
                 select: {
+                    id_number: true,
                     personal_information: {
                         select: {
                             surname: true,
@@ -48,6 +49,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                 profilePicture={userData?.profile_picture || ""}
                 surname={userData?.employees?.personal_information?.surname || ""}
                 department={userData?.employees?.departments.department || ""}
+                idNumber={userData?.employees?.id_number || ""}
             />
 
             <div className="flex-1 flex flex-col">
