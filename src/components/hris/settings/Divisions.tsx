@@ -21,7 +21,7 @@ export default function Divisions({ data }: DivisionsTemplateProps) {
 
     return (
         <div className="space-y-4">
-            {/* 1. ADD NEW DEPARTMENT FORM */}
+            {/* 1. ADD NEW DIVISION FORM */}
             <form action={addDivision} className="flex flex-col sm:flex-row gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <input
                     type="text"
@@ -64,7 +64,7 @@ export default function Divisions({ data }: DivisionsTemplateProps) {
                                             }}
                                             className="flex gap-2"
                                         >
-                                            <input type="text" name="department" defaultValue={div.division} required className="flex-1 border rounded px-2 py-1 text-sm" />
+                                            <input type="text" name="division" defaultValue={div.division} required className="flex-1 border rounded px-2 py-1 text-sm" />
                                             <input type="text" name="description" defaultValue={div.description || ""} className="flex-1 border rounded px-2 py-1 text-sm" />
                                             <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium">Save</button>
                                             <button type="button" onClick={() => setEditingId(null)} className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs font-medium">Cancel</button>
@@ -78,7 +78,7 @@ export default function Divisions({ data }: DivisionsTemplateProps) {
                                         <td className="px-4 py-3 text-right space-x-3">
                                             <button onClick={() => setEditingId(div.id)} className="text-blue-600 hover:underline text-xs font-medium">Edit</button>
                                             <button onClick={() => {
-                                                if (confirm("Are you sure you want to delete this department?")) {
+                                                if (confirm("Are you sure you want to delete this division?")) {
                                                     deleteDivision(div.id);
                                                 }
                                             }} className="text-red-600 hover:underline text-xs font-medium">
