@@ -6,8 +6,6 @@ const SALT_ROUNDS = 10;
 
 export async function main() {
     const hashedPassword = await bcrypt.hash("@lakeshore123", SALT_ROUNDS);
-
-    // 2. Define your fully mapped sample data
     const seeds = [
         {
             username: "hmarandang", email: "hmarandang@lakeshore.edu.ph", password: hashedPassword, role: "admin",
