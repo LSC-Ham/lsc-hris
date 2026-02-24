@@ -5,6 +5,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt"; // Requires: npm install bcryptjs\
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth";
 
 export async function createEmployee(data: any) {
     try {
@@ -130,7 +133,7 @@ export async function getUsers(userId: string) {
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: {
-                id: true, profile_picture: true,
+                id: true, profile_picture: true, email: true,
             }
         });
 
@@ -139,11 +142,72 @@ export async function getUsers(userId: string) {
         return {
             id: user.id,
             profile_picture: user.profile_picture,
+            email: user.email
         };
 
     } catch (error) {
         console.error("Failed to fetch profile picture:", error);
         return null;
+    }
+}
+
+export async function updateEmail(newEmail: string) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) redirect("/login");
+
+    const userId = (session.user as any).id;
+
+    try {
+        // 1. Check if email is already taken by another user
+        const existingUser = await prisma.user.findUnique({ where: { email: newEmail } });
+        if (existingUser && existingUser.id !== userId) {
+            return { error: "This email is already in use by another account." };
+        }
+
+        // 2. Update the user
+        await prisma.user.update({
+            where: { id: userId },
+            data: { email: newEmail },
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Update Email Error:", error);
+        return { error: "Something went wrong. Please try again." };
+    }
+}
+
+export async function changePassword(currentPassword: string, newPassword: string) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) redirect("/login");
+
+    const userId = (session.user as any).id;
+
+    try {
+        // 1. Fetch user to get their current hashed password
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user || !user.password) return { error: "User not found or password not set." };
+
+        // 2. Verify current password
+        const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+        if (!isValidPassword) {
+            return { error: "The current password you entered is incorrect." };
+        }
+
+        // 3. Hash the new password and update
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                password: hashedNewPassword,
+                password_changed: true // Updating your schema boolean!
+            },
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Change Password Error:", error);
+        return { error: "Something went wrong. Please try again." };
     }
 }
 
