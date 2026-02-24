@@ -19,7 +19,16 @@ export default function ProfilePictureUpload({
     size = 'lg',
     isEditable = true // ✨ 2. Default is true, so it doesn't break your existing editable pages
 }: ProfilePictureProps) {
-    const [imagePreview, setImagePreview] = useState<string | null>(initialImage || null);
+
+    // ✨ HERE IS THE EDIT: Format the image URL for the API
+    const [imagePreview, setImagePreview] = useState<string | null>(() => {
+        if (!initialImage) return null;
+        if (initialImage.startsWith('http') || initialImage.startsWith('blob:') || initialImage.startsWith('/api/')) {
+            return initialImage;
+        }
+        return initialImage;
+    });
+
     const [isUploading, setIsUploading] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -176,7 +185,6 @@ export default function ProfilePictureUpload({
                     className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 transition-opacity"
                     onClick={() => setShowOptions(false)}
                 >
-                    {/* ... (Your existing options menu modal content remains exactly the same here) ... */}
                     <div className="bg-white rounded-xl shadow-2xl w-full max-w-xs overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 bg-gray-50 flex flex-col items-center border-b border-gray-100">
                             <div className="relative w-32 h-32 rounded-full border-4 border-white shadow-md bg-green-50 flex items-center justify-center text-[#1a6b36] overflow-hidden mb-4">
@@ -217,7 +225,6 @@ export default function ProfilePictureUpload({
             {/* THE CROPPER MODAL */}
             {rawImage && isEditable && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 p-4">
-                    {/* ... (Your existing cropper modal content remains exactly the same here) ... */}
                     <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md flex flex-col items-center">
                         <h3 className="text-lg font-bold mb-4 text-gray-800">Adjust Profile Picture</h3>
                         <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden mb-6">
