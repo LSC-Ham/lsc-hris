@@ -5,7 +5,6 @@ import bcrypt from "bcrypt";
 const SALT_ROUNDS = 10;
 
 export async function main() {
-    // 1. Prepare the password hash once
     const hashedPassword = await bcrypt.hash("@lakeshore123", SALT_ROUNDS);
 
     // 2. Define your fully mapped sample data
