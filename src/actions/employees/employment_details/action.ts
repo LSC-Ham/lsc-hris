@@ -1,11 +1,78 @@
 "use server";
 
-// Remove these if you aren't actually using them in this file
-// import { getServerSession } from "next-auth/next";
-// import { authOptions } from "@/lib/auth"; 
-
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma"; // Adjust path if needed
+import { authOptions } from "@/lib/auth"; // Adjust path if needed
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+
+export async function generateEmployeeID() {
+    try {
+        const count = await prisma.employees.count();
+
+        const nextId = count + 1;
+
+        return nextId.toString().padStart(4, '0');
+    } catch (error) {
+        console.error("Error generating ID:", error);
+        return "";
+    }
+}
+
+export async function getEmployeeDetails(employeeId: string) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) redirect("/login");
+
+        const employee = await prisma.employees.findUnique({
+            where: { id: employeeId },
+            include: {
+                positions: { include: { positions: true }, orderBy: { start_at: 'desc' } },
+                government_ids: true,
+                divisions: true,
+                departments: true
+            }
+        });
+
+        if (!employee) return null;
+
+        // 1. Map standard government ID labels to your frontend snake_case keys
+        const govIdKeys: Record<string, string> = {
+            "GSIS No.": "gsis_no", "Pag-IBIG No.": "pagibig_no",
+            "PhilHealth No.": "philhealth_no", "SSS No.": "sss_no",
+            "TIN No.": "tin_no", "Agency No.": "agency_no"
+        };
+
+        // 2. Transform the array of IDs into a flat object (e.g., { gsis_no: "123", tin_no: "456" })
+        const flatGovIds = employee.government_ids.reduce((acc: any, curr) => {
+            const key = govIdKeys[curr.id_label];
+            if (key) acc[key] = curr.id_number;
+            return acc;
+        }, {});
+
+        return {
+            id: employee.id,
+            id_number: employee.id_number,
+            remarks: employee.remarks,
+            hired_at: employee.hired_at,
+            division: employee.divisions?.division || "",
+            department: employee.departments?.department || "",
+            govt_ids: employee.government_ids,
+            ...flatGovIds, // <--- Spreads gsis_no, tin_no, etc., directly into the return object!
+
+            // 3. Flatten the positions array using the spread operator
+            positions: employee.positions.map(({ positions, ...record }) => ({
+                ...record, // Grabs status, description, start_at, end_at, etc.
+                position_id: positions.id,
+                position: positions.position,
+            })),
+        };
+
+    } catch (error) {
+        console.error("Error fetching employment details:", error);
+        return null;
+    }
+}
 
 export async function updateEmploymentDetails(employeeId: string, formData: any) {
     try {

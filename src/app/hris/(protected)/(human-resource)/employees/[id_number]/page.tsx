@@ -2,7 +2,14 @@
 import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";
 import { getPositions } from "@/actions/admin/settings/positions/action";
-import { getAddress, getEducationalBackground, getEligibility, getEmployeeDetails, getFamilyBackground, getPersonalInformation, getUsers, getWorkExperience } from "@/actions/employees/id/get";
+import { getAddress } from "@/actions/employees/address/action";
+import { getEducationalBackground } from "@/actions/employees/educational_background/route";
+import { getEligibility } from "@/actions/employees/eligibility/action";
+import { getEmployeeDetails } from "@/actions/employees/employment_details/action";
+import { getFamilyBackground } from "@/actions/employees/family_background/action";
+import { getPersonalInformation } from "@/actions/employees/personal_information/actions";
+import { getUsers } from "@/actions/employees/users/action";
+import { getWorkExperience } from "@/actions/employees/work_experience/action";
 import ProfilePage from "@/components/hris/profile/ProfilePage";
 
 import { prisma } from "@/lib/prisma";

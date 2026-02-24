@@ -4,8 +4,7 @@ import { useState, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Cropper from 'react-easy-crop';
 import getCroppedImg from '@/utils/cropImage';
-import { uploadProfilePicture } from '@/actions/employees/profile/post';
-import { deleteProfilePicture } from '@/actions/employees/profile/delete';
+import { deleteProfilePicture, uploadProfilePicture } from '@/actions/employees/users/action';
 
 interface ProfilePictureProps {
     userId: string;

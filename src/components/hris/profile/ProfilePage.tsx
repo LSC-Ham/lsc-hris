@@ -9,13 +9,14 @@ import { EducationalBackground } from "@/components/hris/profile/EducationalBack
 import { Eligibility } from "@/components/hris/profile/Eligibility";
 import { WorkExperience } from "@/components/hris/profile/WorkExperience";
 
-// Import ALL update actions here
-import {
-    updateAddress, updateEducationalBackground, updateEligibility,
-    updateFamilyBackground, updatePersonalInformation, updateWorkExperience
-} from "@/actions/employees/profile/update";
 import ProfilePictureUpload from "./ProfilePictureUpload";
-import { updateEmploymentDetails } from "@/actions/employees/id/update";
+import { updateEmploymentDetails } from "@/actions/employees/employment_details/action";
+import { updatePersonalInformation } from "@/actions/employees/personal_information/actions";
+import { updateAddress } from "@/actions/employees/address/action";
+import { updateFamilyBackground } from "@/actions/employees/family_background/action";
+import { updateEducationalBackground } from "@/actions/employees/educational_background/route";
+import { updateEligibility } from "@/actions/employees/eligibility/action";
+import { updateWorkExperience } from "@/actions/employees/work_experience/action";
 
 interface ProfilePageProps {
     role: null | "moderator";
