@@ -64,7 +64,9 @@ export async function updateEligibility(data: any[]) {
                         qualification: record.qualification || null,
                         rating: record.rating || null,
                         // Schema uses String? for these, so we pass them directly
-                        date_examination: record.date_examination || null,
+                        date_examination: record.date_examination && record.date_examination.trim() !== ""
+                            ? new Date(record.date_examination)
+                            : null,
                         place_examination: record.place_examination || null,
                         id_number: record.id_number || null,
                         date_validity: record.date_validity || null,

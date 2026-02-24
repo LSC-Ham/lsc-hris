@@ -55,7 +55,7 @@ export async function createEmployee(data: any) {
             // B. Create Employee Profile using the new User's ID
             const employee = await tx.employees.create({
                 data: {
-                    id: newUser.id, // <--- Links the Employee to the User perfectly
+                    users_id: newUser.id,
                     id_number: data.id_number,
                     hired_at: data.hired_at ? new Date(data.hired_at) : null,
                     divisions_id: division.id,

@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation"; // Added router for redirection
 import { EmploymentDetails } from "@/components/hris/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/hris/profile/PersonalInformation";
 
-import { generateEmployeeID } from "@/actions/employees/profile/get";
-import { createEmployee } from "@/actions/employees/profile/post";
 import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";
 import { getPositions } from "@/actions/admin/settings/positions/action";
+import { generateEmployeeID } from "@/actions/employees/employment_details/action";
+import { createEmployee } from "@/actions/employees/users/action";
 
 export default function Page() {
     const router = useRouter();
