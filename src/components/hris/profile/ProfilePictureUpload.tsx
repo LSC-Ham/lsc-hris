@@ -23,10 +23,15 @@ export default function ProfilePictureUpload({
     // ✨ HERE IS THE EDIT: Format the image URL for the API
     const [imagePreview, setImagePreview] = useState<string | null>(() => {
         if (!initialImage) return null;
-        if (initialImage.startsWith('http') || initialImage.startsWith('blob:') || initialImage.startsWith('/api/')) {
+
+        // If it's a blob from the cropper (unsaved), use it directly
+        if (initialImage.startsWith('blob:') || initialImage.startsWith('http')) {
             return initialImage;
         }
-        return initialImage;
+
+        // FORCE IT TO USE THE API ROUTE
+        // initialImage is your DB path like "/uploads/profile-xxx.jpg"
+        return `/api/profile_picture?fileName=${initialImage}`;
     });
 
     const [isUploading, setIsUploading] = useState(false);

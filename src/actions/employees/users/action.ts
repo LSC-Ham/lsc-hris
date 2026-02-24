@@ -223,7 +223,7 @@ export async function deleteProfilePicture(userId: string) {
 
         // 2. If they have a picture, delete it from the filesystem
         if (user?.profile_picture) {
-            // This assumes your DB path looks like "/uploads/filename.jpg"
+            // This assumes your DB path looks like "/avatar/filename.jpg"
             const filepath = path.join(process.cwd(), 'public', user.profile_picture);
 
             try {
@@ -280,14 +280,14 @@ export async function uploadProfilePicture(formData: FormData) {
         const filename = `profile-${userId}-${uniqueSuffix}.jpg`;
 
         // Ensure your uploads directory exists
-        const uploadDir = path.join(process.cwd(), 'public/uploads');
+        const uploadDir = path.join(process.cwd(), 'public/avatar');
         await fs.mkdir(uploadDir, { recursive: true });
 
         const newFilePath = path.join(uploadDir, filename);
         await fs.writeFile(newFilePath, buffer);
 
         // 3. Update the database with the new path
-        const dbImagePath = `/uploads/${filename}`;
+        const dbImagePath = `/avatar/${filename}`;
         await prisma.user.update({
             where: { id: userId },
             data: { profile_picture: dbImagePath }

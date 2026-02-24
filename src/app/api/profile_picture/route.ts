@@ -3,43 +3,42 @@ import path from "path";
 import fs from "fs";
 
 export async function GET(req: NextRequest) {
-    // Get the filename from the URL (e.g., ?fileName=profile-068a...jpg)
     const searchParams = req.nextUrl.searchParams;
-    const fileName = searchParams.get("fileName");
+    let fileName = searchParams.get("fileName");
 
     if (!fileName) {
         return new NextResponse("Filename is required", { status: 400 });
     }
 
-    // ✨ This builds the exact path: public/uploads/your-image.jpg
-    const filePath = path.join(process.cwd(), "public", "uploads", fileName);
+    // Since your DB stores "/uploads/profile-xxx.jpg", we strip the leading slash 
+    // to prevent path.join from treating it as a root directory on Linux/Mac
+    if (fileName.startsWith('/')) {
+        fileName = fileName.slice(1);
+    }
+
+    // This dynamically points to the live folder on your disk, ignoring Next.js build cache
+    const filePath = path.join(process.cwd(), "public", fileName);
 
     try {
-        // Check if the file exists
         if (!fs.existsSync(filePath)) {
             return new NextResponse("Image not found", { status: 404 });
         }
 
-        // Read the file
         const fileBuffer = fs.readFileSync(filePath);
-
-        // Determine the Content-Type
+        
         const ext = path.extname(fileName).toLowerCase();
-        let contentType = "image/jpeg"; // default for .jpg
+        let contentType = "image/jpeg";
         if (ext === ".png") contentType = "image/png";
         else if (ext === ".webp") contentType = "image/webp";
-        else if (ext === ".gif") contentType = "image/gif";
-        else if (ext === ".svg") contentType = "image/svg+xml";
-
-        // Send the image to the browser
+        
         return new NextResponse(fileBuffer, {
             headers: {
                 "Content-Type": contentType,
-                "Cache-Control": "public, max-age=86400, stale-while-revalidate=43200",
+                "Cache-Control": "public, max-age=86400", 
             },
         });
     } catch (error) {
-        console.error("Error reading profile picture:", error);
+        console.error("API Error reading file:", error);
         return new NextResponse("Internal Server Error", { status: 500 });
     }
 }

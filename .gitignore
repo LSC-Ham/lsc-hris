@@ -34,7 +34,7 @@ yarn-error.log*
 .env*
 
 # Ignore user-uploaded profile pictures
-public/uploads/
+public/avatar/
 
 # vercel
 .vercel
