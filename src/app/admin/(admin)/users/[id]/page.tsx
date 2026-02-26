@@ -5,17 +5,18 @@ import { getServerSession } from "next-auth";
 
 
 //src\app\hris\(protected)\account\page.tsx
-export default async function Page() {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id: id } = await params;
     const session = await getServerSession(authOptions);
 
     const userId = (session?.user as any).id || "";
     const userRole = (session?.user as any).role || "";
 
-    const user = await getUsers(userId);
+    const user = await getUsers(id);
 
     return <AccountSettingsPage
         user={user}
         currentUserId={userId}
-        currentUserRole={userRole} 
+        currentUserRole={userRole}
     />
 }

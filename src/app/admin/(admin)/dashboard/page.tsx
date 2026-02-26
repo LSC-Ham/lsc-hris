@@ -19,7 +19,7 @@ export default async function Dashboard() {
                 role: true,
                 created_at: true,
                 password_changed: true,
-                employees: {
+                biography: {
                     select: {
                         personal_information: {
                             select: { firstname: true, surname: true }
@@ -134,8 +134,8 @@ export default async function Dashboard() {
 
                     <div className="space-y-3 flex-1 overflow-y-auto">
                         {recentUsers.map((user) => {
-                            const firstName = user.employees?.personal_information?.firstname || "";
-                            const lastName = user.employees?.personal_information?.surname || "";
+                            const firstName = user.biography?.personal_information?.firstname || "";
+                            const lastName = user.biography?.personal_information?.surname || "";
 
                             return (
                                 <div key={user.id} className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-0 last:pb-0 capitalize">
@@ -169,8 +169,8 @@ export default async function Dashboard() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                         {recentUsers.map((user) => {
-                            const firstName = user.employees?.personal_information?.firstname || "";
-                            const lastName = user.employees?.personal_information?.surname || "";
+                            const firstName = user.biography?.personal_information?.firstname || "";
+                            const lastName = user.biography?.personal_information?.surname || "";
 
                             return (
                                 <div key={user.id} className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-0 md:[&:nth-last-child(-n+2)]:border-0 md:[&:nth-last-child(-n+2)]:pb-0 capitalize">

@@ -35,9 +35,14 @@ export default async function UsersLists({
             skip,
             take: ITEMS_PER_PAGE,
             include: {
-                employees: {
+                biography: {
                     select: {
-                        id_number: true,
+                        employees: {
+                            select: {
+
+                                id_number: true,
+                            }
+                        },
                         personal_information: {
                             select: {
                                 surname: true,
@@ -103,12 +108,12 @@ export default async function UsersLists({
                                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                                         {/* ID Number */}
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 uppercase">
-                                            {user.employees?.id_number}
+                                            {user.biography?.employees?.id_number}
                                         </td>
 
                                         {/* Full Name */}
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 capitalize">
-                                            {user.employees?.personal_information?.surname}, {user.employees?.personal_information?.firstname} {user.employees?.personal_information?.middlename}
+                                            {user.biography?.personal_information?.surname}, {user.biography?.personal_information?.firstname} {user.biography?.personal_information?.middlename}
                                         </td>
 
                                         {/* Role - Hidden on Mobile */}
@@ -137,7 +142,7 @@ export default async function UsersLists({
                                         {/* Actions */}
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link
-                                                href={`/users/${user.employees?.id_number}`}
+                                                href={`/admin/users/${user.id}`}
                                                 className="text-[#1a6b36] hover:text-[#155a2b] hover:underline"
                                             >
                                                 View / Edit

@@ -148,7 +148,7 @@ export async function getUsers(userId: string) {
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: {
-                id: true, profile_picture: true, email: true,
+                id: true, profile_picture: true, email: true, role: true, username: true,
             }
         });
 
@@ -157,7 +157,9 @@ export async function getUsers(userId: string) {
         return {
             id: user.id,
             profile_picture: user.profile_picture,
-            email: user.email
+            email: user.email,
+            role: user.role,
+            username: user.username,
         };
 
     } catch (error) {
@@ -166,11 +168,51 @@ export async function getUsers(userId: string) {
     }
 }
 
-export async function updateEmail(newEmail: string) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) redirect("/login");
+export async function updateUsername(userId: string, newUsername: string) {
 
-    const userId = (session.user as any).id;
+    try {
+        // 1. Check if username is already taken by another user
+        const existingUser = await prisma.user.findUnique({ where: { username: newUsername } });
+        if (existingUser && existingUser.id !== userId) {
+            return { error: "This username is already in use by another account." };
+        }
+
+        // 2. Update the user
+        await prisma.user.update({
+            where: { id: userId },
+            data: { username: newUsername },
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Update Username Error:", error);
+        return { error: "Something went wrong. Please try again." };
+    }
+}
+
+export async function updateRole(userId: string, newRole: string) {
+
+    try {
+        // 1. Check if role is valid (you can define allowed roles in your app)
+        const allowedRoles = ["user", "admin", "manager"];
+        if (!allowedRoles.includes(newRole)) {
+            return { error: "Invalid role." };
+        }
+
+        // 2. Update the user's role
+        await prisma.user.update({
+            where: { id: userId },
+            data: { role: newRole },
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Update Role Error:", error);
+        return { error: "Something went wrong. Please try again." };
+    }
+}
+
+export async function updateEmail(userId: string, newEmail: string) {
 
     try {
         // 1. Check if email is already taken by another user
@@ -192,12 +234,7 @@ export async function updateEmail(newEmail: string) {
     }
 }
 
-export async function changePassword(currentPassword: string, newPassword: string) {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) redirect("/login");
-
-    const userId = (session.user as any).id;
-
+export async function changePassword(userId: string, currentPassword: string, newPassword: string) {
     try {
         // 1. Fetch user to get their current hashed password
         const user = await prisma.user.findUnique({ where: { id: userId } });

@@ -28,7 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         where: { id: userId },
         select: {
             profile_picture: true,
-            employees: {
+            biography: {
                 select: {
                     personal_information: {
                         select: {
@@ -46,13 +46,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 userRole={userRole}
                 userId={userId}
                 profilePicture={userData?.profile_picture || ""}
-                surname={userData?.employees?.personal_information?.surname || ""}
+                surname={userData?.biography?.personal_information?.surname || ""}
             />
             <div className="flex-1 flex flex-col">
 
                 <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10">
                     <h2 className="text-sm font-semibold text-gray-500">
-                        Welcome back, <span className="text-gray-900 capitalize">{userData?.employees?.personal_information?.surname}</span>
+                        Welcome back, <span className="text-gray-900 capitalize">{userData?.biography?.personal_information?.surname}</span>
                     </h2>
 
                     <LogoutButton />
