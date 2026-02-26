@@ -14,8 +14,10 @@ export async function getEducationalBackground(employeeId: string) {
         // Directly query the "Many" table using the employee's ID
         const educationRecords = await prisma.educational_background.findMany({
             where: {
-                employees: {
-                    id: employeeId
+                biography: {
+                    employees: {
+                        id: employeeId
+                    }
                 }
             },
             orderBy: {
@@ -53,7 +55,7 @@ export async function updateEducationalBackground(data: any[]) { // Expecting an
 
         const userId = (session.user as any).id;
 
-        await prisma.employees.update({
+        await prisma.biography.update({
             where: {
                 users_id: userId
             },

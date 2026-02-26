@@ -56,14 +56,18 @@ export async function createEmployee(data: any) {
             });
 
             // B. Create Employee Profile using the new User's ID
-            const employee = await tx.employees.create({
+            const biographyRecord = await tx.biography.create({
                 data: {
                     users_id: newUser.id,
-                    id_number: data.id_number,
-                    hired_at: data.hired_at ? new Date(data.hired_at) : null,
-                    divisions_id: division.id,
-                    departments_id: department.id,
-                    remarks: data.remarks,
+                    employees: {
+                        create: {
+                            id_number: data.id_number,
+                            hired_at: data.hired_at ? new Date(data.hired_at) : null,
+                            divisions_id: division.id,
+                            departments_id: department.id,
+                            remarks: data.remarks,
+                        }
+                    },
                     personal_information: {
                         create: {
                             firstname: data.firstname,
@@ -84,7 +88,18 @@ export async function createEmployee(data: any) {
                         }
                     }
                 },
+                // 👇 THIS IS THE CRUCIAL ADDITION
+                include: {
+                    employees: true
+                }
             });
+
+            // Extract the actual Employee ID
+            const realEmployeeId = biographyRecord.employees?.id;
+
+            if (!realEmployeeId) {
+                throw new Error("Failed to create the employee relation.");
+            }
 
             // C. Insert Position History
             const positionInserts = (data.positions || [])
@@ -92,7 +107,7 @@ export async function createEmployee(data: any) {
                     const posId = positionMap.get(p.position);
                     if (!posId) return null;
                     return {
-                        employees_id: employee.id,
+                        employees_id: realEmployeeId, // 👇 USE THE REAL ID HERE
                         positions_id: posId,
                         status: p.status,
                         description: p.description,
@@ -107,14 +122,14 @@ export async function createEmployee(data: any) {
             }
 
             // D. Insert Government IDs
-            // Map the employee.id onto the objects we prepared earlier
-            const mappedGovIds = govIdInserts.map(g => ({ ...g, employees_id: employee.id }));
+            // 👇 USE THE REAL ID HERE TOO
+            const mappedGovIds = govIdInserts.map(g => ({ ...g, employees_id: realEmployeeId }));
             if (mappedGovIds.length > 0) {
                 await tx.employees_govIDs.createMany({ data: mappedGovIds });
             }
 
-            // Return the employee ID so we can pass it to the frontend for redirection
-            return employee.id;
+            // Return the REAL employee ID so we can pass it to the frontend for redirection
+            return realEmployeeId;
         });
 
         // 6. Revalidate cache so the new employee shows up immediately in lists

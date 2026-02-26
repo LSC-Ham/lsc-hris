@@ -11,8 +11,10 @@ export async function getWorkExperience(employeeId: string) {
         // Query the work_experience table directly
         const workRecords = await prisma.work_experience.findMany({
             where: {
-                employees: {
-                    id: employeeId
+                biography: {
+                    employees: {
+                        id: employeeId
+                    }
                 }
             },
             orderBy: {
@@ -51,7 +53,7 @@ export async function updateWorkExperience(data: any[]) {
 
         const userId = (session.user as any).id;
 
-        await prisma.employees.update({
+        await prisma.biography.update({
             where: {
                 users_id: userId
             },

@@ -30,8 +30,10 @@ export const authOptions: NextAuthOptions = {
                             // 2. Check if it matches the 'id_number' in the related Employees table
                             // (Assuming your User model has a relation to employees)
                             {
-                                employees: {
-                                    id_number: credentials?.username,
+                                biography: {
+                                    employees: {
+                                        id_number: credentials?.username,
+                                    }
                                 }
                             }
                         ]

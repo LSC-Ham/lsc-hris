@@ -23,7 +23,11 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
             id_number: id_number,
         }, select: {
             id: true,
-            users_id: true,
+            biography: {
+                select: {
+                    users_id: true,
+                }
+            }
         }
     })
 
@@ -31,7 +35,7 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
         return null
     }
 
-    const user = await getUsers(employeeId?.users_id || "");
+    const user = await getUsers(employeeId?.biography?.users_id || "");
     const employment_details = await getEmployeeDetails(employeeId?.id || "");
     const personal_information = await getPersonalInformation(employeeId?.id || "");
     const address = await getAddress(employeeId?.id || "");

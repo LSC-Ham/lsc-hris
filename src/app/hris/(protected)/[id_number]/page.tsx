@@ -19,25 +19,33 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
 
     const userId = (session?.user as any).id || "";
 
-    const employeeId = await prisma.employees.findFirst({
+    const biography = await prisma.biography.findFirst({
         where: {
             users_id: userId
         },
-        select: { id_number: true, id: true, users_id: true, }
+        select: {
+            users_id: true,
+            employees: {
+                select: {
+                    id: true,
+                    id_number: true,
+                }
+            }
+        }
     });
 
-    if (!employeeId || employeeId.id_number !== id_number) {
+    if (!biography || biography.employees?.id_number !== id_number) {
         return redirect("/hris/dashboard")
     }
 
-    const user = await getUsers(employeeId?.users_id || "");
-    const employment_details = await getEmployeeDetails(employeeId?.id || "");
-    const personal_information = await getPersonalInformation(employeeId?.id || "");
-    const address = await getAddress(employeeId?.id || "");
-    const family_background = await getFamilyBackground(employeeId?.id || "");
-    const educational_background = await getEducationalBackground(employeeId?.id || "");
-    const eligibility = await getEligibility(employeeId?.id || "");
-    const work_experience = await getWorkExperience(employeeId?.id || "");
+    const user = await getUsers(biography?.users_id || "");
+    const employment_details = await getEmployeeDetails(biography?.employees?.id || "");
+    const personal_information = await getPersonalInformation(biography?.employees?.id || "");
+    const address = await getAddress(biography?.employees?.id || "");
+    const family_background = await getFamilyBackground(biography?.employees?.id || "");
+    const educational_background = await getEducationalBackground(biography?.employees?.id || "");
+    const eligibility = await getEligibility(biography?.employees?.id || "");
+    const work_experience = await getWorkExperience(biography?.employees?.id || "");
 
 
     // 3. Pass the fetched data to the Client Component

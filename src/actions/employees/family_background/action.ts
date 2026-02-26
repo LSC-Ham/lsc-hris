@@ -14,13 +14,17 @@ export async function getFamilyBackground(employeeId: string) {
         const employee = await prisma.employees.findUnique({
             where: { id: employeeId },
             include: {
-                family_background: true,
+                biography: {
+                    select: {
+                        family_background: true,
+                    }
+                }
             },
         });
 
         if (!employee) return null;
 
-        const formattedFam_bg = employee.family_background.map((record) => ({
+        const formattedFam_bg = employee.biography?.family_background.map((record) => ({
             id: record.id,
             relation_type: record.relation_type,
             surname: record.surname,
@@ -53,7 +57,7 @@ export async function updateFamilyBackground(data: any) {
 
         const userId = (session.user as any).id;
 
-        await prisma.employees.update({
+        await prisma.biography.update({
             where: {
                 users_id: userId
             },

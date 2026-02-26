@@ -295,22 +295,8 @@ export async function main() {
                 email: data.email,
                 password: data.password,
                 role: data.role,
-                employees: {
+                biography: {
                     create: {
-                        id_number: data.id_number,
-                        hired_at: data.hired_at,
-                        departments_id: department.id,
-                        divisions_id: division.id,
-
-                        // Create associated position mapping
-                        positions: {
-                            create: {
-                                positions_id: position.id,
-                                status: "Full-Time",
-                                start_at: new Date(),
-                            }
-                        },
-
                         // Create Personal Information dynamically
                         personal_information: {
                             create: {
@@ -323,15 +309,32 @@ export async function main() {
                                 nationality: data.nationality,
                             }
                         },
+                        employees: {
+                            create: {
+                                id_number: data.id_number,
+                                hired_at: data.hired_at,
+                                departments_id: department.id,
+                                divisions_id: division.id,
 
-                        // Create Government IDs dynamically (will skip if array is empty)
-                        ...(data.government_ids.length > 0 && {
-                            government_ids: {
-                                create: data.government_ids,
+                                // Create associated position mapping
+                                positions: {
+                                    create: {
+                                        positions_id: position.id,
+                                        status: "Full-Time",
+                                        start_at: new Date(),
+                                    }
+                                },
+
+                                // Create Government IDs dynamically (will skip if array is empty)
+                                ...(data.government_ids.length > 0 && {
+                                    government_ids: {
+                                        create: data.government_ids,
+                                    }
+                                })
                             }
-                        })
+                        }
                     }
-                }
+                },
             },
         });
         console.log(`Created user with id: ${user.id} (${data.firstname} ${data.surname})`);

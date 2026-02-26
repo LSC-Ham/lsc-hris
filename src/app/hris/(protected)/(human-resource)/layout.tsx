@@ -17,19 +17,24 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     const userData = await prisma.user.findUnique({
         where: { id: userId },
         select: {
-            employees: {
+            biography: {
                 select: {
-                    departments: {
+                    employees: {
                         select: {
-                            department: true,
+                            departments: {
+                                select: {
+                                    department: true,
+                                }
+                            }
                         }
                     }
                 }
             }
+
         } // Only grab what we need for performance
     });
 
-    const role = ALLOWED_DEPARTMENTS.includes(userData?.employees?.departments.department.toLowerCase() || "")
+    const role = ALLOWED_DEPARTMENTS.includes(userData?.biography?.employees?.departments.department.toLowerCase() || "")
 
     if (!role) {
         redirect("/hris/dashboard");

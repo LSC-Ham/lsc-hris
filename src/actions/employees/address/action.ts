@@ -14,13 +14,17 @@ export async function getAddress(employeeId: string) {
         const employee = await prisma.employees.findUnique({
             where: { id: employeeId },
             include: {
-                address: true,
+                biography: {
+                    select: {
+                        address: true,
+                    }
+                }
             },
         });
 
         if (!employee) return null;
 
-        const formattedAddress = employee.address.map((record) => ({
+        const formattedAddress = employee.biography?.address.map((record) => ({
             id: record.id,
             address_type: record.address_type,
             region: record.region,
@@ -53,7 +57,7 @@ export async function updateAddress(data: any) {
         const userId = (session.user as any).id;
 
         // data looks like: { residential: {...}, permanent: {...} }
-        await prisma.employees.update({
+        await prisma.biography.update({
             where: {
                 users_id: userId
             },

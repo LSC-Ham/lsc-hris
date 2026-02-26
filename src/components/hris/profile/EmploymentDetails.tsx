@@ -124,7 +124,7 @@ export function EmploymentDetails({
     };
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-6">
             {/* Header */}
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                 <h1 className="text-xl font-bold text-gray-800 tracking-tight">Employment Details</h1>

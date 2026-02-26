@@ -14,8 +14,10 @@ export async function getEligibility(employeeId: string) {
         // Directly query the "Many" table using the employee's ID
         const eligibilityRecords = await prisma.eligibility.findMany({
             where: {
-                employees: {
-                    id: employeeId
+                biography: {
+                    employees: {
+                        id: employeeId
+                    }
                 }
             },
         });
@@ -49,7 +51,7 @@ export async function updateEligibility(data: any[]) {
 
         const userId = (session.user as any).id;
 
-        await prisma.employees.update({
+        await prisma.biography.update({
             where: {
                 users_id: userId
             },

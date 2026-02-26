@@ -19,7 +19,11 @@ export async function getPersonalInformation(employeeId: string) {
         const employee = await prisma.employees.findUnique({
             where: { id: employeeId }, // 👈 This is the magic change
             include: {
-                personal_information: true,
+                biography: {
+                    select: {
+                        personal_information: true,
+                    }
+                }
             },
         });
 
@@ -27,7 +31,7 @@ export async function getPersonalInformation(employeeId: string) {
 
         return {
             id: employee.id,
-            ...(employee.personal_information || {}),
+            ...(employee.biography?.personal_information || {}),
         };
 
     } catch (error) {
@@ -47,9 +51,9 @@ export async function updatePersonalInformation(data: any) {
             ? new Date(updateData.birthdate).toISOString()
             : null;
 
-        await prisma.employees.update({
+        await prisma.biography.update({
             where: {
-                id: data.employees_id
+                id: data.biography_id
             },
             data: {
                 personal_information: {
@@ -89,7 +93,7 @@ export async function updatePersonalInformation(data: any) {
                             blood_type: updateData.blood_type,
                         }
                     }
-                }
+                },
             }
         });
 

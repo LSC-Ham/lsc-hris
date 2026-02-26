@@ -26,9 +26,26 @@ model User {
 
   accounts  Accounts[] @relation("UserAccounts")
   sessions  Session[]  @relation("UserSessions")
-  employees employees?
+  biography biography?
 
   @@map("users")
+}
+
+model biography {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  users_id   String?   @unique @db.Uuid
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
+
+  employees              employees?
+  personal_information   personal_information?
+  address                address[]
+  family_background      family_background[]
+  eligibility            eligibility[]
+  educational_background educational_background[]
+  work_experience        work_experience[]
+
+  users User? @relation(fields: [users_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 }
 
 model Accounts {
@@ -119,25 +136,19 @@ model employees_positions {
 }
 
 model employees {
-  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  users_id               String?                  @unique @db.Uuid
-  id_number              String                   @unique
-  hired_at               DateTime?                @db.Timestamp(6)
-  remarks                String?
-  created_at             DateTime                 @default(now()) @db.Timestamp(6)
-  updated_at             DateTime?                @updatedAt @db.Timestamp(6)
-  divisions_id           String                   @db.Uuid
-  departments_id         String                   @db.Uuid
-  personal_information   personal_information?
-  government_ids         employees_govIDs[]
-  address                address[]
-  family_background      family_background[]
-  eligibility            eligibility[]
-  educational_background educational_background[]
-  work_experience        work_experience[]
-  positions              employees_positions[]
+  id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  biography_id   String?               @unique @db.Uuid
+  id_number      String                @unique
+  hired_at       DateTime?             @db.Timestamp(6)
+  remarks        String?
+  created_at     DateTime              @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?             @updatedAt @db.Timestamp(6)
+  divisions_id   String                @db.Uuid
+  departments_id String                @db.Uuid
+  positions      employees_positions[]
+  government_ids employees_govIDs[]
 
-  users       User?       @relation(fields: [users_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  biography   biography?  @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   divisions   divisions   @relation(fields: [divisions_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   departments departments @relation(fields: [departments_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
@@ -155,7 +166,7 @@ model employees_govIDs {
 
 model personal_information {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employees_id String    @unique @db.Uuid
+  biography_id String    @unique @db.Uuid
   surname      String
   firstname    String
   middlename   String?
@@ -172,12 +183,12 @@ model personal_information {
   weight       String?
   blood_type   String?
 
-  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  biography biography @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model address {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employees_id String    @db.Uuid
+  biography_id String    @db.Uuid
   address_type String
   region       String?
   province     String?
@@ -190,12 +201,12 @@ model address {
   created_at   DateTime  @default(now()) @db.Timestamp(6)
   updated_at   DateTime? @updatedAt @db.Timestamp(6)
 
-  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  biography biography @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model family_background {
   id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employees_id       String    @db.Uuid
+  biography_id       String    @db.Uuid
   relation_type      String
   surname            String?
   firstname          String?
@@ -208,12 +219,12 @@ model family_background {
   created_at         DateTime  @default(now()) @db.Timestamp(6)
   updated_at         DateTime? @updatedAt @db.Timestamp(6)
 
-  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  biography biography @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model eligibility {
   id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employees_id      String    @db.Uuid
+  biography_id      String    @db.Uuid
   qualification     String?
   rating            String?
   date_examination  DateTime?
@@ -223,12 +234,12 @@ model eligibility {
   created_at        DateTime  @default(now()) @db.Timestamp(6)
   updated_at        DateTime? @updatedAt @db.Timestamp(6)
 
-  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  biography biography @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model educational_background {
   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employees_id   String    @db.Uuid
+  biography_id   String    @db.Uuid
   level          String?
   school         String?
   degree         String?
@@ -239,12 +250,12 @@ model educational_background {
   created_at     DateTime  @default(now()) @db.Timestamp(6)
   updated_at     DateTime? @updatedAt @db.Timestamp(6)
 
-  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  biography biography @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model work_experience {
   id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employees_id       String    @db.Uuid
+  biography_id       String    @db.Uuid
   date_from          DateTime?
   date_to            DateTime?
   position_title     String?
@@ -255,5 +266,5 @@ model work_experience {
   created_at         DateTime  @default(now()) @db.Timestamp(6)
   updated_at         DateTime? @updatedAt @db.Timestamp(6)
 
-  employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  biography biography @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
