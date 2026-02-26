@@ -242,7 +242,7 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
                                     </div>
                                 ) : (
                                     <div className="flex flex-col gap-3 w-full md:w-1/2">
-                                        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-2.5 border border-gray-200 rounded-lg text-sm outline-none transition-all shadow-sm bg-white focus:ring-1 focus:border-green-500" />
+                                        <input type="email" value={email || ""} onChange={(e) => setEmail(e.target.value)} required className="w-full p-2.5 border border-gray-200 rounded-lg text-sm outline-none transition-all shadow-sm bg-white focus:ring-1 focus:border-green-500" />
                                         <div className="flex gap-2">
                                             <button type="submit" disabled={isEmailLoading || email === userData.email || !email} className="flex-1 bg-[#1a6b36] text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all disabled:opacity-50">Save</button>
                                             <button type="button" onClick={() => { setIsEditingEmail(false); setEmail(userData.email); }} className="flex-1 bg-white text-gray-600 border border-gray-300 text-sm font-medium px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition-all">Cancel</button>
