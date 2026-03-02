@@ -142,19 +142,26 @@ export default function ProfilePage({
 
         switch (activeTab) {
             case "Employment Details":
-                return <EmploymentDetails mode={isMod ? "update" : "view"} formData={employmentData} onSave={handleSaveEmploymentDetails} departments={departments} divisions={divisions} availablePositions={positions} />;
+                return <EmploymentDetails
+                    mode={isMod ? "update" : "view"} formData={employmentData} onSave={handleSaveEmploymentDetails}
+                    departments={departments} divisions={divisions} availablePositions={positions} />;
             case "Personal Information":
                 return <PersonalInformation formData={personalData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":
-                return <Address mode={isMod ? "view" : undefined} formData={addressData} onSave={isUser ? handleSaveAddress : undefined} />;
+                return <Address //mode={isMod ? "view" : undefined} 
+                    formData={addressData} onSave={isUser ? handleSaveAddress : undefined} />;
             case "Family Background":
-                return <FamilyBackground mode={isMod ? "view" : undefined} formData={familyData} onSave={isUser ? handleSaveFamily : undefined} />;
+                return <FamilyBackground //mode={isMod ? "view" : undefined} 
+                    formData={familyData} onSave={isUser ? handleSaveFamily : undefined} />;
             case "Educational Background":
-                return <EducationalBackground mode={isMod ? "view" : undefined} formData={educationData} onSave={isUser ? handleSaveEducation : undefined} />;
+                return <EducationalBackground //mode={isMod ? "view" : undefined} 
+                    formData={educationData} onSave={isUser ? handleSaveEducation : undefined} />;
             case "Eligibility":
-                return <Eligibility mode={isMod ? "view" : undefined} formData={eligibilityData} onSave={isUser ? handleSaveEligibility : undefined} />;
+                return <Eligibility //mode={isMod ? "view" : undefined} 
+                    formData={eligibilityData} onSave={isUser ? handleSaveEligibility : undefined} />;
             case "Work Experience":
-                return <WorkExperience mode={isMod ? "view" : undefined} formData={workExperienceData} onSave={isUser ? handleSaveWorkExp : undefined} />;
+                return <WorkExperience //mode={isMod ? "view" : undefined} 
+                    formData={workExperienceData} onSave={isUser ? handleSaveWorkExp : undefined} />;
             default:
                 return (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">

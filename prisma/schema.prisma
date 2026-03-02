@@ -131,8 +131,6 @@ model employees_positions {
 
   employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   positions positions @relation(fields: [positions_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([employees_id, positions_id], name: "unique_employees_positions")
 }
 
 model employees {

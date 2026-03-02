@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 
 const POSITION_STATUSES = ["Full-Time", "Part-Time",];
-const EMPLOYMENT_STATUSES = ["Probationary", "Regular",];
+const EMPLOYMENT_STATUSES = ["Probationary", "Regular", "Resigned"];
 
 interface EmploymentDetailsProps {
     mode?: "view" | "update" | "create";
@@ -190,18 +190,18 @@ export function EmploymentDetails({
                     </div>
 
                     {/* Positions Logic */}
-                    <div className="border-t border-gray-100 pt-6">
+                    <div className="border-t border-gray-100 pt-6 space-y-4">
                         <label className="block text-xs font-semibold text-gray-500 uppercase mb-4">
                             Assigned Positions & History
                         </label>
 
                         {/* List */}
-                        <div className="space-y-3 mb-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                             {draftData.positions && draftData.positions.length > 0 ? (
                                 draftData.positions.map((pos: any, index: number) => (
                                     <div
                                         key={pos.id || index}
-                                        className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-lg border transition-colors ${pos.status === 'Active'
+                                        className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-lg border transition-colors ${pos.end_at < new Date()
                                             ? 'bg-white border-green-200 shadow-sm'
                                             : 'bg-gray-50 border-gray-100 opacity-75'
                                             }`}
@@ -212,7 +212,7 @@ export function EmploymentDetails({
                                                 <h4 className="font-bold text-gray-800 text-sm">
                                                     {pos.position}
                                                 </h4>
-                                                <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border ${pos.status === 'Active'
+                                                <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border ${pos.end_at < new Date()
                                                     ? 'bg-green-50 text-green-700 border-green-200'
                                                     : 'bg-gray-200 text-gray-600 border-gray-300'
                                                     }`}>
@@ -252,7 +252,7 @@ export function EmploymentDetails({
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center py-6 border-2 border-dashed border-gray-100 rounded-lg">
+                                <div className="grid col-span-full text-center py-6 border-2 border-dashed border-gray-100 rounded-lg">
                                     <p className="text-sm text-gray-400 italic">No position history found.</p>
                                 </div>
                             )}
