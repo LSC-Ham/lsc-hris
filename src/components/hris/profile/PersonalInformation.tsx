@@ -1,9 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import countriesData from "@/data/countries.json";
 
 const CIVIL_STATUS = ["Single", "Married", "Divorced", "Widowed", "Separated", "Domestic Partnership", "Civil Union"];
 const SEX = ["Male", "Female", "Non-binary", "Other/Prefer not to say"];
+
+const countriesArray = countriesData.data;
+
+const phData = countriesArray.find((item: any) => item.iso2 === "PH");
+const rawCities = phData ? phData.cities : [];
+const uniqueSortedCities = Array.from(new Set(rawCities)).sort((a: any, b: any) => a.localeCompare(b));
+
+// 3. Process Nationalities (Extract all country names using countriesArray)
+const rawNationalities = countriesArray.map((item: any) => item.country);
+const uniqueSortedNationalities = Array.from(new Set(rawNationalities)).sort((a: any, b: any) => a.localeCompare(b));
 
 interface PersonalInformationProps {
     mode?: "view" | "create";
@@ -17,11 +28,6 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
 
     // 1. Create a local draft to hold typed text safely
     const [draftData, setDraftData] = useState(formData);
-
-    const [cityOptions, setCityOptions] = useState<string[]>([]);
-    const [nationalityOptions, setNationalityOptions] = useState<string[]>([]);
-    const [isLoadingCities, setIsLoadingCities] = useState(true);
-    const [isLoadingNationalities, setIsLoadingNationalities] = useState(true);
 
     // 2. Keep the draft fresh if parent data updates
     useEffect(() => {
@@ -66,43 +72,6 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
         }
     };
 
-    // --- Fetch Cities ---
-    useEffect(() => {
-        const fetchCities = async () => {
-            try {
-                const response = await fetch("https://psgc.gitlab.io/api/cities/");
-                const data = await response.json();
-                const cityNames = data.map((city: any) => city.name);
-                const uniqueCities = Array.from(new Set(cityNames));
-                const sortedNames = (uniqueCities as string[]).sort((a, b) => a.localeCompare(b));
-                setCityOptions(sortedNames);
-            } catch (error) {
-                console.error("Failed to fetch cities:", error);
-            } finally {
-                setIsLoadingCities(false);
-            }
-        };
-        fetchCities();
-    }, []);
-
-    // --- Fetch Nationalities ---
-    useEffect(() => {
-        const fetchNationalities = async () => {
-            try {
-                const response = await fetch("https://countriesnow.space/api/v0.1/countries/flag/unicode");
-                const result = await response.json();
-                const sortedData = result.data.sort((a: any, b: any) => a.name.localeCompare(b.name));
-                const formattedCountries = sortedData.map((country: any) => `${country.name}`);
-                setNationalityOptions(formattedCountries);
-            } catch (error) {
-                console.error("Failed to fetch nationalities:", error);
-            } finally {
-                setIsLoadingNationalities(false);
-            }
-        };
-        fetchNationalities();
-    }, []);
-
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -140,11 +109,7 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("birthdate", e.target.value)}
                     />
-                    {isLoadingCities ? (
-                        <LoadingPlaceholder label="Place of Birth" />
-                    ) : (
-                        <ProfileSelect label="Place of Birth" value={draftData.birthplace} options={cityOptions} isEditing={isEditing} onChange={(e: any) => handleLocalChange("birthplace", e.target.value)} />
-                    )}
+                    <ProfileSelect label="Place of Birth" value={draftData.birthplace} options={uniqueSortedCities} isEditing={isEditing} onChange={(e: any) => handleLocalChange("birthplace", e.target.value)} />
 
                     <ProfileSelect label="Sex" value={draftData.sex} options={SEX} isEditing={isEditing} onChange={(e: any) => handleLocalChange("sex", e.target.value)} required />
                     <ProfileSelect label="Civil Status" value={draftData.civil_status} options={CIVIL_STATUS} isEditing={isEditing} onChange={(e: any) => handleLocalChange("civil_status", e.target.value)} required />
@@ -155,11 +120,7 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
 
                 <ProfileField label="Personal Email Address" type="email" value={draftData.email} isEditing={isEditing} placeholder="jdelacruz@lakeshore.edu.ph" onChange={(e: any) => handleLocalChange("email", e.target.value)} />
 
-                {isLoadingNationalities ? (
-                    <LoadingPlaceholder label="Nationality" />
-                ) : (
-                    <ProfileSelect label="Nationality" value={draftData.nationality} options={nationalityOptions} isEditing={isEditing} onChange={(e: any) => handleLocalChange("nationality", e.target.value)} required />
-                )}
+                <ProfileSelect label="Nationality" value={draftData.nationality} options={uniqueSortedNationalities} isEditing={isEditing} onChange={(e: any) => handleLocalChange("nationality", e.target.value)} required />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <ProfileField label="Height" value={draftData.height} isEditing={isEditing} placeholder="1.79M" onChange={(e: any) => handleLocalChange("height", e.target.value)} />

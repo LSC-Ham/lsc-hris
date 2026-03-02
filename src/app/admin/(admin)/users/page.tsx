@@ -1,8 +1,7 @@
-// src/app/(protected)/(admin)/employees/page.tsx
+// src/app/(protected)/(admin)/users/page.tsx
 import UsersTable from "@/components/admin/users/UsersTable";
 import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
 
 export default async function Page({
     searchParams,
@@ -17,7 +16,7 @@ export default async function Page({
     const currentPage = Number(resolvedSearchParams?.page) || 1;
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
 
-    // 3. Fetch employees with pagination and total count in parallel
+    // 3. Fetch users with pagination and total count in parallel
     const [usersLists, totalUsers] = await Promise.all([
         prisma.user.findMany({
             skip,
@@ -27,7 +26,6 @@ export default async function Page({
                     select: {
                         employees: {
                             select: {
-
                                 id_number: true,
                             }
                         },
@@ -53,6 +51,7 @@ export default async function Page({
 
     return (
         <div className="space-y-6">
+            {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Users Directory</h1>
@@ -60,11 +59,8 @@ export default async function Page({
                 </div>
             </div>
 
-            {/* Table Container */}
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                    <UsersTable usersLists={usersLists} />
-                </div>
+                <UsersTable usersLists={usersLists} />
 
                 {/* Pagination rendered at the bottom of the table container */}
                 <Pagination

@@ -1,4 +1,10 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+
 export default function EmployeesTable({ employeesList }: { employeesList: any[] }) {
+    const router = useRouter();
+    
     const formatDateTime = (date: Date | null) => {
         if (!date) return "—";
         return new Intl.DateTimeFormat("en-US", {
@@ -10,12 +16,22 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
             hour12: true,
         }).format(date);
     };
+
+    const handleRowClick = (idNumber: string) => {
+        if (idNumber) {
+            router.push(`/hris/employees/${idNumber}`);
+        }
+    };
+
     return (
         <>
             <div className="block md:hidden divide-y divide-gray-100">
                 {employeesList.length > 0 ? (
                     employeesList.map((emp: any) => (
-                        <div key={emp.id} className="p-4 hover:bg-gray-50 transition-colors space-y-3">
+                        <div
+                            key={emp.id}
+                            onClick={() => handleRowClick(emp.employees?.id_number)} // <-- Added onClick
+                            className="p-4 hover:bg-gray-50 transition-colors space-y-3 cursor-pointer">
                             {/* Card Header */}
                             <div className="flex justify-between items-start gap-4">
                                 <div className="flex flex-col gap-2.5">
@@ -69,13 +85,15 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
                             <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Created At</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Updated At</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Remarks</th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                         {employeesList.length > 0 ? (
                             employeesList.map((emp: any) => (
-                                <tr key={emp.id} className="hover:bg-gray-50 transition-colors">
+                                <tr
+                                    key={emp.id}
+                                    onClick={() => handleRowClick(emp.employees?.id_number)} // <-- Added onClick
+                                    className="hover:bg-gray-50 transition-colors cursor-pointer">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 uppercase">{emp.employees?.id_number}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-900 font-medium capitalize">
