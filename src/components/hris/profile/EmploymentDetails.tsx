@@ -140,9 +140,9 @@ export function EmploymentDetails({
                 )}
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-6">
                 {/* ID & Dept */}
-                <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ProfileField
                         label="Employee ID Number"
                         value={draftData.id_number}
@@ -151,172 +151,169 @@ export function EmploymentDetails({
                         required
                         disabled={true}
                     />
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* THE FIX IS APPLIED HERE */}
 
-                        {/* THE FIX IS APPLIED HERE */}
+                    <ProfileSelect
+                        label="Employment Status"
+                        value={draftData.remarks}
+                        options={EMPLOYMENT_STATUSES}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("remarks", e.target.value)}
+                        required
+                    />
+                    <ProfileField
+                        label="Date Hired"
+                        type="datetime-local"
+                        value={isEditing ? draftData.hired_at : formatHiredDateView(draftData.hired_at)}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("hired_at", e.target.value)}
+                        required
+                    />
+                    <ProfileSelect
+                        label="Division"
+                        value={draftData.division}
+                        options={divisions}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("division", e.target.value)}
+                        required
+                    />
+                    <ProfileSelect
+                        label="Department"
+                        value={draftData.department}
+                        options={departments}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("department", e.target.value)}
+                        required
+                    />
+                </div>
 
-                        <ProfileSelect
-                            label="Employment Status"
-                            value={draftData.remarks}
-                            options={EMPLOYMENT_STATUSES}
-                            isEditing={isEditing}
-                            onChange={(e: any) => handleLocalChange("remarks", e.target.value)}
-                            required
-                        />
-                        <ProfileField
-                            label="Date Hired"
-                            type="datetime-local"
-                            value={isEditing ? draftData.hired_at : formatHiredDateView(draftData.hired_at)}
-                            isEditing={isEditing}
-                            onChange={(e: any) => handleLocalChange("hired_at", e.target.value)}
-                            required
-                        />
-                        <ProfileSelect
-                            label="Division"
-                            value={draftData.division}
-                            options={divisions}
-                            isEditing={isEditing}
-                            onChange={(e: any) => handleLocalChange("division", e.target.value)}
-                            required
-                        />
-                        <ProfileSelect
-                            label="Department"
-                            value={draftData.department}
-                            options={departments}
-                            isEditing={isEditing}
-                            onChange={(e: any) => handleLocalChange("department", e.target.value)}
-                            required
-                        />
-                    </div>
+                {/* Positions Logic */}
+                <div className="border-t border-gray-100 pt-6 space-y-4">
+                    <label className="block text-xs font-semibold text-gray-500 uppercase mb-4">
+                        Assigned Positions & History
+                    </label>
 
-                    {/* Positions Logic */}
-                    <div className="border-t border-gray-100 pt-6 space-y-4">
-                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-4">
-                            Assigned Positions & History
-                        </label>
-
-                        {/* List */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {draftData.positions && draftData.positions.length > 0 ? (
-                                draftData.positions.map((pos: any, index: number) => (
-                                    <div
-                                        key={pos.id || index}
-                                        className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-lg border transition-colors ${pos.end_at < new Date()
-                                            ? 'bg-white border-green-200 shadow-sm'
-                                            : 'bg-gray-50 border-gray-100 opacity-75'
-                                            }`}
-                                    >
-                                        {/* Left Side: Position Info */}
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <h4 className="font-bold text-gray-800 text-sm">
-                                                    {pos.position}
-                                                </h4>
-                                                <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border ${pos.end_at < new Date()
-                                                    ? 'bg-green-50 text-green-700 border-green-200'
-                                                    : 'bg-gray-200 text-gray-600 border-gray-300'
-                                                    }`}>
-                                                    {pos.status || 'N/A'}
-                                                </span>
-                                            </div>
-
-                                            {pos.description && (
-                                                <p className="text-xs text-gray-500 line-clamp-1">
-                                                    {pos.description}
-                                                </p>
-                                            )}
-
-                                            <div className="flex items-center gap-1 text-xs text-gray-400 font-medium mt-1">
-                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                                <span>
-                                                    {formatDate(pos.start_at)} — {pos.end_at ? formatDate(pos.end_at) : <span className="text-green-600">Present</span>}
-                                                </span>
-                                            </div>
+                    {/* List */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {draftData.positions && draftData.positions.length > 0 ? (
+                            draftData.positions.map((pos: any, index: number) => (
+                                <div
+                                    key={pos.id || index}
+                                    className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-lg border transition-colors ${pos.end_at < new Date()
+                                        ? 'bg-white border-green-200 shadow-sm'
+                                        : 'bg-gray-50 border-gray-100 opacity-75'
+                                        }`}
+                                >
+                                    {/* Left Side: Position Info */}
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <h4 className="font-bold text-gray-800 text-sm">
+                                                {pos.position}
+                                            </h4>
+                                            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border ${pos.end_at < new Date()
+                                                ? 'bg-green-50 text-green-700 border-green-200'
+                                                : 'bg-gray-200 text-gray-600 border-gray-300'
+                                                }`}>
+                                                {pos.status || 'N/A'}
+                                            </span>
                                         </div>
 
-                                        {/* Right Side: Actions */}
-                                        {isEditing && (
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemovePosition(index)}
-                                                className="group flex items-center gap-1 text-red-400 hover:text-red-600 text-xs font-medium mt-3 sm:mt-0 transition-colors"
-                                            >
-                                                <span>Remove</span>
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
+                                        {pos.description && (
+                                            <p className="text-xs text-gray-500 line-clamp-1">
+                                                {pos.description}
+                                            </p>
                                         )}
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="grid col-span-full text-center py-6 border-2 border-dashed border-gray-100 rounded-lg">
-                                    <p className="text-sm text-gray-400 italic">No position history found.</p>
-                                </div>
-                            )}
-                        </div>
 
-                        {/* Add Form */}
-                        {isEditing && (
-                            <div className="bg-green-50/50 border border-green-100 rounded-xl p-4 space-y-4">
-                                <h4 className="text-xs font-bold text-[#1a6b36] uppercase">Add New Position</h4>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <ProfileSelect
-                                        label="Position Title"
-                                        value={assignedPosition.position}
-                                        options={availablePositions}
-                                        isEditing={true}
-                                        onChange={(e: any) => handleAssignedChange("position", e.target.value)}
-                                        required
-                                    />
-                                    <ProfileSelect
-                                        label="Status"
-                                        value={assignedPosition.status}
-                                        options={POSITION_STATUSES}
-                                        isEditing={true}
-                                        onChange={(e: any) => handleAssignedChange("status", e.target.value)}
-                                        required
-                                    />
+                                        <div className="flex items-center gap-1 text-xs text-gray-400 font-medium mt-1">
+                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <span>
+                                                {formatDate(pos.start_at)} — {pos.end_at ? formatDate(pos.end_at) : <span className="text-green-600">Present</span>}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Right Side: Actions */}
+                                    {isEditing && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemovePosition(index)}
+                                            className="group flex items-center gap-1 text-red-400 hover:text-red-600 text-xs font-medium mt-3 sm:mt-0 transition-colors"
+                                        >
+                                            <span>Remove</span>
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    )}
                                 </div>
-                                <ProfileField
-                                    label="Description"
-                                    value={assignedPosition.description}
-                                    isEditing={true}
-                                    placeholder="Optional details..."
-                                    onChange={(e: any) => handleAssignedChange("description", e.target.value)}
-                                />
-                                <div className="grid grid-cols-2 gap-4">
-                                    <ProfileField
-                                        label="Start Date"
-                                        type="date"
-                                        value={assignedPosition.start_at}
-                                        isEditing={true}
-                                        onChange={(e: any) => handleAssignedChange("start_at", e.target.value)}
-                                        required
-                                    />
-                                    <ProfileField
-                                        label="End Date (Optional)"
-                                        type="date"
-                                        value={assignedPosition.end_at}
-                                        isEditing={true}
-                                        onChange={(e: any) => handleAssignedChange("end_at", e.target.value)}
-                                    />
-                                </div>
-                                <div className="flex justify-end">
-                                    <button
-                                        type="button"
-                                        onClick={handleAddPositionObj}
-                                        disabled={!assignedPosition.position || !assignedPosition.status}
-                                        className="bg-[#1a6b36] text-white text-xs px-4 py-2 rounded-lg hover:bg-[#155a2b] disabled:opacity-50 transition-colors"
-                                    >
-                                        + Add Position
-                                    </button>
-                                </div>
+                            ))
+                        ) : (
+                            <div className="grid col-span-full text-center py-6 border-2 border-dashed border-gray-100 rounded-lg">
+                                <p className="text-sm text-gray-400 italic">No position history found.</p>
                             </div>
                         )}
                     </div>
+
+                    {/* Add Form */}
+                    {isEditing && (
+                        <div className="bg-green-50/50 border border-green-100 rounded-xl p-4 space-y-4">
+                            <h4 className="text-xs font-bold text-[#1a6b36] uppercase">Add New Position</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <ProfileSelect
+                                    label="Position Title"
+                                    value={assignedPosition.position}
+                                    options={availablePositions}
+                                    isEditing={true}
+                                    onChange={(e: any) => handleAssignedChange("position", e.target.value)}
+                                    required
+                                />
+                                <ProfileSelect
+                                    label="Status"
+                                    value={assignedPosition.status}
+                                    options={POSITION_STATUSES}
+                                    isEditing={true}
+                                    onChange={(e: any) => handleAssignedChange("status", e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <ProfileField
+                                label="Description"
+                                value={assignedPosition.description}
+                                isEditing={true}
+                                placeholder="Optional details..."
+                                onChange={(e: any) => handleAssignedChange("description", e.target.value)}
+                            />
+                            <div className="grid grid-cols-2 gap-4">
+                                <ProfileField
+                                    label="Start Date"
+                                    type="date"
+                                    value={assignedPosition.start_at}
+                                    isEditing={true}
+                                    onChange={(e: any) => handleAssignedChange("start_at", e.target.value)}
+                                    required
+                                />
+                                <ProfileField
+                                    label="End Date (Optional)"
+                                    type="date"
+                                    value={assignedPosition.end_at}
+                                    isEditing={true}
+                                    onChange={(e: any) => handleAssignedChange("end_at", e.target.value)}
+                                />
+                            </div>
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={handleAddPositionObj}
+                                    disabled={!assignedPosition.position || !assignedPosition.status}
+                                    className="bg-[#1a6b36] text-white text-xs px-4 py-2 rounded-lg hover:bg-[#155a2b] disabled:opacity-50 transition-colors"
+                                >
+                                    + Add Position
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Government IDs */}

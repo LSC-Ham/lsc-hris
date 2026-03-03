@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/hris/auth";
 
 export default async function Home() {
   // We still fetch the session just to personalize the greeting!

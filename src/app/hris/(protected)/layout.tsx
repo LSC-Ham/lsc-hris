@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/hris/auth";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/hris/Sidebar";
 import { LogoutButton } from "@/components/hris/auth/LogoutButton";

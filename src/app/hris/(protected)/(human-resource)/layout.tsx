@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // Make sure this path is correct
+import { authOptions } from "@/lib/hris/auth"; // Make sure this path is correct
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 

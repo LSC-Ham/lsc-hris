@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma"; // Adjust this import to your actual Prisma client location
-import { authOptions } from "@/lib/auth"; // Make sure this path is correct
+import { authOptions } from "@/lib/hris/auth"; // Make sure this path is correct
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
