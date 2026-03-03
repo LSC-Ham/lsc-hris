@@ -2,6 +2,8 @@
 
 import { changePassword, updateEmail, updateUsername, updateRole } from "@/actions/employees/users/action";
 import { useState, useEffect } from "react";
+import AccountDangerModal from "./AccountDangerModal";
+import { deactivateOrDeleteAccount } from "@/actions/admin/users/action";
 
 interface UserProps {
     user: any;
@@ -127,6 +129,39 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
         }
     };
 
+    // NEW: State for the Danger Modal
+    const [isDangerModalOpen, setIsDangerModalOpen] = useState(false);
+
+    // NEW: Handler for the Danger Modal submission
+    // 2. Update the handler function
+    const handleDangerAction = async (action: "deactivate" | "delete", password: string) => {
+        try {
+            // Call the server action
+            const res = await deactivateOrDeleteAccount(user.id, action, password);
+
+            if (res.error) {
+                // You can replace this alert with a toast notification if you use something like sonner or react-hot-toast
+                alert(`Error: ${res.error}`);
+                return;
+            }
+
+            alert(res.success);
+            setIsDangerModalOpen(false);
+
+            // 3. Redirect the user! 
+            // If they are deactivated/deleted, they shouldn't be on the settings page anymore.
+            // You will likely want to sign them out and push them to the login page here.
+            // Example:
+            // await signOut({ callbackUrl: '/login' }); 
+            // OR window.location.href = '/login';
+
+        } catch (error: any) {
+            alert("An unexpected error occurred.");
+        }
+    };
+
+
+
     return (
         <div className="space-y-6 max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* PAGE HEADER */}
@@ -141,7 +176,7 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                         <div>
-                            <h2 className="text-lg font-semibold text-gray-800">Profile Details</h2>
+                            <h2 className="text-lg font-semibold text-gray-800">Account Details</h2>
                             <p className="text-xs text-gray-500">Update the username and account role.</p>
                         </div>
                         {!isEditingProfile && (
@@ -199,6 +234,20 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
                                     </div>
                                 )}
                             </div>
+                            {currentUserRole === "admin" && (
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Deactivation or Deletion</label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsDangerModalOpen(true)} // Open the modal here!
+                                        className="w-full md:w-1/2 p-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 shadow-sm hover:bg-red-100 transition-colors cursor-pointer"
+                                    >
+                                        Deactivate or Delete Account
+                                    </button>
+                                </div>
+                            )}
+
+
 
                             {isEditingProfile && (
                                 <div className="flex gap-2 pt-2 md:w-1/2">
@@ -290,6 +339,12 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
                 </div>
 
             </div>
+
+            <AccountDangerModal
+                isOpen={isDangerModalOpen}
+                onClose={() => setIsDangerModalOpen(false)}
+                onConfirm={handleDangerAction}
+            />
         </div>
     );
 }

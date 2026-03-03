@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 export default function EmployeesTable({ employeesList }: { employeesList: any[] }) {
     const router = useRouter();
-    
+
     const formatDateTime = (date: Date | null) => {
         if (!date) return "—";
         return new Intl.DateTimeFormat("en-US", {

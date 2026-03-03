@@ -142,7 +142,10 @@ export default function ProfilePage({
 
         switch (activeTab) {
             case "Employment Details":
-                return <EmploymentDetails mode={isMod ? "update" : "view"} formData={employmentData} onSave={handleSaveEmploymentDetails} departments={departments} divisions={divisions} availablePositions={positions} />;
+                return <EmploymentDetails
+                    mode={isMod ? "update" : "view"}
+                    formData={employmentData}
+                    onSave={handleSaveEmploymentDetails} departments={departments} divisions={divisions} availablePositions={positions} />;
             case "Personal Information":
                 return <PersonalInformation formData={personalData} onSave={handleSavePersonalInfo} />;
             case "Employee Address":
