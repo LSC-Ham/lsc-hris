@@ -234,7 +234,7 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
                                     </div>
                                 )}
                             </div>
-                            {currentUserRole === "admin" && (
+                            {currentUserRole === "admin" && canEditRole && (
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">Deactivation or Deletion</label>
                                     <button
