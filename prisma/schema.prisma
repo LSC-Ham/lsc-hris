@@ -292,7 +292,7 @@ model acad_years {
 model acad_level {
   id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   acad_level_code String    @unique
-  acad_level_name String
+  acad_level_name String?
   description     String?
   created_at      DateTime  @default(now()) @db.Timestamp(6)
   updated_at      DateTime? @updatedAt @db.Timestamp(6)
@@ -355,8 +355,6 @@ model students {
   scholarships scholarships? @relation(fields: [scholarship_id], references: [id])
 
   subjects student_subjects[]
-
-  @@unique([id_number, semester_id, acad_year_id])
 }
 
 model scholarships {
@@ -376,7 +374,7 @@ model courses {
   id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   department_id String       @db.Uuid
   course_code   String       @unique
-  course_name   String
+  course_name   String?
   created_by    String
   created_at    DateTime     @default(now()) @db.Timestamp(6)
   updated_at    DateTime?    @updatedAt @db.Timestamp(6)
