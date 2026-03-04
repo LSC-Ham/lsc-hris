@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/hris/auth";
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/hris/Sidebar";
 import { LogoutButton } from "@/components/hris/auth/LogoutButton";
@@ -53,7 +53,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                 userId={userId}
                 profilePicture={userData?.profile_picture || ""}
                 surname={userData?.biography?.personal_information?.surname || ""}
-                department={userData?.biography?.employees?.departments.department || ""}
+                department={userData?.biography?.employees?.departments?.department || ""}
                 idNumber={userData?.biography?.employees?.id_number || ""}
             />
 

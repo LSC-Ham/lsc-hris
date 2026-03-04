@@ -1,7 +1,7 @@
 "use server"
 
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/hris/auth"; // Make sure this path is correct
+import { authOptions } from "@/lib/auth"; // Make sure this path is correct
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma"; // Adjust path if needed
 

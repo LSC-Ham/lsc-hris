@@ -1,6 +1,6 @@
 import { getUsers } from "@/actions/employees/users/action";
 import AccountSettingsPage from "@/components/hris/account/AccountSettings";
-import { authOptions } from "@/lib/hris/auth";
+import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 
 

@@ -8,7 +8,7 @@ import { getPersonalInformation } from "@/actions/employees/personal_information
 import { getUsers } from "@/actions/employees/users/action";
 import { getWorkExperience } from "@/actions/employees/work_experience/action";
 import ProfilePage from "@/components/hris/profile/ProfilePage";
-import { authOptions } from "@/lib/hris/auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";

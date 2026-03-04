@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt"; // Requires: npm install bcryptjs\
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/hris/auth";
+import { authOptions } from "@/lib/auth";
 
 export async function createEmployee(data: any) {
     try {
