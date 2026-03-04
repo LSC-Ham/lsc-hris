@@ -6,13 +6,37 @@ const SALT_ROUNDS = 10;
 
 export async function main() {
     const hashedPassword = await bcrypt.hash("@lakeshore123", SALT_ROUNDS);
-    const seeds = [
+    const seed = [
         {
+            // user
             username: "hmarandang", email: "hmarandang@lakeshore.edu.ph", password: hashedPassword, role: "admin",
-            id_number: "ad03069", department: "Information Technology", position: "IT Personnel", division: "Administration", hired_at: new Date(),
+
+            //personal information
             surname: "marandang", firstname: "hamodi", contact_number: "9958956869", birthdate: new Date("05/31/2001"),
             sex: "male", civil_status: "single", nationality: "Philippines",
             government_ids: [],
+
+            //employee
+            id_number: "ad03069", department: "Information Technology", position: "IT Personnel", division: "Administration", hired_at: new Date(),
+
+            //student
+            student_id: "2025-P0001", semester: "first semester", acad_year: "2026-2027",
+            course_code: "bspsych", acad_level_code: "col", year: "second year", section: "",
+        },
+        {
+            // user
+            username: "lcontreras", email: "lcontreras@lakeshore.edu.ph", password: hashedPassword, role: "user",
+
+            //personal information
+            surname: "contreras", firstname: "lance", contact_number: "09123456789", birthdate: new Date("05/31/2001"),
+            sex: "male", civil_status: "single", nationality: "Philippines",
+
+            //employee
+            id_number: "", government_ids: [], department: "", position: "", division: "",
+
+            //student
+            student_id: "2025-0106", semester: "first semester", acad_year: "2026-2027",
+            course_code: "acad", acad_level_code: "shs", year: "grade 12", section: "faith",
         },
         {
             username: "rasino", email: "rasino@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
@@ -261,32 +285,116 @@ export async function main() {
         },
     ];
 
-    console.log(`Start seeding ...`);
+    console.log(`Start employing ...`);
 
-    for (const data of seeds) {
-        // 3. Upsert lookup tables (creates them only if they don't exist)
+    for (const data of seed) {
+        // 1. Identify if the user is an Employee, a Student, or both based on the data
+        const isEmployee = Boolean(data.id_number && data.id_number.trim() !== "");
+        // @ts-ignore (we know student_id exists on some objects but not all)
+        const isStudent = Boolean(data.student_id && data.student_id.trim() !== "");
+
+        // Department is shared by both employees and students (for courses)
+        const deptStr = data.department || "Unassigned";
         const department = await prisma.departments.upsert({
-            where: { department: data.department },
+            where: { department: deptStr },
             update: {},
-            create: { department: data.department },
+            create: { department: deptStr },
         });
 
-        const position = await prisma.positions.upsert({
-            where: { position: data.position },
-            update: {},
-            create: { position: data.position },
-        });
+        // 2. Prepare Employee Payload & lookups
+        let employeePayload = undefined;
+        if (isEmployee) {
+            const divisionStr = data.division || "Unassigned";
+            const positionStr = data.position || "Unassigned";
 
-        const division = await prisma.divisions.upsert({
-            where: { division: data.division },
-            update: {},
-            create: { division: data.division },
-        });
+            const division = await prisma.divisions.upsert({
+                where: { division: divisionStr },
+                update: {},
+                create: { division: divisionStr },
+            });
 
-        // 4. Create User, Employee, Personal Info, and Government IDs all at once
+            const position = await prisma.positions.upsert({
+                where: { position: positionStr },
+                update: {},
+                create: { position: positionStr },
+            });
+
+            employeePayload = {
+                create: {
+                    id_number: data.id_number,
+                    hired_at: data.hired_at || new Date(),
+                    departments_id: department.id,
+                    divisions_id: division.id,
+                    positions: {
+                        create: {
+                            positions_id: position.id,
+                            status: "Full-Time",
+                            start_at: new Date(),
+                        }
+                    },
+                    // Attach government IDs only if they exist and the user is an employee
+                    ...(data.government_ids && data.government_ids.length > 0 && {
+                        government_ids: {
+                            create: data.government_ids,
+                        }
+                    })
+                }
+            };
+        }
+
+        // 3. Prepare Student Payload & lookups
+        let studentPayload = undefined;
+        if (isStudent) {
+            // @ts-ignore
+            const semesterStr = data.semester || "Unassigned";
+            // @ts-ignore
+            const acadYearStr = data.acad_year || "Unassigned";
+            // @ts-ignore
+            const acadLevelCodeStr = data.acad_level_code || "Unassigned";
+            // @ts-ignore
+            const yearStr = data.year || "Unassigned";
+            // @ts-ignore
+            const courseCodeStr = data.course_code || "Unassigned";
+            // @ts-ignore
+            const sectionStr = data.section || "Unassigned";
+
+            const semester = await prisma.semesters.upsert({
+                where: { semester: semesterStr }, update: {}, create: { semester: semesterStr }
+            });
+            const acad_year = await prisma.acad_years.upsert({
+                where: { acad_year: acadYearStr }, update: {}, create: { acad_year: acadYearStr }
+            });
+            const acad_level = await prisma.acad_level.upsert({
+                where: { acad_level_code: acadLevelCodeStr }, update: {}, create: { acad_level_code: acadLevelCodeStr }
+            });
+            const year_level = await prisma.year_level.upsert({
+                where: { year_level: yearStr }, update: {}, create: { acad_level_id: acad_level.id, year_level: yearStr }
+            });
+            const course = await prisma.courses.upsert({
+                where: { course_code: courseCodeStr }, update: {}, create: { department_id: department.id, course_code: courseCodeStr, created_by: "seeds" }
+            });
+            const section = await prisma.sections.upsert({
+                where: { section: sectionStr }, update: {}, create: { acad_level_id: acad_level.id, section: sectionStr }
+            });
+
+            studentPayload = {
+                create: {
+                    // @ts-ignore
+                    id_number: data.student_id || "",
+                    semester_id: semester.id,
+                    acad_level_id: acad_level.id,
+                    acad_year_id: acad_year.id,
+                    course_id: course.id,
+                    year_level_id: year_level.id,
+                    sections_id: section.id,
+                }
+            };
+        }
+
+        // 4. Create User, Personal Info, and conditionally attach employee/student tables
         const user = await prisma.user.upsert({
             where: { username: data.username },
-            update: {}, // Skip if username already exists
+            update: {},
             create: {
                 username: data.username,
                 email: data.email,
@@ -294,7 +402,6 @@ export async function main() {
                 role: data.role,
                 biography: {
                     create: {
-                        // Create Personal Information dynamically
                         personal_information: {
                             create: {
                                 surname: data.surname,
@@ -306,35 +413,15 @@ export async function main() {
                                 nationality: data.nationality,
                             }
                         },
-                        employees: {
-                            create: {
-                                id_number: data.id_number,
-                                hired_at: data.hired_at,
-                                departments_id: department.id,
-                                divisions_id: division.id,
-
-                                // Create associated position mapping
-                                positions: {
-                                    create: {
-                                        positions_id: position.id,
-                                        status: "Full-Time",
-                                        start_at: new Date(),
-                                    }
-                                },
-
-                                // Create Government IDs dynamically (will skip if array is empty)
-                                ...(data.government_ids.length > 0 && {
-                                    government_ids: {
-                                        create: data.government_ids,
-                                    }
-                                })
-                            }
-                        }
+                        // Conditionally attach the payloads (if undefined, Prisma cleanly ignores them)
+                        ...(employeePayload && { employees: employeePayload }),
+                        ...(studentPayload && { students: studentPayload })
                     }
-                },
+                }
             },
         });
-        console.log(`Created user with id: ${user.id} (${data.firstname} ${data.surname})`);
+
+        console.log(`Created user with id: ${user.id} (${data.firstname} ${data.surname}) - Employee: ${isEmployee}, Student: ${isStudent}`);
     }
 
     console.log(`Seeding finished successfully.`);
