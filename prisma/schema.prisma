@@ -38,6 +38,7 @@ model biography {
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @updatedAt @db.Timestamp(6)
 
+  students               students[]
   employees              employees?
   personal_information   personal_information?
   address                address[]
@@ -136,7 +137,7 @@ model employees_positions {
 
 model employees {
   id             String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  biography_id   String?               @unique @db.Uuid
+  biography_id   String                @unique @db.Uuid
   id_number      String                @unique
   hired_at       DateTime?             @db.Timestamp(6)
   remarks        String?
@@ -147,7 +148,7 @@ model employees {
   positions      employees_positions[]
   government_ids employees_govIDs[]
 
-  biography   biography?   @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  biography   biography    @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   divisions   divisions?   @relation(fields: [divisions_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
   departments departments? @relation(fields: [departments_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
 }
@@ -266,4 +267,179 @@ model work_experience {
   updated_at         DateTime? @updatedAt @db.Timestamp(6)
 
   biography biography @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model semesters {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  semester    String       @unique
+  description String?
+  created_at  DateTime     @default(now()) @db.Timestamp(6)
+  updated_at  DateTime?    @updatedAt @db.Timestamp(6)
+  students    students[]
+  checklists  checklists[]
+}
+
+model acad_years {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  acad_year  String    @unique
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
+
+  students   students[]
+  checklists checklists[]
+}
+
+model acad_level {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  acad_level_code String    @unique
+  acad_level_name String
+  description     String?
+  created_at      DateTime  @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @updatedAt @db.Timestamp(6)
+
+  students     students[]
+  years        year_level[]
+  sections     sections[]
+  scholarships scholarships[]
+}
+
+model year_level {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  acad_level_id String       @db.Uuid
+  year_level    String       @unique
+  description   String?
+  created_at    DateTime     @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?    @updatedAt @db.Timestamp(6)
+  checklists    checklists[]
+
+  acad_level acad_level @relation(fields: [acad_level_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  students   students[]
+}
+
+model sections {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  acad_level_id String    @db.Uuid
+  section       String    @unique
+  description   String?
+  created_at    DateTime  @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @updatedAt @db.Timestamp(6)
+
+  acad_level acad_level @relation(fields: [acad_level_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  students   students[]
+}
+
+model students {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  biography_id   String    @db.Uuid
+  id_number      String
+  semester_id    String?   @db.Uuid
+  acad_year_id   String?   @db.Uuid
+  acad_level_id  String?   @db.Uuid
+  course_id      String?   @db.Uuid
+  year_level_id  String?   @db.Uuid
+  sections_id    String?   @db.Uuid
+  scholarship_id String?   @db.Uuid
+  discount       Decimal?  @db.Decimal(10, 2)
+  assessed_at    DateTime?
+  enrolled_at    DateTime?
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @updatedAt @db.Timestamp(6)
+
+  semesters    semesters?    @relation(fields: [semester_id], references: [id])
+  acad_years   acad_years?   @relation(fields: [acad_year_id], references: [id])
+  acad_level   acad_level?   @relation(fields: [acad_level_id], references: [id])
+  course       courses?      @relation(fields: [course_id], references: [id])
+  year_level   year_level?   @relation(fields: [year_level_id], references: [id])
+  sections     sections?     @relation(fields: [sections_id], references: [id])
+  biography    biography     @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  scholarships scholarships? @relation(fields: [scholarship_id], references: [id])
+
+  subjects student_subjects[]
+
+  @@unique([id_number, semester_id, acad_year_id])
+}
+
+model scholarships {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  acad_level_id String    @db.Uuid
+  scholarship   String
+  description   String?
+  amount        Decimal?  @db.Decimal(10, 2)
+  created_at    DateTime  @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @updatedAt @db.Timestamp(6)
+
+  acad_level acad_level @relation(fields: [acad_level_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  students   students[]
+}
+
+model courses {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  department_id String       @db.Uuid
+  course_code   String       @unique
+  course_name   String
+  created_by    String
+  created_at    DateTime     @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?    @updatedAt @db.Timestamp(6)
+  checklists    checklists[]
+  students      students[]
+}
+
+model checklists {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  acad_year_id  String    @db.Uuid
+  semester_id   String    @db.Uuid
+  course_id     String    @db.Uuid
+  year_level_id String    @db.Uuid
+  sections_id   String?   @db.Uuid
+  time          String?
+  room          String?
+  professor     String?
+  subject_code  String
+  subject_name  String
+  unit          String?
+  created_by    String
+  created_at    DateTime  @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @updatedAt @db.Timestamp(6)
+
+  courses    courses    @relation(fields: [course_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  semesters  semesters  @relation(fields: [semester_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  acad_years acad_years @relation(fields: [acad_year_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  year_level year_level @relation(fields: [year_level_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model student_subjects {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  students_id   String    @db.Uuid
+  checklists_id String    @db.Uuid
+  created_at    DateTime  @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @updatedAt @db.Timestamp(6)
+
+  students students? @relation(fields: [students_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model student_installments {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullname       String?
+  id_number      String?
+  semester_name  String?
+  acad_year_name String?
+  label          String?
+  amount         Decimal?  @db.Decimal(10, 2)
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @updatedAt @db.Timestamp(6)
+}
+
+model student_payments {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullname       String?
+  id_number      String?
+  semester_name  String?
+  acad_year_name String?
+  section_name   String?
+  label          String?
+  amount         Decimal?  @db.Decimal(10, 2)
+  or_number      String?
+  payment_date   DateTime? @db.Timestamp(6)
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @updatedAt @db.Timestamp(6)
 }
