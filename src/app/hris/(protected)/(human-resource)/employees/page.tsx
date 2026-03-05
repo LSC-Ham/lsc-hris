@@ -23,23 +23,32 @@ export default async function Page({
 
     // 2. Fetch Data and Total Count simultaneously
     const [employeesList, totalEmployees] = await Promise.all([
-        prisma.biography.findMany({
+        prisma.employees.findMany({
             skip: skip,
             take: ITEMS_PER_PAGE,
             include: {
-                personal_information: {
+                departments: {
                     select: {
-                        firstname: true,
-                        middlename: true,
-                        surname: true,
+                        department: true,
                     }
                 },
-                employees: {
-                    include: {
-                        departments: true,
-                        divisions: true,
+                divisions: {
+                    select: {
+                        division: true
                     }
                 },
+                biography: {
+                    select: {
+                        personal_information: {
+                            select: {
+                                firstname: true,
+                                middlename: true,
+                                surname: true,
+                            }
+                        },
+                    }
+                }
+
             },
             orderBy: {
                 created_at: "desc",
@@ -74,7 +83,7 @@ export default async function Page({
                     totalPages={totalPages}
                     currentPage={currentPage}
                     totalItems={totalEmployees}
-                    itemName="users"
+                    itemName="employees"
                 />
             </div>
         </div>
