@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; // Added router for redirection
-import { EmploymentDetails } from "@/components/hris/profile/EmploymentDetails";
-import { PersonalInformation } from "@/components/hris/profile/PersonalInformation";
+import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
+import { PersonalInformation } from "@/components/profile/PersonalInformation";
 
 import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";

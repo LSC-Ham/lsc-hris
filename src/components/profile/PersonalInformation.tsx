@@ -145,18 +145,6 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
     );
 }
 
-// --- Internal Helper for Loading States ---
-function LoadingPlaceholder({ label }: { label: string }) {
-    return (
-        <div className="w-full">
-            <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">{label}</label>
-            <div className="w-full p-2.5 border border-gray-100 bg-gray-50 rounded-lg text-xs text-gray-400 animate-pulse">
-                Loading options...
-            </div>
-        </div>
-    );
-}
-
 // ----------------------------------------------------------------------
 // HELPER COMPONENTS
 // ----------------------------------------------------------------------
@@ -176,14 +164,14 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
                     required={required}
                     disabled={disabled}
                     className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm outline-none 
-                    ${type === 'text' ? 'uppercase' : ''} 
+                    ${type === 'text'} 
                     ${disabled
                             ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
                             : "bg-white focus:ring-1 " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
                         }`}
                 />
             ) : (
-                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center">
+                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center uppercase">
                     {value || <span className="text-gray-400 italic">Not set</span>}
                 </div>
             )}
@@ -220,7 +208,7 @@ function ProfileSelect({ label, value, options, isEditing, onChange, required, d
                     </div>
                 </div>
             ) : (
-                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center">
+                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center uppercase">
                     {value || <span className="text-gray-400 italic">Not set</span>}
                 </div>
             )}

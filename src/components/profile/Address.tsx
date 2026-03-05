@@ -351,7 +351,7 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
                     />
                 )
             ) : (
-                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center">
+                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center uppercase">
                     {value || <span className="text-gray-400 italic">Not set</span>}
                 </div>
             )}

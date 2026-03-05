@@ -10,7 +10,7 @@ import { getFamilyBackground } from "@/actions/employees/family_background/actio
 import { getPersonalInformation } from "@/actions/employees/personal_information/actions";
 import { getUsers } from "@/actions/employees/users/action";
 import { getWorkExperience } from "@/actions/employees/work_experience/action";
-import ProfilePage from "@/components/hris/profile/ProfilePage";
+import EmployeePage from "@/app/hris/(protected)/(human-resource)/employees/[id_number]/EmployeePage";
 
 import { prisma } from "@/lib/prisma";
 
@@ -55,7 +55,7 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
 
 
     // 3. Pass the fetched data to the Client Component
-    return <ProfilePage role="moderator"
+    return <EmployeePage role="moderator"
         user={user} personal_information={personal_information}
         employment_details={employment_details} address={address}
         family_background={family_background}

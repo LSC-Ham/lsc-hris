@@ -7,7 +7,7 @@ import { getFamilyBackground } from "@/actions/employees/family_background/actio
 import { getPersonalInformation } from "@/actions/employees/personal_information/actions";
 import { getUsers } from "@/actions/employees/users/action";
 import { getWorkExperience } from "@/actions/employees/work_experience/action";
-import ProfilePage from "@/components/hris/profile/ProfilePage";
+import EmployeePage from "@/app/hris/(protected)/(human-resource)/employees/[id_number]/EmployeePage";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -49,7 +49,7 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
 
 
     // 3. Pass the fetched data to the Client Component
-    return <ProfilePage
+    return <EmployeePage
         role={null}
         user={user}
         personal_information={personal_information}

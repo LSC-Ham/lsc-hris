@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import ProfilePictureUpload from "./profile/ProfilePictureUpload";
+import ProfilePictureUpload from "../profile/ProfilePictureUpload";
 import Image from "next/image";
 
 // 1. Add idNumber to your props interface

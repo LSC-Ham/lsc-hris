@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import ProfilePictureUpload from "../hris/profile/ProfilePictureUpload";
+import ProfilePictureUpload from "../profile/ProfilePictureUpload";
 
 // 1. REMOVED Admin Panel from here to place it manually later
 const navItems = [

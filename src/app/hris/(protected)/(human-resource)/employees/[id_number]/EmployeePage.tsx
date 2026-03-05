@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { EmploymentDetails } from "@/components/hris/profile/EmploymentDetails";
-import { PersonalInformation } from "@/components/hris/profile/PersonalInformation";
-import { Address } from "@/components/hris/profile/Address";
-import { FamilyBackground } from "@/components/hris/profile/FamilyBackground";
-import { EducationalBackground } from "@/components/hris/profile/EducationalBackground";
-import { Eligibility } from "@/components/hris/profile/Eligibility";
-import { WorkExperience } from "@/components/hris/profile/WorkExperience";
+import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
+import { PersonalInformation } from "@/components/profile/PersonalInformation";
+import { Address } from "@/components/profile/Address";
+import { FamilyBackground } from "@/components/profile/FamilyBackground";
+import { EducationalBackground } from "@/components/profile/EducationalBackground";
+import { Eligibility } from "@/components/profile/Eligibility";
+import { WorkExperience } from "@/components/profile/WorkExperience";
 
-import ProfilePictureUpload from "./ProfilePictureUpload";
+import ProfilePictureUpload from "../../../../../../components/profile/ProfilePictureUpload";
 import { updateEmploymentDetails } from "@/actions/employees/employment_details/action";
 import { updatePersonalInformation } from "@/actions/employees/personal_information/actions";
 import { updateAddress } from "@/actions/employees/address/action";
@@ -18,7 +18,7 @@ import { updateEducationalBackground } from "@/actions/employees/educational_bac
 import { updateEligibility } from "@/actions/employees/eligibility/action";
 import { updateWorkExperience } from "@/actions/employees/work_experience/action";
 
-interface ProfilePageProps {
+interface EmployeePageProps {
     role: null | "moderator";
     user: any;
     personal_information: any;
@@ -48,12 +48,12 @@ const DEFAULT_EMPLOYMENT_DATA = {
     gsis_no: "", pagibig_no: "", philhealth_no: "", sss_no: "", tin_no: "", agency_no: ""
 };
 
-export default function ProfilePage({
+export default function EmployeePage({
     role, user,
     personal_information, employment_details, address, family_background,
     educational_background, eligibility, work_experience,
     departments = [], divisions = [], positions = []
-}: ProfilePageProps) {
+}: EmployeePageProps) {
 
     const [activeTab, setActiveTab] = useState("Employment Details");
 
