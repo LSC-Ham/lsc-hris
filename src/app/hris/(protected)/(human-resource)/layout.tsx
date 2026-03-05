@@ -34,7 +34,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
         } // Only grab what we need for performance
     });
 
-    const role = ALLOWED_DEPARTMENTS.includes(userData?.biography?.employees?.departments.department.toLowerCase() || "")
+    const role = ALLOWED_DEPARTMENTS.includes(userData?.biography?.employees?.departments?.department.toLowerCase() || "")
 
     if (!role) {
         redirect("/hris/dashboard");

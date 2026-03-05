@@ -109,6 +109,7 @@ export async function updateEmploymentDetails(employeeId: string, formData: any)
                     positions_id: posId,
                     status: p.status,
                     description: p.description,
+                    is_active: Boolean(p.is_active), // <--- ADDED: Save the active state
                     start_at: p.start_at ? new Date(p.start_at) : null,
                     end_at: p.end_at ? new Date(p.end_at) : null,
                 };

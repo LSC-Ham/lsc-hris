@@ -5,9 +5,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt"; // Requires: npm install bcryptjs\
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
 
 export async function createEmployee(data: any) {
     try {
@@ -111,6 +108,7 @@ export async function createEmployee(data: any) {
                         positions_id: posId,
                         status: p.status,
                         description: p.description,
+                        is_active: Boolean(p.is_active), // <--- ADDED: Save the active state here too!
                         start_at: p.start_at ? new Date(p.start_at) : null,
                         end_at: p.end_at ? new Date(p.end_at) : null,
                     };

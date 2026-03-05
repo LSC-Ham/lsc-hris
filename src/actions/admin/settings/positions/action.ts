@@ -13,6 +13,7 @@ export async function getPositions() {
             select: {
                 id: true,
                 position: true,
+                departments_id: true, // <-- ADDED: So the frontend can pre-fill the dropdowns
                 description: true
             },
             orderBy: { position: 'asc' },
@@ -26,10 +27,12 @@ export async function getPositions() {
 // CREATE
 export async function addPosition(formData: FormData) {
     const position = formData.get("position") as string;
+    const department = formData.get("department") as string; // <-- ADDED: Get the selected department ID
     const description = formData.get("description") as string;
 
     await prisma.positions.create({
-        data: { position, description },
+        // ADDED: Pass the department ID to your database column (departments_id)
+        data: { position, departments_id: department, description },
     });
 
     revalidatePath("/hris/settings");
@@ -38,11 +41,13 @@ export async function addPosition(formData: FormData) {
 // UPDATE
 export async function updatePosition(id: string, formData: FormData) {
     const position = formData.get("position") as string;
+    const department = formData.get("department") as string; // <-- ADDED: Get the selected department ID
     const description = formData.get("description") as string;
 
     await prisma.positions.update({
         where: { id },
-        data: { position, description },
+        // ADDED: Update the department ID in your database column
+        data: { position, departments_id: department, description },
     });
 
     revalidatePath("/hris/settings");
@@ -57,8 +62,7 @@ export async function deletePosition(id: string) {
     revalidatePath("/hris/settings");
 }
 
-// src/actions/admin/settings/positions/actions.ts
-
+// GET EXISTING STATUSES
 export async function getExistingStatuses() {
     try {
         return await prisma.employees_positions.findMany({
@@ -70,5 +74,4 @@ export async function getExistingStatuses() {
         console.error("Error fetching statuses:", error);
         return [];
     }
-
 }

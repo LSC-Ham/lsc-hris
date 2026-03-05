@@ -3,20 +3,27 @@
 
 import { addPosition, deletePosition, updatePosition } from "@/actions/admin/settings/positions/action";
 import { useState } from "react";
-// Import your server actions (adjust the path if necessary)
 
-// Define the shape of the data we expect to receive
+// The Position type
 type Position = {
     id: string;
     position: string;
+    departments_id: string | null;
     description: string | null;
+};
+
+// CHANGED: 'name' is now 'department' to match the likely database structure
+type Department = {
+    id: string;
+    department: string;
 };
 
 interface PositionsTemplateProps {
     data: Position[];
+    departments: Department[];
 }
 
-export default function Positions({ data }: PositionsTemplateProps) {
+export default function Positions({ data, departments }: PositionsTemplateProps) {
     const [editingId, setEditingId] = useState<string | null>(null);
 
     return (
@@ -30,6 +37,22 @@ export default function Positions({ data }: PositionsTemplateProps) {
                     required
                     className="flex-1 border border-gray-300 px-3 py-2 rounded-md text-sm"
                 />
+
+                <select
+                    name="department"
+                    required
+                    defaultValue=""
+                    className="flex-1 border border-gray-300 px-3 py-2 rounded-md text-sm bg-white"
+                >
+                    <option value="" disabled>Select Department</option>
+                    {/* CHANGED: Now rendering dept.department */}
+                    {departments?.map((dept) => (
+                        <option key={dept.id} value={dept.id}>
+                            {dept.department}
+                        </option>
+                    ))}
+                </select>
+
                 <input
                     type="text"
                     name="description"
@@ -47,51 +70,74 @@ export default function Positions({ data }: PositionsTemplateProps) {
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
                             <th className="px-4 py-3 font-medium text-gray-700">Name</th>
+                            <th className="px-4 py-3 font-medium text-gray-700">Department</th>
                             <th className="px-4 py-3 font-medium text-gray-700">Description</th>
                             <th className="px-4 py-3 font-medium text-gray-700 w-32 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 bg-white">
-                        {data.map((pos) => (
-                            <tr key={pos.id}>
-                                {/* IF EDITING THIS ROW */}
-                                {editingId === pos.id ? (
-                                    <td colSpan={3} className="px-4 py-3">
-                                        <form
-                                            action={(formData) => {
-                                                updatePosition(pos.id, formData);
-                                                setEditingId(null);
-                                            }}
-                                            className="flex gap-2"
-                                        >
-                                            <input type="text" name="position" defaultValue={pos.position} required className="flex-1 border rounded px-2 py-1 text-sm" />
-                                            <input type="text" name="description" defaultValue={pos.description || ""} className="flex-1 border rounded px-2 py-1 text-sm" />
-                                            <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium">Save</button>
-                                            <button type="button" onClick={() => setEditingId(null)} className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs font-medium">Cancel</button>
-                                        </form>
-                                    </td>
-                                ) : (
-                                    /* NORMAL ROW DISPLAY */
-                                    <>
-                                        <td className="px-4 py-3 font-medium text-gray-900">{pos.position}</td>
-                                        <td className="px-4 py-3 text-gray-500">{pos.description || "—"}</td>
-                                        <td className="px-4 py-3 text-right space-x-3">
-                                            <button onClick={() => setEditingId(pos.id)} className="text-blue-600 hover:underline text-xs font-medium">Edit</button>
-                                            <button onClick={() => {
-                                                if (confirm("Are you sure you want to delete this position?")) {
-                                                    deletePosition(pos.id);
-                                                }
-                                            }} className="text-red-600 hover:underline text-xs font-medium">
-                                                Delete
-                                            </button>
+                        {data.map((pos) => {
+                            // CHANGED: Now checking for d.department instead of d.name
+                            const departmentName = departments?.find(d => d.id === pos.departments_id)?.department || pos.departments_id;
+
+                            return (
+                                <tr key={pos.id}>
+                                    {/* IF EDITING THIS ROW */}
+                                    {editingId === pos.id ? (
+                                        <td colSpan={4} className="px-4 py-3">
+                                            <form
+                                                action={(formData) => {
+                                                    updatePosition(pos.id, formData);
+                                                    setEditingId(null);
+                                                }}
+                                                className="flex gap-2"
+                                            >
+                                                <input type="text" name="position" defaultValue={pos.position} required className="flex-1 border rounded px-2 py-1 text-sm" />
+
+                                                <select
+                                                    name="department"
+                                                    defaultValue={pos.departments_id || ""}
+                                                    required
+                                                    className="flex-1 border rounded px-2 py-1 text-sm bg-white"
+                                                >
+                                                    <option value="" disabled>Select Department</option>
+                                                    {/* CHANGED: Now rendering dept.department */}
+                                                    {departments?.map((dept) => (
+                                                        <option key={dept.id} value={dept.id}>
+                                                            {dept.department}
+                                                        </option>
+                                                    ))}
+                                                </select>
+
+                                                <input type="text" name="description" defaultValue={pos.description || ""} className="flex-1 border rounded px-2 py-1 text-sm" />
+                                                <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium">Save</button>
+                                                <button type="button" onClick={() => setEditingId(null)} className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs font-medium">Cancel</button>
+                                            </form>
                                         </td>
-                                    </>
-                                )}
-                            </tr>
-                        ))}
+                                    ) : (
+                                        /* NORMAL ROW DISPLAY */
+                                        <>
+                                            <td className="px-4 py-3 font-medium text-gray-900">{pos.position}</td>
+                                            <td className="px-4 py-3 font-medium text-gray-900">{departmentName}</td>
+                                            <td className="px-4 py-3 text-gray-500">{pos.description || "—"}</td>
+                                            <td className="px-4 py-3 text-right space-x-3">
+                                                <button onClick={() => setEditingId(pos.id)} className="text-blue-600 hover:underline text-xs font-medium">Edit</button>
+                                                <button onClick={() => {
+                                                    if (confirm("Are you sure you want to delete this position?")) {
+                                                        deletePosition(pos.id);
+                                                    }
+                                                }} className="text-red-600 hover:underline text-xs font-medium">
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </>
+                                    )}
+                                </tr>
+                            );
+                        })}
                         {data.length === 0 && (
                             <tr>
-                                <td colSpan={3} className="px-4 py-6 text-center text-gray-500">
+                                <td colSpan={4} className="px-4 py-6 text-center text-gray-500">
                                     No positions found.
                                 </td>
                             </tr>

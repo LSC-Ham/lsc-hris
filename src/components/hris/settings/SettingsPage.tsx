@@ -47,7 +47,7 @@ export default function SettingsPage({ divisions, departments, positions }: Sett
 
                     {/* Positions (Placeholder for when you make PositionsTemplate) */}
                     <CollapsibleSection title="Positions">
-                        <Positions data={positions} />
+                        <Positions data={positions} departments={departments} />
                     </CollapsibleSection>
 
                 </div>

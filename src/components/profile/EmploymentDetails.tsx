@@ -1,8 +1,9 @@
+// src/components/hris/employees/EmploymentDetails.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 
-const POSITION_STATUSES = ["Full-Time", "Part-Time",];
+const POSITION_STATUSES = ["Full-Time", "Part-Time"];
 const EMPLOYMENT_STATUSES = ["Probationary", "Regular", "Resigned"];
 
 interface EmploymentDetailsProps {
@@ -12,7 +13,7 @@ interface EmploymentDetailsProps {
     departments?: string[];
     availablePositions?: string[];
     onSave?: (updatedData: any) => void;
-    onChange?: (updatedFields: any) => void; // 👈 ADD THIS
+    onChange?: (updatedFields: any) => void;
 }
 
 export function EmploymentDetails({
@@ -26,15 +27,15 @@ export function EmploymentDetails({
 }: EmploymentDetailsProps) {
     const [isEditing, setIsEditing] = useState(mode === "create");
     const [draftData, setDraftData] = useState<any>({});
+
+    // ADDED: is_active to the state
     const [assignedPosition, setAssignedPosition] = useState({
-        position: "", status: "", description: "", start_at: "", end_at: ""
+        position: "", status: "", description: "", start_at: "", end_at: "", is_active: false
     });
 
     // --- Formatters ---
-    // 1. Formats the date EXACTLY ONCE for the input field
     const formatDateForInput = (dateVal: any) => {
         if (!dateVal) return "";
-        // If it's already formatted as YYYY-MM-DDTHH:mm, leave it alone
         if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dateVal)) {
             return dateVal.slice(0, 16);
         }
@@ -50,7 +51,6 @@ export function EmploymentDetails({
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
 
-    // 2. Formats the date for human-readable View Mode
     const formatHiredDateView = (dateVal: any) => {
         if (!dateVal) return "";
         const d = new Date(dateVal);
@@ -71,9 +71,15 @@ export function EmploymentDetails({
     // --- State Sync ---
     useEffect(() => {
         const initialData = formData || {};
+
+        // Ensure positions are sorted on initial load (Active on top)
+        const sortedPositions = [...(initialData.positions || [])].sort((a, b) =>
+            (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1)
+        );
+
         setDraftData({
             ...initialData,
-            // Pre-format the date when loading so we don't do it on every keystroke
+            positions: sortedPositions,
             hired_at: formatDateForInput(initialData.hired_at)
         });
     }, [formData]);
@@ -82,22 +88,50 @@ export function EmploymentDetails({
     // --- Handlers ---
     const handleLocalChange = (field: string, value: any) => {
         setDraftData((prev: any) => ({ ...prev, [field]: value }));
-
         if (onChange) {
             onChange({ [field]: value });
         }
     };
 
-    const handleAssignedChange = (field: string, value: string) => {
+    // CHANGED: Value parameter accepts `any` now to support the checkbox boolean
+    const handleAssignedChange = (field: string, value: any) => {
         setAssignedPosition((prev) => ({ ...prev, [field]: value }));
     };
 
+    // --- POSITIONS LOGIC ---
     const handleAddPositionObj = () => {
         if (!assignedPosition.position || !assignedPosition.status) return;
 
-        const updatedPositions = [...(draftData.positions || []), assignedPosition];
+        let updatedPositions = [...(draftData.positions || [])];
+
+        // 1. Enforce uniqueness: If the new position is active, deactivate the rest
+        if (assignedPosition.is_active) {
+            updatedPositions = updatedPositions.map(p => ({ ...p, is_active: false }));
+        } else if (updatedPositions.length === 0) {
+            // Quality of life: If it's the very first position being added, make it active by default
+            assignedPosition.is_active = true;
+        }
+
+        updatedPositions.push({ ...assignedPosition });
+
+        // 2. Sort so the active position is always at index 0
+        updatedPositions.sort((a, b) => (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1));
+
         handleLocalChange("positions", updatedPositions);
-        setAssignedPosition({ position: "", status: "", description: "", start_at: "", end_at: "" });
+        setAssignedPosition({ position: "", status: "", description: "", start_at: "", end_at: "", is_active: false });
+    };
+
+    const handleSetActivePosition = (indexToActivate: number) => {
+        // Map through and set ONLY the target index to true, the rest to false
+        let updatedPositions = (draftData.positions || []).map((p: any, i: number) => ({
+            ...p,
+            is_active: i === indexToActivate
+        }));
+
+        // Re-sort to put the active one on top
+        updatedPositions.sort((a: any, b: any) => (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1));
+
+        handleLocalChange("positions", updatedPositions);
     };
 
     const handleRemovePosition = (indexToRemove: number) => {
@@ -108,12 +142,17 @@ export function EmploymentDetails({
     // --- Save & Cancel Logic ---
     const handleCancel = () => {
         const initialData = formData || {};
+        const sortedPositions = [...(initialData.positions || [])].sort((a, b) =>
+            (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1)
+        );
+
         setDraftData({
             ...initialData,
-            hired_at: formatDateForInput(initialData.hired_at) // Reset formatting on cancel
+            positions: sortedPositions,
+            hired_at: formatDateForInput(initialData.hired_at)
         });
         setIsEditing(false);
-        setAssignedPosition({ position: "", status: "", description: "", start_at: "", end_at: "" });
+        setAssignedPosition({ position: "", status: "", description: "", start_at: "", end_at: "", is_active: false });
     };
 
     const handleSaveClick = () => {
@@ -151,8 +190,6 @@ export function EmploymentDetails({
                         required
                         disabled={true}
                     />
-                    {/* THE FIX IS APPLIED HERE */}
-
                     <ProfileSelect
                         label="Employment Status"
                         value={draftData.remarks}
@@ -199,17 +236,25 @@ export function EmploymentDetails({
                             draftData.positions.map((pos: any, index: number) => (
                                 <div
                                     key={pos.id || index}
-                                    className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-lg border transition-colors ${pos.end_at < new Date()
-                                        ? 'bg-white border-green-200 shadow-sm'
-                                        : 'bg-gray-50 border-gray-100 opacity-75'
+                                    className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-lg border transition-all ${pos.is_active
+                                            ? 'bg-white border-green-300 shadow-sm ring-1 ring-green-100'
+                                            : 'bg-gray-50 border-gray-200 opacity-75'
                                         }`}
                                 >
                                     {/* Left Side: Position Info */}
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
-                                            <h4 className="font-bold text-gray-800 text-sm">
+                                            <h4 className={`font-bold text-sm ${pos.is_active ? 'text-gray-900' : 'text-gray-600'}`}>
                                                 {pos.position}
                                             </h4>
+
+                                            {/* ACTIVE BADGE */}
+                                            {pos.is_active && (
+                                                <span className="px-2 py-[2px] rounded text-[9px] uppercase font-bold tracking-wider border bg-green-50 text-green-700 border-green-200">
+                                                    Active Role
+                                                </span>
+                                            )}
+
                                             <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border ${pos.end_at < new Date()
                                                 ? 'bg-green-50 text-green-700 border-green-200'
                                                 : 'bg-gray-200 text-gray-600 border-gray-300'
@@ -236,16 +281,29 @@ export function EmploymentDetails({
 
                                     {/* Right Side: Actions */}
                                     {isEditing && (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemovePosition(index)}
-                                            className="group flex items-center gap-1 text-red-400 hover:text-red-600 text-xs font-medium mt-3 sm:mt-0 transition-colors"
-                                        >
-                                            <span>Remove</span>
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
+                                        <div className="flex items-center gap-4 mt-3 sm:mt-0">
+                                            {/* SET ACTIVE BUTTON */}
+                                            {!pos.is_active && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleSetActivePosition(index)}
+                                                    className="text-[#1a6b36] hover:text-green-800 text-xs font-semibold transition-colors"
+                                                >
+                                                    Set Active
+                                                </button>
+                                            )}
+
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemovePosition(index)}
+                                                className="group flex items-center gap-1 text-red-400 hover:text-red-600 text-xs font-medium transition-colors"
+                                            >
+                                                <span>Remove</span>
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             ))
@@ -302,7 +360,19 @@ export function EmploymentDetails({
                                     onChange={(e: any) => handleAssignedChange("end_at", e.target.value)}
                                 />
                             </div>
-                            <div className="flex justify-end">
+
+                            {/* ACTIVE CHECKBOX & ADD BUTTON */}
+                            <div className="flex justify-between items-center border-t border-green-100 pt-4 mt-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={assignedPosition.is_active}
+                                        onChange={(e) => handleAssignedChange("is_active", e.target.checked)}
+                                        className="w-4 h-4 text-[#1a6b36] rounded border-gray-300 focus:ring-[#1a6b36]"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">Set as current Active Role</span>
+                                </label>
+
                                 <button
                                     type="button"
                                     onClick={handleAddPositionObj}
@@ -349,7 +419,7 @@ export function EmploymentDetails({
 }
 
 // ----------------------------------------------------------------------
-// HELPER COMPONENTS
+// HELPER COMPONENTS (Unchanged)
 // ----------------------------------------------------------------------
 
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
@@ -369,14 +439,14 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
                     required={required}
                     disabled={disabled}
                     className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm outline-none 
-                    ${type === 'text' ? 'uppercase' : ''} 
+                    ${type === 'text'} 
                     ${disabled
                             ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
                             : "bg-white focus:ring-1 " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
                         }`}
                 />
             ) : (
-                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center">
+                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center uppercase">
                     {displayValue || <span className="text-gray-400 italic">Not set</span>}
                 </div>
             )}
@@ -413,7 +483,7 @@ function ProfileSelect({ label, value, options, isEditing, onChange, required, d
                     </div>
                 </div>
             ) : (
-                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center">
+                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center uppercase">
                     {value || <span className="text-gray-400 italic">Not set</span>}
                 </div>
             )}
