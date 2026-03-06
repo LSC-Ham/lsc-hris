@@ -225,18 +225,30 @@ export default function EmployeePage({
         );
     };
 
-    const handleSaveEligibility = (data: any[]) => {
+    const handleSaveEligibility = (data: any) => {
         handleAction(
-            updateEligibility,
+            (formData: any[]) => {
+                const payload = {
+                    id_number: employmentData.id_number,
+                    records: formData
+                };
+                return updateEligibility(payload);
+            },
             setEligibilityData,
             data,
             "Eligibility updated successfully!"
         );
     };
 
-    const handleSaveWorkExp = (data: any[]) => {
+    const handleSaveWorkExp = (data: any) => {
         handleAction(
-            updateWorkExperience,
+            (formData: any[]) => {
+                const payload = {
+                    id_number: employmentData.id_number,
+                    records: formData
+                };
+                return updateWorkExperience(payload);
+            },
             setWorkExperienceData,
             data,
             "Work Experience updated successfully!"
@@ -281,8 +293,9 @@ export default function EmployeePage({
             case "Employee Address":
                 return (
                     <Address
+                        mode={isMod ? "view" : undefined}
                         formData={addressData}
-                        onSave={handleSaveAddress}
+                        onSave={isUser ? handleSaveAddress : undefined}
                     />
                 );
             case "Family Background":

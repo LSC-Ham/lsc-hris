@@ -44,18 +44,24 @@ export async function getWorkExperience(employeeId: string) {
     }
 }
 
-export async function updateWorkExperience(data: any[]) {
+export async function updateWorkExperience(data: any) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) {
-            return { success: false, error: "Unauthorized. Please log in." };
-        }
+        const employee = await prisma.employees.findFirst({
+            where: { id_number: data.id_number },
+            select: {
+                biography: {
+                    select: { users_id: true }
+                }
+            }
+        });
 
-        const userId = (session.user as any).id;
+        if (!employee || !employee.biography?.users_id) {
+            return { success: false, error: "Employee record not found." };
+        }
 
         await prisma.biography.update({
             where: {
-                users_id: userId
+                users_id: employee.biography.users_id
             },
             data: {
                 work_experience: {
@@ -63,7 +69,7 @@ export async function updateWorkExperience(data: any[]) {
                     deleteMany: {},
 
                     // 2. Create the new records
-                    create: data.map((record: any) => ({
+                    create: data.records.map((record: any) => ({
                         date_from: record.date_from ? new Date(record.date_from) : null,
                         date_to: record.date_to ? new Date(record.date_to) : null,
                         position_title: record.position_title || null,

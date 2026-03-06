@@ -42,18 +42,24 @@ export async function getEligibility(employeeId: string) {
     }
 }
 
-export async function updateEligibility(data: any[]) {
+export async function updateEligibility(data: any) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) {
-            return { success: false, error: "Unauthorized. Please log in." };
-        }
+        const employee = await prisma.employees.findFirst({
+            where: { id_number: data.id_number },
+            select: {
+                biography: {
+                    select: { users_id: true }
+                }
+            }
+        });
 
-        const userId = (session.user as any).id;
+        if (!employee || !employee.biography?.users_id) {
+            return { success: false, error: "Employee record not found." };
+        }
 
         await prisma.biography.update({
             where: {
-                users_id: userId
+                users_id: employee.biography.users_id
             },
             data: {
                 // Nested write for the eligibility relation
@@ -62,7 +68,7 @@ export async function updateEligibility(data: any[]) {
                     deleteMany: {},
 
                     // 2. Create the new records from the array
-                    create: data.map((record: any) => ({
+                    create: data.records.map((record: any) => ({
                         qualification: record.qualification || null,
                         rating: record.rating || null,
                         // Schema uses String? for these, so we pass them directly
