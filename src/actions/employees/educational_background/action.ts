@@ -46,19 +46,23 @@ export async function getEducationalBackground(employeeId: string) {
     }
 }
 
-export async function updateEducationalBackground(data: any[]) { // Expecting an array of records
+export async function updateEducationalBackground(data: any) { // Expecting an array of records
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) {
-            return { success: false, error: "Unauthorized. Please log in." };
+        const employee = await prisma.employees.findFirst({
+            where: { id_number: data.id_number },
+            select: {
+                biography: {
+                    select: { users_id: true }
+                }
+            }
+        });
+
+        if (!employee || !employee.biography?.users_id) {
+            return { success: false, error: "Employee record not found." };
         }
 
-        const userId = (session.user as any).id;
-
         await prisma.biography.update({
-            where: {
-                users_id: userId
-            },
+            where: { users_id: employee.biography.users_id },
             data: {
                 // This is the magic nested write block
                 educational_background: {
@@ -66,7 +70,7 @@ export async function updateEducationalBackground(data: any[]) { // Expecting an
                     deleteMany: {},
 
                     // 2. Insert the updated array of records
-                    create: data.map((record: any) => ({
+                    create: data.records.map((record: any) => ({
                         level: record.level || null,
                         school: record.school || null,
                         degree: record.degree || null,

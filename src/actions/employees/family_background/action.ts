@@ -50,25 +50,27 @@ export async function getFamilyBackground(employeeId: string) {
 
 export async function updateFamilyBackground(data: any) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) {
-            return { success: false, error: "Unauthorized. Please log in." };
+        const employee = await prisma.employees.findFirst({
+            where: { id_number: data.id_number },
+            select: {
+                biography: {
+                    select: { users_id: true }
+                }
+            }
+        });
+
+        if (!employee || !employee.biography?.users_id) {
+            return { success: false, error: "Employee record not found." };
         }
 
-        const userId = (session.user as any).id;
-
         await prisma.biography.update({
-            where: {
-                users_id: userId
-            },
+            where: { users_id: employee.biography.users_id },
             data: {
                 // Access your family background relation (adjust 'family_background' to match your schema)
                 family_background: {
                     // 1. Clear out the existing family records for these specific relationships
                     deleteMany: {
-                        relation_type: {
-                            in: ["guardian", "father", "mother"]
-                        }
+                        relation_type: { in: ["guardian", "father", "mother"] }
                     },
                     // 2. Insert the updated records
                     create: [

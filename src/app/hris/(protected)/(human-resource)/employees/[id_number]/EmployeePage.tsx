@@ -9,16 +9,16 @@ import { EducationalBackground } from "@/components/profile/EducationalBackgroun
 import { Eligibility } from "@/components/profile/Eligibility";
 import { WorkExperience } from "@/components/profile/WorkExperience";
 
-import ProfilePictureUpload from "../../../../../../components/profile/ProfilePictureUpload";
+import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
 import { updateEmploymentDetails } from "@/actions/employees/employment_details/action";
 import { updatePersonalInformation } from "@/actions/employees/personal_information/actions";
 import { updateAddress } from "@/actions/employees/address/action";
 import { updateFamilyBackground } from "@/actions/employees/family_background/action";
-import { updateEducationalBackground } from "@/actions/employees/educational_background/route";
+import { updateEducationalBackground } from "@/actions/employees/educational_background/action";
 import { updateEligibility } from "@/actions/employees/eligibility/action";
 import { updateWorkExperience } from "@/actions/employees/work_experience/action";
 import { deleteEmployee } from "@/actions/employees/action";
-import { useRouter } from "next/navigation"; // 👈 Import this at the top
+import { useRouter } from "next/navigation";
 
 interface EmployeePageProps {
     role: null | "moderator";
@@ -36,25 +36,57 @@ interface EmployeePageProps {
 }
 
 const DEFAULT_USER_DATA = {
-    id: "", profile_picture: ""
-}
+    id: "",
+    profile_picture: ""
+};
 
 const DEFAULT_PERSONAL_DATA = {
-    surname: "", firstname: "", middlename: "", extension: "", birthdate: "",
-    birthplace: "", sex: "", civil_status: "", telephone_no: "", mobile_no: "",
-    email: "", nationality: "", height: "", weight: "", blood_type: ""
+    surname: "",
+    firstname: "",
+    middlename: "",
+    extension: "",
+    birthdate: "",
+    birthplace: "",
+    sex: "",
+    civil_status: "",
+    telephone_no: "",
+    mobile_no: "",
+    email: "",
+    nationality: "",
+    height: "",
+    weight: "",
+    blood_type: ""
 };
 
 const DEFAULT_EMPLOYMENT_DATA = {
-    id_number: "", remarks: "", hired_at: "", division: "", department: "", positions: [], govt_ids: [],
-    gsis_no: "", pagibig_no: "", philhealth_no: "", sss_no: "", tin_no: "", agency_no: ""
+    id_number: "",
+    remarks: "",
+    hired_at: "",
+    division: "",
+    department: "",
+    positions: [],
+    govt_ids: [],
+    gsis_no: "",
+    pagibig_no: "",
+    philhealth_no: "",
+    sss_no: "",
+    tin_no: "",
+    agency_no: ""
 };
 
 export default function EmployeePage({
-    role, user,
-    personal_information, employment_details, address, family_background,
-    educational_background, eligibility, work_experience,
-    departments = [], divisions = [], positions = []
+    role,
+    user,
+    personal_information,
+    employment_details,
+    address,
+    family_background,
+    educational_background,
+    eligibility,
+    work_experience,
+    departments = [],
+    divisions = [],
+    positions = []
 }: EmployeePageProps) {
     const router = useRouter();
 
@@ -64,7 +96,6 @@ export default function EmployeePage({
     const [educationData, setEducationData] = useState(Array.isArray(educational_background) ? educational_background : []);
     const [eligibilityData, setEligibilityData] = useState(Array.isArray(eligibility) ? eligibility : []);
     const [workExperienceData, setWorkExperienceData] = useState(Array.isArray(work_experience) ? work_experience : []);
-
 
     const [userData] = useState({ ...DEFAULT_USER_DATA, ...(user || {}) });
     const [personalData, setPersonalData] = useState({ ...DEFAULT_PERSONAL_DATA, ...(personal_information || {}) });
@@ -80,8 +111,26 @@ export default function EmployeePage({
         const perm = getAddr("permanent");
 
         return {
-            residential: { house_no: res.house_no || "", street: res.street || "", subdivision: res.subdivision || "", region: res.region || "", province: res.province || "", city: res.city || "", barangay: res.barangay || "", zip_code: res.zip_code || "" },
-            permanent: { house_no: perm.house_no || "", street: perm.street || "", subdivision: perm.subdivision || "", region: perm.region || "", province: perm.province || "", city: perm.city || "", barangay: perm.barangay || "", zip_code: perm.zip_code || "" }
+            residential: {
+                house_no: res.house_no || "",
+                street: res.street || "",
+                subdivision: res.subdivision || "",
+                region: res.region || "",
+                province: res.province || "",
+                city: res.city || "",
+                barangay: res.barangay || "",
+                zip_code: res.zip_code || ""
+            },
+            permanent: {
+                house_no: perm.house_no || "",
+                street: perm.street || "",
+                subdivision: perm.subdivision || "",
+                region: perm.region || "",
+                province: perm.province || "",
+                city: perm.city || "",
+                barangay: perm.barangay || "",
+                zip_code: perm.zip_code || ""
+            }
         };
     };
 
@@ -94,17 +143,25 @@ export default function EmployeePage({
         const m = getFam("mother");
 
         const mapPerson = (person: any) => ({
-            surname: person.surname || "", firstname: person.firstname || "", middlename: person.middlename || "",
-            extension: person.extension || "", occupation: person.occupation || "", employer: person.employer || "",
-            occupation_address: person.occupation_address || "", contact_no: person.contact_no || ""
+            surname: person.surname || "",
+            firstname: person.firstname || "",
+            middlename: person.middlename || "",
+            extension: person.extension || "",
+            occupation: person.occupation || "",
+            employer: person.employer || "",
+            occupation_address: person.occupation_address || "",
+            contact_no: person.contact_no || ""
         });
 
-        return { guardian: mapPerson(g), father: mapPerson(f), mother: mapPerson(m) };
+        return {
+            guardian: mapPerson(g),
+            father: mapPerson(f),
+            mother: mapPerson(m)
+        };
     };
 
     const [addressData, setAddressData] = useState(buildAddressState());
     const [familyData, setFamilyData] = useState(buildFamilyState());
-
 
     // --- 2. HANDLERS ---
     // CLEANUP: Use a generic helper to reduce the repetitive try/catch blocks
@@ -120,18 +177,77 @@ export default function EmployeePage({
         }
     };
 
-    const handleSavePersonalInfo = (data: any) => handleAction(updatePersonalInformation, (d: any) => setPersonalData((prev: any) => ({ ...prev, ...d })), data, "Personal Information updated successfully!");
-    const handleSaveAddress = (data: any) => handleAction(updateAddress, setAddressData, data, "Address updated successfully!");
-    const handleSaveFamily = (data: any) => handleAction(updateFamilyBackground, setFamilyData, data, "Family background updated successfully!");
-    const handleSaveEducation = (data: any[]) => handleAction(updateEducationalBackground, setEducationData, data, "Educational background updated successfully!");
-    const handleSaveEligibility = (data: any[]) => handleAction(updateEligibility, setEligibilityData, data, "Eligibility updated successfully!");
-    const handleSaveWorkExp = (data: any[]) => handleAction(updateWorkExperience, setWorkExperienceData, data, "Work Experience updated successfully!");
+    const handleSavePersonalInfo = (data: any) => {
+        handleAction(
+            updatePersonalInformation,
+            (d: any) => setPersonalData((prev: any) => ({ ...prev, ...d })),
+            data,
+            "Personal Information updated successfully!"
+        );
+    };
+
+    const handleSaveAddress = (data: any) => {
+        handleAction(
+            (d: any) => {
+                const payload = { ...d, id_number: employmentData.id_number };
+                return updateAddress(payload);
+            },
+            setAddressData,
+            data,
+            "Address updated successfully!"
+        );
+    };
+
+    const handleSaveFamily = (data: any) => {
+        handleAction(
+            (d: any) => {
+                const payload = { ...d, id_number: employmentData.id_number };
+                return updateFamilyBackground(payload);
+            },
+            setFamilyData,
+            data,
+            "Family background updated successfully!"
+        );
+    };
+
+    const handleSaveEducation = (data: any) => {
+        handleAction(
+            (formData: any[]) => {
+                const payload = {
+                    id_number: employmentData.id_number,
+                    records: formData
+                };
+                return updateEducationalBackground(payload);
+            },
+            setEducationData,
+            data,
+            "Educational background updated successfully!"
+        );
+    };
+
+    const handleSaveEligibility = (data: any[]) => {
+        handleAction(
+            updateEligibility,
+            setEligibilityData,
+            data,
+            "Eligibility updated successfully!"
+        );
+    };
+
+    const handleSaveWorkExp = (data: any[]) => {
+        handleAction(
+            updateWorkExperience,
+            setWorkExperienceData,
+            data,
+            "Work Experience updated successfully!"
+        );
+    };
+
     const handleSaveEmploymentDetails = (data: any) => {
         handleAction(
             // 1. Extract the ID from the data and pass it as the first argument
             // 2. Pass the rest of the form data as the second argument
             (formData: any) => updateEmploymentDetails(formData.id, formData),
-
             (d: any) => setEmploymentData((prev: any) => ({ ...prev, ...d })),
             data,
             "Employment details updated successfully!"
@@ -145,22 +261,62 @@ export default function EmployeePage({
 
         switch (activeTab) {
             case "Employment Details":
-                return <EmploymentDetails
-                    mode={isMod ? "update" : "view"}
-                    formData={employmentData}
-                    onSave={handleSaveEmploymentDetails} departments={departments} divisions={divisions} availablePositions={positions} />;
+                return (
+                    <EmploymentDetails
+                        mode={isMod ? "update" : "view"}
+                        formData={employmentData}
+                        onSave={handleSaveEmploymentDetails}
+                        departments={departments}
+                        divisions={divisions}
+                        availablePositions={positions}
+                    />
+                );
             case "Personal Information":
-                return <PersonalInformation formData={personalData} onSave={handleSavePersonalInfo} />;
+                return (
+                    <PersonalInformation
+                        formData={personalData}
+                        onSave={handleSavePersonalInfo}
+                    />
+                );
             case "Employee Address":
-                return <Address mode={isMod ? "view" : undefined} formData={addressData} onSave={isUser ? handleSaveAddress : undefined} />;
+                return (
+                    <Address
+                        formData={addressData}
+                        onSave={handleSaveAddress}
+                    />
+                );
             case "Family Background":
-                return <FamilyBackground mode={isMod ? "view" : undefined} formData={familyData} onSave={isUser ? handleSaveFamily : undefined} />;
+                return (
+                    <FamilyBackground
+                        mode={isMod ? "view" : undefined}
+                        formData={familyData}
+                        onSave={isUser ? handleSaveFamily : undefined}
+                    />
+                );
             case "Educational Background":
-                return <EducationalBackground mode={isMod ? "view" : undefined} formData={educationData} onSave={isUser ? handleSaveEducation : undefined} />;
+                return (
+                    <EducationalBackground
+                        mode={isMod ? "view" : undefined}
+                        formData={educationData}
+                        onSave={isUser ? handleSaveEducation : undefined}
+                    />
+                );
             case "Eligibility":
-                return <Eligibility mode={isMod ? "view" : undefined} formData={eligibilityData} onSave={isUser ? handleSaveEligibility : undefined} />;
+                return (
+                    <Eligibility
+                        mode={isMod ? "view" : undefined}
+                        formData={eligibilityData}
+                        onSave={isUser ? handleSaveEligibility : undefined}
+                    />
+                );
             case "Work Experience":
-                return <WorkExperience mode={isMod ? "view" : undefined} formData={workExperienceData} onSave={isUser ? handleSaveWorkExp : undefined} />;
+                return (
+                    <WorkExperience
+                        mode={isMod ? "view" : undefined}
+                        formData={workExperienceData}
+                        onSave={isUser ? handleSaveWorkExp : undefined}
+                    />
+                );
             default:
                 return (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">
@@ -171,7 +327,19 @@ export default function EmployeePage({
         }
     };
 
-    const menuItems = ["Employment Details", "Personal Information", "Employee Address", "Family Background", "Educational Background", "Eligibility", "Work Experience", "Voluntary Works", "Learning & Development", "Other Information", "References"];
+    const menuItems = [
+        "Employment Details",
+        "Personal Information",
+        "Employee Address",
+        "Family Background",
+        "Educational Background",
+        "Eligibility",
+        "Work Experience",
+        "Voluntary Works",
+        "Learning & Development",
+        "Other Information",
+        "References"
+    ];
 
     return (
         <div className="space-y-6">
@@ -216,9 +384,17 @@ export default function EmployeePage({
                 <div className="md:col-span-4 lg:col-span-3 space-y-6">
                     {/* Profile Picture & Name Card */}
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
-                        <ProfilePictureUpload userId={userData.id} initialImage={userData.profile_picture} size="lg" />
-                        <h2 className="text-lg font-bold text-gray-800 capitalize">{personalData.firstname} {personalData.surname}</h2>
-                        <p className="text-xs text-gray-500 mb-1">{employmentData.department || "No Department Set"}</p>
+                        <ProfilePictureUpload
+                            userId={userData.id}
+                            initialImage={userData.profile_picture}
+                            size="lg"
+                        />
+                        <h2 className="text-lg font-bold text-gray-800 capitalize">
+                            {personalData.firstname} {personalData.surname}
+                        </h2>
+                        <p className="text-xs text-gray-500 mb-1">
+                            {employmentData.department || "No Department Set"}
+                        </p>
                     </div>
 
                     {/* Navigation Menu */}

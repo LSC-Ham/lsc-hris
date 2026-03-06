@@ -25,7 +25,7 @@ export interface EducationRecord {
 interface EducationalBackgroundProps {
     mode?: "view",
     formData: EducationRecord[];
-    onSave?: (updatedData: EducationRecord[]) => Promise<void>; // Changed to onSave and made async
+    onSave?: (updatedData: EducationRecord[]) => void; // Changed to onSave and made async
 }
 
 const emptyRecord: EducationRecord = {

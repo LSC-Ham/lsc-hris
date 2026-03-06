@@ -113,13 +113,15 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
                 <div>
                     <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
                         <h2 className="text-xl font-bold text-gray-800 tracking-tight">Father&apos;s Information</h2>
-                        <button
-                            type="button"
-                            onClick={() => editMode.father ? handleCancel("father") : setEditMode(p => ({ ...p, father: true }))}
-                            className="text-[#1a6b36] text-sm font-medium hover:underline"
-                        >
-                            {editMode.father ? "Cancel" : "Edit"}
-                        </button>
+                        {mode !== "view" && (
+                            <button
+                                type="button"
+                                onClick={() => editMode.father ? handleCancel("father") : setEditMode(p => ({ ...p, father: true }))}
+                                className="text-[#1a6b36] text-sm font-medium hover:underline"
+                            >
+                                {editMode.father ? "Cancel" : "Edit"}
+                            </button>
+                        )}
                     </div>
 
                     <FamilyFormSection
@@ -147,13 +149,15 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
                 <div>
                     <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
                         <h2 className="text-xl font-bold text-gray-800 tracking-tight">Mother&apos;s Information</h2>
-                        <button
-                            type="button"
-                            onClick={() => editMode.mother ? handleCancel("mother") : setEditMode(p => ({ ...p, mother: true }))}
-                            className="text-[#1a6b36] text-sm font-medium hover:underline"
-                        >
-                            {editMode.mother ? "Cancel" : "Edit"}
-                        </button>
+                        {mode !== "view" && (
+                            <button
+                                type="button"
+                                onClick={() => editMode.mother ? handleCancel("mother") : setEditMode(p => ({ ...p, mother: true }))}
+                                className="text-[#1a6b36] text-sm font-medium hover:underline"
+                            >
+                                {editMode.mother ? "Cancel" : "Edit"}
+                            </button>
+                        )}
                     </div>
 
                     <FamilyFormSection

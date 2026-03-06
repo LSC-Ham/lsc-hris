@@ -49,26 +49,27 @@ export async function getAddress(employeeId: string) {
 
 export async function updateAddress(data: any) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) {
-            return { success: false, error: "Unauthorized. Please log in." };
+        const employee = await prisma.employees.findFirst({
+            where: { id_number: data.id_number },
+            select: {
+                biography: {
+                    select: { users_id: true }
+                }
+            }
+        });
+
+        if (!employee || !employee.biography?.users_id) {
+            return { success: false, error: "Employee record not found." };
         }
 
-        const userId = (session.user as any).id;
-
-        // data looks like: { residential: {...}, permanent: {...} }
         await prisma.biography.update({
-            where: {
-                users_id: userId
-            },
+            where: { users_id: employee?.biography.users_id },
             data: {
                 // Access the related address table
                 address: {
                     // 1. Remove the old addresses of these specific types
                     deleteMany: {
-                        address_type: {
-                            in: ["residential", "permanent"]
-                        }
+                        address_type: { in: ["residential", "permanent"] }
                     },
                     // 2. Insert the newly updated ones
                     create: [

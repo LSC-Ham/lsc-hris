@@ -16,7 +16,7 @@ export interface WorkExperienceRecord {
 interface WorkExperienceProps {
     mode?: "view",
     formData: WorkExperienceRecord[];
-    onSave?: (updatedData: WorkExperienceRecord[]) => Promise<void>;
+    onSave?: (updatedData: WorkExperienceRecord[]) => void;
 }
 
 const emptyRecord: WorkExperienceRecord = {

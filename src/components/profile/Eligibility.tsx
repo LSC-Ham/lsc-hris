@@ -15,7 +15,7 @@ export interface EligibilityRecord {
 interface EligibilityProps {
     mode?: "view",
     formData: EligibilityRecord[];
-    onSave?: (updatedData: EligibilityRecord[]) => Promise<void>;
+    onSave?: (updatedData: EligibilityRecord[]) => void;
 }
 
 const emptyRecord: EligibilityRecord = {

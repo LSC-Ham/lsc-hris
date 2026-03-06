@@ -3,7 +3,7 @@ import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";
 import { getPositions } from "@/actions/admin/settings/positions/action";
 import { getAddress } from "@/actions/employees/address/action";
-import { getEducationalBackground } from "@/actions/employees/educational_background/route";
+import { getEducationalBackground } from "@/actions/employees/educational_background/action";
 import { getEligibility } from "@/actions/employees/eligibility/action";
 import { getEmployeeDetails } from "@/actions/employees/employment_details/action";
 import { getFamilyBackground } from "@/actions/employees/family_background/action";
