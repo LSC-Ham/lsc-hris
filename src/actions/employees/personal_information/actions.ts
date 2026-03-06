@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-export async function getPersonalInformation(employeeId: string) {
+export async function getPersonalInformation(idNumber: string) {
     try {
         // 2. Keep the session check! This ensures anonymous visitors 
         // can't just type in a URL and steal employee data.
@@ -17,7 +17,7 @@ export async function getPersonalInformation(employeeId: string) {
 
         // 3. Search database using the employeeId from the URL, NOT the session ID
         const employee = await prisma.employees.findUnique({
-            where: { id: employeeId }, // 👈 This is the magic change
+            where: { id_number: idNumber }, // 👈 This is the magic change
             include: {
                 biography: {
                     select: {

@@ -17,6 +17,8 @@ import { updateFamilyBackground } from "@/actions/employees/family_background/ac
 import { updateEducationalBackground } from "@/actions/employees/educational_background/route";
 import { updateEligibility } from "@/actions/employees/eligibility/action";
 import { updateWorkExperience } from "@/actions/employees/work_experience/action";
+import { deleteEmployee } from "@/actions/employees/action";
+import { useRouter } from "next/navigation"; // 👈 Import this at the top
 
 interface EmployeePageProps {
     role: null | "moderator";
@@ -54,6 +56,7 @@ export default function EmployeePage({
     educational_background, eligibility, work_experience,
     departments = [], divisions = [], positions = []
 }: EmployeePageProps) {
+    const router = useRouter();
 
     const [activeTab, setActiveTab] = useState("Employment Details");
 
@@ -63,7 +66,7 @@ export default function EmployeePage({
     const [workExperienceData, setWorkExperienceData] = useState(Array.isArray(work_experience) ? work_experience : []);
 
 
-    const [userData, setUserData] = useState({ ...DEFAULT_USER_DATA, ...(user || {}) });
+    const [userData] = useState({ ...DEFAULT_USER_DATA, ...(user || {}) });
     const [personalData, setPersonalData] = useState({ ...DEFAULT_PERSONAL_DATA, ...(personal_information || {}) });
     const [employmentData, setEmploymentData] = useState({ ...DEFAULT_EMPLOYMENT_DATA, ...(employment_details || {}) });
 
@@ -173,13 +176,39 @@ export default function EmployeePage({
     return (
         <div className="space-y-6">
             {/* PAGE HEADER */}
-            <div>
-                <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
-                    {role === null ? "My Profile" : "Employee Profile"}
-                </h1>
-                <p className="text-sm text-gray-500">
-                    {role === null ? "Manage your personal data and employment records." : "View and manage employee records."}
-                </p>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
+                        {role === null ? "My Profile" : "Employee Profile"}
+                    </h1>
+                    <p className="text-sm text-gray-500">
+                        {role === null ? "Manage your personal data and employment records." : "View and manage employee records."}
+                    </p>
+                </div>
+                {role === "moderator" && (
+                    <button
+                        onClick={async () => {
+                            if (!window.confirm("Are you sure you want to delete this employee's profile? This action cannot be undone.")) return;
+
+                            try {
+                                const result = await deleteEmployee(employmentData.id_number);
+
+                                if (result.success) {
+                                    alert("Employee profile deleted successfully!");
+                                    router.push("/hris/employees");
+                                } else {
+                                    alert("Error: " + result.error);
+                                }
+                            } catch (error) {
+                                console.error("Delete Error:", error);
+                                alert("An unexpected error occurred while deleting.");
+                            }
+                        }}
+                        className="bg-[#1a6b36] hover:bg-[#155a2b] text-white px-4 py-2 rounded-lg text-sm"
+                    >
+                        Delete Employee
+                    </button>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">

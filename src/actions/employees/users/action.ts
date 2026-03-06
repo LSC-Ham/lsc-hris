@@ -142,6 +142,10 @@ export async function createEmployee(data: any) {
 }
 
 export async function getUsers(userId: string) {
+    if (!userId || userId === "") {
+        console.warn("getUsers called with an empty userId");
+        return null; // Return null so your UI can handle the missing user gracefully
+    }
     try {
         const user = await prisma.user.findUnique({
             where: { id: userId },
