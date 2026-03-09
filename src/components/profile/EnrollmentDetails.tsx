@@ -1,4 +1,4 @@
-// src/components/hris/employees/EmploymentDetails.tsx
+// src\components\profile\EnrollmentDetails.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,70 +6,31 @@ import { useState, useEffect } from "react";
 interface EnrollmentDetailsProps {
     mode?: "view" | "update" | "create";
     formData: any;
-    divisions?: string[];
-    departments?: string[];
-    availablePositions?: string[];
     onSave?: (updatedData: any) => void;
     onChange?: (updatedFields: any) => void;
+    activeSemester: string;
+    activeAcadYear: string;
+    acadLevel: string[];
 }
 
 export function EnrollmentDetails({
     mode = "view",
     formData,
     onSave,
-    onChange
+    onChange,
+    activeSemester,
+    activeAcadYear,
+    acadLevel = [],
 }: EnrollmentDetailsProps) {
     const [isEditing, setIsEditing] = useState(mode === "create");
     const [draftData, setDraftData] = useState<any>({});
-
-    // --- Formatters ---
-    const formatDateForInput = (dateVal: any) => {
-        if (!dateVal) return "";
-        if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dateVal)) {
-            return dateVal.slice(0, 16);
-        }
-        const d = new Date(dateVal);
-        if (isNaN(d.getTime())) return "";
-
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        const hours = String(d.getHours()).padStart(2, '0');
-        const minutes = String(d.getMinutes()).padStart(2, '0');
-
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
-
-    const formatHiredDateView = (dateVal: any) => {
-        if (!dateVal) return "";
-        const d = new Date(dateVal);
-        if (isNaN(d.getTime())) return "";
-        return d.toLocaleString('en-US', {
-            month: 'short', day: 'numeric', year: 'numeric',
-            hour: 'numeric', minute: '2-digit', hour12: true
-        });
-    };
-
-    const formatDate = (dateString: string | Date) => {
-        if (!dateString) return "Present";
-        return new Date(dateString).toLocaleDateString('en-US', {
-            month: 'short', year: 'numeric'
-        });
-    };
 
     // --- State Sync ---
     useEffect(() => {
         const initialData = formData || {};
 
-        // Ensure positions are sorted on initial load (Active on top)
-        const sortedPositions = [...(initialData.positions || [])].sort((a, b) =>
-            (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1)
-        );
-
         setDraftData({
             ...initialData,
-            positions: sortedPositions,
-            hired_at: formatDateForInput(initialData.hired_at)
         });
     }, [formData]);
 
@@ -82,37 +43,12 @@ export function EnrollmentDetails({
         }
     };
 
-    
-
-    const handleSetActivePosition = (indexToActivate: number) => {
-        // Map through and set ONLY the target index to true, the rest to false
-        let updatedPositions = (draftData.positions || []).map((p: any, i: number) => ({
-            ...p,
-            is_active: i === indexToActivate
-        }));
-
-        // Re-sort to put the active one on top
-        updatedPositions.sort((a: any, b: any) => (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1));
-
-        handleLocalChange("positions", updatedPositions);
-    };
-
-    const handleRemovePosition = (indexToRemove: number) => {
-        const updatedPositions = (draftData.positions || []).filter((_: any, index: number) => index !== indexToRemove);
-        handleLocalChange("positions", updatedPositions);
-    };
-
     // --- Save & Cancel Logic ---
     const handleCancel = () => {
         const initialData = formData || {};
-        const sortedPositions = [...(initialData.positions || [])].sort((a, b) =>
-            (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1)
-        );
 
         setDraftData({
             ...initialData,
-            positions: sortedPositions,
-            hired_at: formatDateForInput(initialData.hired_at)
         });
         setIsEditing(false);
     };
@@ -128,7 +64,7 @@ export function EnrollmentDetails({
         <div className="space-y-6">
             {/* Header */}
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                <h1 className="text-xl font-bold text-gray-800 tracking-tight">Employment Details</h1>
+                <h1 className="text-xl font-bold text-gray-800 tracking-tight">Enrollment Details</h1>
 
                 {mode === "update" && (
                     <button
@@ -143,16 +79,82 @@ export function EnrollmentDetails({
 
             <div className="space-y-6">
                 {/* ID & Dept */}
+
+                <ProfileField
+                    label="Student ID Number"
+                    value={draftData.id_number}
+                    isEditing={isEditing}
+                    onChange={(e: any) => handleLocalChange("id_number", e.target.value)}
+                    required
+                    disabled={true}
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ProfileField
-                        label="Employee ID Number"
-                        value={draftData.id_number}
+                        label="Academic Year"
+                        value={activeAcadYear}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("id_number", e.target.value)}
+                        onChange={(e: any) => handleLocalChange("acad_year", e.target.value)}
                         required
                         disabled={true}
                     />
+                    <ProfileField
+                        label="Semester"
+                        value={activeSemester}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("semester", e.target.value)}
+                        required
+                        disabled={true}
+                    />
+                    <ProfileSelect
+                        label="Academic Level"
+                        value={draftData.acad_level_name}
+                        options={acadLevel}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("acad_level_name", e.target.value)}
+                        required
+                    />
+                    {/*<ProfileSelect
+                        label="Course"
+                        value={draftData.course}
+                        options={""}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("course", e.target.value)}
+                        required
+                    />
+                    <ProfileSelect
+                        label="Year"
+                        value={draftData.year}
+                        options={""}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("year", e.target.value)}
+                        required
+                    />
+                    <ProfileSelect
+                        label="Section"
+                        value={draftData.section}
+                        options={""}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("section", e.target.value)}
+                        required
+                    />
+                    <ProfileSelect
+                        label="Student Type"
+                        value={draftData.student_type}
+                        options={""}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("student_type", e.target.value)}
+                        required
+                    />
+                    <ProfileSelect
+                        label="Scholarship"
+                        value={draftData.scholarship}
+                        options={""}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("scholarship", e.target.value)}
+                        required
+                    />*/}
                 </div>
+
             </div>
 
             {/* Save Button */}

@@ -1,4 +1,4 @@
-//src\app\(protected)\(admin)\employees\[id]\page.tsx
+//src\app\(protected)\(admin)\employees\[id_number]\page.tsx
 import { prisma } from "@/lib/prisma";
 import StudentPage from "./StudentPage";
 import { getStudentDetails } from "@/actions/students/enrollment_details/action";
@@ -7,26 +7,27 @@ import { getUsers } from "@/actions/users/action";
 import { getAddress } from "@/actions/students/address/action";
 import { getFamilyBackground } from "@/actions/students/family_background/action";
 import { getEducationalBackground } from "@/actions/students/educational_background/action";
+import { getAcadLevel } from "@/actions/admin/settings/sms/acad_level/action";
 
 export default async function Page({ params }: { params: Promise<{ id_number: string }> }) {
 
     const { id_number: id_number } = await params;
 
-    const semester = await prisma.semesters.findUnique({
+    const activeSemester = await prisma.semesters.findFirst({
         where: {
-            semester: "first semester"
+            is_active: true,
         },
         select: {
-            id: true,
+            semester: true,
         }
     })
 
-    const acad_year = await prisma.acad_years.findUnique({
+    const activeAcadYear = await prisma.acad_years.findFirst({
         where: {
-            acad_year: "2026-2027"
+            is_active: true,
         },
         select: {
-            id: true,
+            acad_year: true,
         }
     })
 
@@ -55,8 +56,13 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const family_background = await getFamilyBackground(studentId?.id || "");
     const educational_background = await getEducationalBackground(studentId?.id || "");
 
+
+    const acadLevels = await getAcadLevel();
+    const acadLevelNames = acadLevels.map((level) => level.acad_level_name);
+
     // 3. Pass the fetched data to the Client Component
     return <StudentPage role="moderator"
         user={user} student_details={student_details} personal_information={personal_information}
-        address={address} family_background={family_background} educational_background={educational_background} />;
+        address={address} family_background={family_background} educational_background={educational_background}
+        activeSemester={activeSemester} activeAcadYear={activeAcadYear} acadLevel={acadLevelNames} />;
 }

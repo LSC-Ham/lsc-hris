@@ -23,6 +23,9 @@ interface StudentPageProps {
     address: any;
     family_background: any;
     educational_background: any;
+    activeSemester: any;
+    activeAcadYear: any;
+    acadLevel?: any[];
 }
 
 const DEFAULT_USER_DATA = {
@@ -60,6 +63,9 @@ export default function StudentPage({
     address,
     family_background,
     educational_background,
+    activeAcadYear,
+    activeSemester,
+    acadLevel = [],
 }: StudentPageProps) {
     const router = useRouter();
 
@@ -218,6 +224,9 @@ export default function StudentPage({
                         mode={isMod ? "update" : "view"}
                         formData={studentData}
                         onSave={handleSaveEnrollmentDetails}
+                        activeSemester={activeSemester.semester || ""}
+                        activeAcadYear={activeAcadYear.acad_year || ""}
+                        acadLevel={acadLevel}
                     />
                 );
             case "Personal Information":
@@ -264,12 +273,6 @@ export default function StudentPage({
         "Student Address",
         "Family Background",
         "Educational Background",
-        "Eligibility",
-        "Work Experience",
-        "Voluntary Works",
-        "Learning & Development",
-        "Other Information",
-        "References"
     ];
 
     return (

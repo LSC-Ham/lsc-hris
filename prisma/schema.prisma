@@ -277,7 +277,9 @@ model work_experience {
 model semesters {
   id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   semester    String       @unique
+  is_active   Boolean      @default(false)
   description String?
+  order       Int?         @unique
   created_at  DateTime     @default(now()) @db.Timestamp(6)
   updated_at  DateTime?    @updatedAt @db.Timestamp(6)
   students    students[]
@@ -287,6 +289,8 @@ model semesters {
 model acad_years {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   acad_year  String    @unique
+  is_active  Boolean   @default(false)
+  order      Int?      @unique
   created_at DateTime  @default(now()) @db.Timestamp(6)
   updated_at DateTime? @updatedAt @db.Timestamp(6)
 
@@ -299,6 +303,7 @@ model acad_level {
   acad_level_code String    @unique
   acad_level_name String?
   description     String?
+  order           Int?      @unique
   created_at      DateTime  @default(now()) @db.Timestamp(6)
   updated_at      DateTime? @updatedAt @db.Timestamp(6)
 
@@ -313,6 +318,7 @@ model year_level {
   acad_level_id String       @db.Uuid
   year_level    String       @unique
   description   String?
+  order         Int?         @unique
   created_at    DateTime     @default(now()) @db.Timestamp(6)
   updated_at    DateTime?    @updatedAt @db.Timestamp(6)
   checklists    checklists[]
@@ -343,6 +349,7 @@ model students {
   course_id      String?   @db.Uuid
   year_level_id  String?   @db.Uuid
   sections_id    String?   @db.Uuid
+  student_type   String?
   scholarship_id String?   @db.Uuid
   discount       Decimal?  @db.Decimal(10, 2)
   assessed_at    DateTime?
