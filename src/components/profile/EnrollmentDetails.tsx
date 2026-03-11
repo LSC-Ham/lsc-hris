@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { SearchFilterBar } from "../sms/SearchFilter";
 
-// 1. Update your interfaces to accept objects instead of just strings
 interface AcadLevelData { id: string; name: string; }
 interface YearData { id: string; year: string; acad_level_id: string; }
 interface SectionData { id: string; section: string; acad_level_id: string; }
@@ -90,14 +90,14 @@ export function EnrollmentDetails({
         }
     };
 
-    const handleFilterChange = (field: "acad_year" | "semester", value: string) => {
-        if (field === "acad_year") setFilterYear(value);
-        if (field === "semester") setFilterSemester(value);
+    const handleFilterChange = (filters: { search: string; acad_year: string; semester: string }) => {
+        setFilterYear(filters.acad_year);
+        setFilterSemester(filters.semester);
 
         if (onFilterChange) {
             onFilterChange({
-                acad_year: field === "acad_year" ? value : filterYear,
-                semester: field === "semester" ? value : filterSemester,
+                acad_year: filters.acad_year,
+                semester: filters.semester,
             });
         }
     };
@@ -134,53 +134,18 @@ export function EnrollmentDetails({
                         </button>
                     )}
                 </div>
-
-                <div className="rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
-                            Filter by Academic Year
-                        </label>
-                        <select
-                            value={filterYear}
-                            onChange={(e) => handleFilterChange("acad_year", e.target.value)}
-                            disabled={isEditing}
-                            className={`w-full p-2 border border-gray-200 rounded-md text-sm outline-none shadow-sm transition-colors
-                                ${isEditing
-                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                    : "bg-white focus:ring-1 focus:border-green-500 text-gray-800"
-                                }`}
-                        >
-                            <option value="" disabled>Select Academic Year</option>
-                            {acadYears.map((opt: string) => (
-                                <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
-                            Filter by Semester
-                        </label>
-                        <select
-                            value={filterSemester}
-                            onChange={(e) => handleFilterChange("semester", e.target.value)}
-                            disabled={isEditing}
-                            className={`w-full p-2 border border-gray-200 rounded-md text-sm outline-none shadow-sm transition-colors
-                                ${isEditing
-                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                    : "bg-white focus:ring-1 focus:border-green-500 text-gray-800"
-                                }`}
-                        >
-                            <option value="" disabled>Select Semester</option>
-                            {semesters.map((opt: string) => (
-                                <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
             </div>
 
-            {/* Editable Details Form */}
             <div className="space-y-6">
+                <SearchFilterBar
+                    acadYears={acadYears}
+                    semesters={semesters}
+                    initialAcadYear={filterYear}
+                    initialSemester={filterSemester}
+                    onFilterChange={handleFilterChange}
+                    showSearch={false}
+                    disabled={isEditing}
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ProfileField
                         label="Student ID Number"
@@ -207,15 +172,15 @@ export function EnrollmentDetails({
                         onChange={(e: any) => handleLocalChange("acad_level", e.target.value)}
                         required
                     />
-                        <ProfileSelect
-                            label="Course"
-                            value={draftData.course}
-                            options={courses}
-                            isEditing={isEditing}
-                            onChange={(e: any) => handleLocalChange("course", e.target.value)}
-                            required={isCollegeLevel}
-                            disabled={!isCollegeLevel}
-                        />
+                    <ProfileSelect
+                        label="Course"
+                        value={draftData.course}
+                        options={courses}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("course", e.target.value)}
+                        required={isCollegeLevel}
+                        disabled={!isCollegeLevel}
+                    />
                     <ProfileSelect
                         label="Year"
                         value={draftData.year}

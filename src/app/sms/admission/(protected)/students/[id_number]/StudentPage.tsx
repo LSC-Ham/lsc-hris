@@ -152,11 +152,9 @@ export default function StudentPage({
     const [addressData, setAddressData] = useState(buildAddressState());
     const [familyData, setFamilyData] = useState(buildFamilyState());
 
-    // --- 2. HANDLERS ---
-    // CLEANUP: Use a generic helper to reduce the repetitive try/catch blocks
     const handleAction = async (actionFn: Function, stateSetter: Function, data: any, successMsg: string) => {
         try {
-            stateSetter(data); // Optimistic UI update
+            stateSetter(data); 
             const result = await actionFn(data);
             if (result.success) alert(successMsg);
             else alert("Error: " + result.error);
@@ -216,8 +214,7 @@ export default function StudentPage({
 
     const handleSaveEnrollmentDetails = (data: any) => {
         handleAction(
-            // 1. Extract the ID from the data and pass it as the first argument
-            // 2. Pass the rest of the form data as the second argument
+
             (formData: any) => updateEnrollmentDetails(formData.id, formData),
             (d: any) => setStudentData((prev: any) => ({ ...prev, ...d })),
             data,
@@ -227,7 +224,6 @@ export default function StudentPage({
 
     const handleEnrollmentFilterChange = async (filters: { acad_year: string; semester: string }) => {
         try {
-            // FIX 1: Pass the STUDENT'S ID, not the logged-in user's ID
             const newData = await getStudentDetails(studentData.id, filters.acad_year, filters.semester);
 
             if (newData) {
@@ -236,7 +232,7 @@ export default function StudentPage({
                     ...newData
                 }));
             } else {
-                // FIX 2: Be careful not to wipe out the student's ID here!
+                
                 setStudentData((prev: any) => ({
                     ...prev,
                     acad_level: null,
@@ -244,7 +240,7 @@ export default function StudentPage({
 
                     acad_level_name: "",
                     course_code: "",
-                    year_level: "",
+                    year: "",
                     section: "",
                     scholarship: "",
 
@@ -258,7 +254,6 @@ export default function StudentPage({
         }
     };
 
-    // --- 3. DYNAMIC RENDERING LOGIC ---
     const renderContent = () => {
         const isMod = role === "moderator";
 
@@ -269,7 +264,7 @@ export default function StudentPage({
                         mode={isMod ? "update" : "view"}
                         formData={studentData}
                         onSave={handleSaveEnrollmentDetails}
-                        onFilterChange={handleEnrollmentFilterChange} // <-- ADD THIS PROP
+                        onFilterChange={handleEnrollmentFilterChange} 
                         acadYears={acadYears}
                         semesters={semesters}
                         acadLevel={acadLevel}
