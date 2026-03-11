@@ -1,9 +1,9 @@
 "use client";
 
-import { changePassword, updateEmail, updateUsername, updateRole } from "@/actions/employees/users/action";
 import { useState, useEffect } from "react";
 import AccountDangerModal from "./AccountDangerModal";
 import { deactivateOrDeleteAccount } from "@/actions/admin/users/action";
+import { changePassword, updateEmail, updateRole, updateUsername } from "@/actions/users/action";
 
 interface UserProps {
     user: any;

@@ -7,15 +7,17 @@ import { revalidatePath } from "next/cache";
 /**
  * FETCH: Full objects for the management table.
  */
-export async function getSemesters() {
+export async function getCourses() {
     try {
-        return await prisma.semesters.findMany({
+        return await prisma.courses.findMany({
             select: {
                 id: true,
-                semester: true,
-                order: true,
+                department_id: true,
+                course_code: true,
+                course_name: true,
+                created_by: true,
             },
-            orderBy: { order: 'asc' },
+            orderBy: { created_at: 'asc' },
         });
     } catch (error) {
         console.error("Failed to fetch academic years:", error);

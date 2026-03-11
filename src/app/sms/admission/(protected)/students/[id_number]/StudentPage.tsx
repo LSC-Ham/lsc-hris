@@ -13,7 +13,7 @@ import { updatePersonalInformation } from "@/actions/students/personal_informati
 import { updateAddress } from "@/actions/students/address/action";
 import { updateFamilyBackground } from "@/actions/students/family_background/action";
 import { updateEducationalBackground } from "@/actions/students/educational_background/action";
-import { updateEnrollmentDetails } from "@/actions/students/enrollment_details/action";
+import { getStudentDetails, updateEnrollmentDetails } from "@/actions/students/enrollment_details/action";
 
 interface StudentPageProps {
     role: null | "moderator";
@@ -23,9 +23,13 @@ interface StudentPageProps {
     address: any;
     family_background: any;
     educational_background: any;
-    activeSemester: any;
-    activeAcadYear: any;
+    acadYears?: any[];
+    semesters?: any[];
     acadLevel?: any[];
+    courses?: any[];
+    years?: any[];
+    sections?: any[];
+    scholarships?: any[];
 }
 
 const DEFAULT_USER_DATA = {
@@ -53,6 +57,12 @@ const DEFAULT_PERSONAL_DATA = {
 
 const DEFAULT_STUDENT_DATA = {
     id_number: "",
+    enrolled_at: "",
+    acad_level: "",
+    course: "",
+    year: "",
+    scholarship: "",
+    section: "",
 };
 
 export default function StudentPage({
@@ -63,9 +73,13 @@ export default function StudentPage({
     address,
     family_background,
     educational_background,
-    activeAcadYear,
-    activeSemester,
+    acadYears = [],
+    semesters = [],
     acadLevel = [],
+    courses = [],
+    years = [],
+    sections = [],
+    scholarships = []
 }: StudentPageProps) {
     const router = useRouter();
 
@@ -213,6 +227,39 @@ export default function StudentPage({
         );
     };
 
+    const handleEnrollmentFilterChange = async (filters: { acad_year: string; semester: string }) => {
+        try {
+            // FIX 1: Pass the STUDENT'S ID, not the logged-in user's ID
+            const newData = await getStudentDetails(studentData.id, filters.acad_year, filters.semester);
+
+            if (newData) {
+                setStudentData((prev: any) => ({
+                    ...prev,
+                    ...newData
+                }));
+            } else {
+                // FIX 2: Be careful not to wipe out the student's ID here!
+                setStudentData((prev: any) => ({
+                    ...prev,
+                    acad_level: null,
+                    course: null,
+
+                    acad_level_name: "",
+                    course_code: "",
+                    year_level: "",
+                    section: "",
+                    scholarship: "",
+
+                    acad_year: filters.acad_year,
+                    semester: filters.semester,
+                }));
+            }
+        } catch (error) {
+            console.error("Failed to fetch filtered enrollment data:", error);
+            alert("Failed to load term data.");
+        }
+    };
+
     // --- 3. DYNAMIC RENDERING LOGIC ---
     const renderContent = () => {
         const isMod = role === "moderator";
@@ -224,9 +271,14 @@ export default function StudentPage({
                         mode={isMod ? "update" : "view"}
                         formData={studentData}
                         onSave={handleSaveEnrollmentDetails}
-                        activeSemester={activeSemester.semester || ""}
-                        activeAcadYear={activeAcadYear.acad_year || ""}
+                        onFilterChange={handleEnrollmentFilterChange} // <-- ADD THIS PROP
+                        acadYears={acadYears}
+                        semesters={semesters}
                         acadLevel={acadLevel}
+                        courses={courses}
+                        section={sections}
+                        years={years}
+                        scholarship={scholarships}
                     />
                 );
             case "Personal Information":

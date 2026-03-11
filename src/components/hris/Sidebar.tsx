@@ -13,7 +13,7 @@ interface SidebarProps {
     profilePicture: string;
     surname: string;
     department?: string;
-    idNumber: string; // ✨ NEW: Add this prop
+    idNumber: string;
 }
 
 export function Sidebar({ userRole, userId, profilePicture, surname, department, idNumber }: SidebarProps) {

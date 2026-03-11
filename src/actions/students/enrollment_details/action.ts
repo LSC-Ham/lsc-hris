@@ -19,22 +19,51 @@ export async function generateStudentID() {
     }
 }
 
-export async function getStudentDetails(studentId: string) {
+export async function getStudentDetails(studentId: string, acadYear?: string, semester?: string) {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user) redirect("/login");
 
-        const student = await prisma.students.findUnique({
-            where: { id: studentId },
+        const whereClause: any = {
+            id: studentId
+        };
+
+        if (acadYear) {
+            whereClause.acad_years = { acad_year: acadYear };
+        }
+        if (semester) {
+            whereClause.semesters = { semester: semester };
+        }
+
+        const studentRecord = await prisma.students.findFirst({
+            where: whereClause,
+            include: {
+                acad_years: true,
+                semesters: true,
+                acad_level: true,
+                course: true,
+                year_level: true,
+                sections: true,
+                scholarships: true,
+            },
+            orderBy: {
+                created_at: "desc"
+            }
         });
 
-        if (!student) return null;
-
-       
+        if (!studentRecord) return null;
 
         return {
-            id: student.id,
-            id_number: student.id_number,
+            id: studentRecord.id,
+            id_number: studentRecord.id_number || "",
+            enrolled_at: studentRecord.enrolled_at || "",
+            acad_level: studentRecord.acad_level?.acad_level_name || "",
+            course: studentRecord.course?.course_code || "",
+            acad_year: studentRecord.acad_years?.acad_year || "",
+            semester: studentRecord.semesters?.semester || "",
+            section: studentRecord.sections?.section || "",
+            year: studentRecord.year_level?.year || "",
+            scholarship: studentRecord.scholarships?.scholarship || "",
         };
 
     } catch (error) {
@@ -45,7 +74,7 @@ export async function getStudentDetails(studentId: string) {
 
 export async function updateEnrollmentDetails(studentId: string, formData: any) {
     try {
-       
+
         // Revalidate the cache so the UI updates immediately
         revalidatePath(`/sms/admission/student/${studentId}`);
         return { success: true };

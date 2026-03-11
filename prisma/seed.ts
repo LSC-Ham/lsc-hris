@@ -6,19 +6,130 @@ const SALT_ROUNDS = 10;
 
 export async function main() {
     const hashedPassword = await bcrypt.hash("@lakeshore123", SALT_ROUNDS);
+
+    // ==========================================
+    // 1. DEFINE FIXED REFERENCE DATA
+    // ==========================================
+    const fixedColleges = [
+        {
+            department: "College of Business and Accountancy",
+            courses: ["bsrem", "bsa", "bsma"]
+        },
+        {
+            department: "College of Psychology",
+            courses: ["bspsych"]
+        },
+        {
+            department: "College of Criminology",
+            courses: ["bscrim"]
+        }
+    ];
+
+    const fixedAcadYears = [
+        { acad_year: "2025-2026", order: 1 },
+        { acad_year: "2026-2027", order: 2 },
+    ];
+
+    const fixedSemesters = [
+        { semester: "first semester", order: 1 },
+        { semester: "second semester", order: 2 },
+    ];
+
+    const fixedAcadLevels = [
+        {
+            code: "jhs", name: "junior high school", order: 1,
+            years: [
+                { name: "grade 7", order: 1 }, { name: "grade 8", order: 2 },
+                { name: "grade 9", order: 3 }, { name: "grade 10", order: 4 }
+            ]
+        },
+        {
+            code: "shs", name: "senior high school", order: 2,
+            years: [
+                { name: "grade 11", order: 5 }, { name: "grade 12", order: 6 }
+            ]
+        },
+        {
+            code: "col", name: "college", order: 3,
+            years: [
+                { name: "first year", order: 7 }, { name: "second year", order: 8 },
+                { name: "third year", order: 9 }, { name: "fourth year", order: 10 }
+            ]
+        }
+    ];
+
+    // ==========================================
+    // 2. EXECUTE PRE-SEEDING FOR REFERENCE DATA
+    // ==========================================
+    console.log(`Pre-seeding fixed colleges and courses...`);
+    for (const college of fixedColleges) {
+        const dept = await prisma.departments.upsert({
+            where: { department: college.department },
+            update: {},
+            create: { department: college.department },
+        });
+
+        for (const courseCode of college.courses) {
+            await prisma.courses.upsert({
+                where: { course_code: courseCode },
+                update: { department_id: dept.id },
+                create: {
+                    course_code: courseCode,
+                    department_id: dept.id,
+                    created_by: "seeds"
+                },
+            });
+        }
+    }
+
+    console.log(`Pre-seeding academic years...`);
+    for (const ay of fixedAcadYears) {
+        await prisma.acad_years.upsert({
+            where: { acad_year: ay.acad_year },
+            update: { order: ay.order },
+            create: { acad_year: ay.acad_year, order: ay.order }
+        });
+    }
+
+    console.log(`Pre-seeding semesters...`);
+    for (const sem of fixedSemesters) {
+        await prisma.semesters.upsert({
+            where: { semester: sem.semester },
+            update: { order: sem.order },
+            create: { semester: sem.semester, order: sem.order }
+        });
+    }
+
+    console.log(`Pre-seeding academic levels and year levels...`);
+    for (const level of fixedAcadLevels) {
+        const acadLevel = await prisma.acad_level.upsert({
+            where: { acad_level_code: level.code },
+            update: { acad_level_name: level.name, order: level.order },
+            create: { acad_level_code: level.code, acad_level_name: level.name, order: level.order }
+        });
+
+        for (const year of level.years) {
+            await prisma.years.upsert({
+                where: { year: year.name },
+                update: { order: year.order, acad_level_id: acadLevel.id },
+                create: { year: year.name, order: year.order, acad_level_id: acadLevel.id }
+            });
+        }
+    }
+
+    // ==========================================
+    // 3. DEFINE USER SEED DATA
+    // ==========================================
     const seed = [
         {
             // user
             username: "hmarandang", email: "hmarandang@lakeshore.edu.ph", password: hashedPassword, role: "admin",
-
             //personal information
             surname: "marandang", firstname: "hamodi", contact_number: "9958956869", birthdate: new Date("05/31/2001"),
             sex: "male", civil_status: "single", nationality: "Philippines",
             government_ids: [],
-
             //employee
             id_number: "ad03069", department: "Information Technology", position: "IT Personnel", division: "Administration", hired_at: new Date(),
-
             //student
             student_id: "2025-P0001", semester: "first semester", acad_year: "2026-2027",
             course_code: "bspsych", acad_level_code: "col", year: "second year", section: "",
@@ -26,21 +137,18 @@ export async function main() {
         {
             // user
             username: "lcontreras", email: "lcontreras@lakeshore.edu.ph", password: hashedPassword, role: "user",
-
             //personal information
             surname: "contreras", firstname: "lance", contact_number: "09123456789", birthdate: new Date("05/31/2001"),
             sex: "male", civil_status: "single", nationality: "Philippines",
-
             //employee
             id_number: "", government_ids: [], department: "", position: "", division: "",
-
             //student
             student_id: "2025-0106", semester: "first semester", acad_year: "2026-2027",
             course_code: "acad", acad_level_code: "shs", year: "grade 12", section: "faith",
         },
         {
             username: "rasino", email: "rasino@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
-            id_number: "CL04001", department: "Human Resource", position: "Faculty", division: "Academics", hired_at: new Date(),
+            id_number: "CL04001", department: "College of Business and Accountancy", position: "Faculty", division: "Academics", hired_at: new Date(),
             surname: "asiño", firstname: "roman", contact_number: "961 096 8091", birthdate: new Date("09/27/1960"),
             sex: "male", civil_status: "single", nationality: "Philippines",
             government_ids: [
@@ -51,8 +159,8 @@ export async function main() {
             ],
         },
         {
-            username: "jbinasoy", email: "jbinasoy@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04003", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
+            username: "jbinasoy", email: "jbinasoy@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
+            id_number: "CL04003", department: "College of Psychology", position: "Faculty", division: "Academics", hired_at: new Date(),
             surname: "binasoy", firstname: "juliet", contact_number: "09361428152", birthdate: new Date("07/03/1975"),
             sex: "female", civil_status: "single", nationality: "Philippines",
             government_ids: [
@@ -63,8 +171,8 @@ export async function main() {
             ],
         },
         {
-            username: "emantala", email: "emantala@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04004", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
+            username: "emantala", email: "emantala@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
+            id_number: "CL04004", department: "College of Criminology", position: "Faculty", division: "Academics", hired_at: new Date(),
             surname: "mantala", firstname: "emman", contact_number: "09359683330", birthdate: new Date("08/27/1983"),
             sex: "male", civil_status: "single", nationality: "Philippines",
             government_ids: [
@@ -156,8 +264,8 @@ export async function main() {
             ],
         },
         {
-            username: "mdumaguing", email: "mdumaguing@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04013", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
+            username: "mdumaguing", email: "mdumaguing@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
+            id_number: "CL04013", department: "College", position: "Human Resource", division: "Academics", hired_at: new Date(),
             surname: "dumaguing", firstname: "marife", contact_number: "09088150476", birthdate: new Date("05/07/1976"),
             sex: "female", civil_status: "single", nationality: "Philippines",
             government_ids: [
@@ -167,156 +275,38 @@ export async function main() {
                 { id_label: "TIN Number", id_number: "217954031" },
             ],
         },
-        {
-            username: "pfontanares", email: "pfontanares@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04014", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
-            surname: "fontanares", firstname: "pilita", contact_number: "09420672594", birthdate: new Date("10/13/1975"),
-            sex: "female", civil_status: "single", nationality: "Philippines",
-            government_ids: [
-                { id_label: "SSS Number", id_number: "33-3774250-4" },
-                { id_label: "Philhealth Number", id_number: "19-051436097-2" },
-                { id_label: "Pag-ibig Number", id_number: "1050-0021-2845" },
-                { id_label: "TIN Number", id_number: "200-541-892" },
-            ],
-        },
-        {
-            username: "jignacio", email: "jignacio@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04015", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
-            surname: "ignacio", firstname: "jennifar", contact_number: "09166202357", birthdate: new Date("03/06/1991"),
-            sex: "female", civil_status: "single", nationality: "Philippines",
-            government_ids: [
-                { id_label: "SSS Number", id_number: "0100025276" },
-                { id_label: "Philhealth Number", id_number: "801211862880" },
-                { id_label: "Pag-ibig Number", id_number: "60315227096" },
-            ],
-        },
-        {
-            username: "emanuel", email: "emanuel@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04016", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
-            surname: "manuel", firstname: "edward", contact_number: "09088965316", birthdate: new Date("03/25/1986"),
-            sex: "male", civil_status: "single", nationality: "Philippines",
-            government_ids: [
-                { id_label: "SSS Number", id_number: "04-1392254-2" },
-                { id_label: "Philhealth Number", id_number: "01-000243782-7" },
-                { id_label: "Pag-ibig Number", id_number: "1210-6619-1580" },
-                { id_label: "TIN Number", id_number: "227-648-108" },
-            ],
-        },
-        {
-            username: "fmasaga", email: "fmasaga@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04017", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
-            surname: "masaga", firstname: "fe", contact_number: "09205206054", birthdate: new Date("04/08/1955"),
-            sex: "female", civil_status: "single", nationality: "Philippines",
-            government_ids: [
-                { id_label: "SSS Number", id_number: "04-0230946-4 - (PENSIONER)" },
-                { id_label: "Philhealth Number", id_number: "19-025039487-3" },
-                { id_label: "Pag-ibig Number", id_number: "124-386-463-000" },
-            ],
-        },
-        {
-            username: "mmendoza", email: "mmendoza@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04018", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
-            surname: "mendoza", firstname: "marissa mae", contact_number: "09279131156", birthdate: new Date("10/08/1981"),
-            sex: "female", civil_status: "single", nationality: "Philippines",
-            government_ids: [
-                { id_label: "SSS Number", id_number: "332670859" },
-                { id_label: "Philhealth Number", id_number: "101-050050486-8" },
-                { id_label: "Pag-ibig Number", id_number: "121085518219" },
-                { id_label: "TIN Number", id_number: "256414134000" },
-            ],
-        },
-        {
-            username: "docampo", email: "docampo@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04020", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
-            surname: "ocampo", firstname: "dianne", contact_number: "09171096745", birthdate: new Date("10/27/1995"),
-            sex: "female", civil_status: "single", nationality: "Philippines",
-            government_ids: [
-                { id_label: "SSS Number", id_number: "0802621342" },
-                { id_label: "Philhealth Number", id_number: "491211725127" },
-                { id_label: "Pag-ibig Number", id_number: "53328-904-799" },
-            ],
-        },
-        {
-            username: "jocampo", email: "jocampo@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04021", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
-            surname: "ocampo", firstname: "john matthew", contact_number: "09162112212", birthdate: new Date("04/20/1990"),
-            sex: "male", civil_status: "single", nationality: "Philippines",
-            government_ids: [
-                { id_label: "SSS Number", id_number: "08-051422867-5" },
-                { id_label: "Philhealth Number", id_number: "121094440445" },
-                { id_label: "Pag-ibig Number", id_number: "440-918-071" },
-            ],
-        },
-        {
-            username: "jotilla", email: "jotilla@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04022", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
-            surname: "otilla", firstname: "jie ann", contact_number: "09182489968", birthdate: new Date("11/22/1987"),
-            sex: "female", civil_status: "single", nationality: "Philippines",
-            government_ids: [
-                { id_label: "SSS Number", id_number: "02-2595408-3" },
-                { id_label: "Philhealth Number", id_number: "05-0501258986" },
-                { id_label: "Pag-ibig Number", id_number: "121082501435" },
-                { id_label: "TIN Number", id_number: "267-061-267-000" },
-            ],
-        },
-        {
-            username: "aperez", email: "aperez@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04023", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
-            surname: "perez", firstname: "albert", contact_number: "09237440788", birthdate: new Date("09/21/1988"),
-            sex: "male", civil_status: "single", nationality: "Philippines",
-            government_ids: [
-                { id_label: "SSS Number", id_number: "04-2582038-6" },
-                { id_label: "Philhealth Number", id_number: "08-051175303-5" },
-                { id_label: "Pag-ibig Number", id_number: "1210-3865-4520" },
-                { id_label: "TIN Number", id_number: "424-163-789-000" },
-            ],
-        },
-        {
-            username: "hsanpedro", email: "hsanpedro@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04024", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
-            surname: "san pedro", firstname: "herbert", contact_number: "09451529000", birthdate: new Date("09/22/1974"),
-            sex: "male", civil_status: "single", nationality: "Philippines",
-            government_ids: [
-                { id_label: "SSS Number", id_number: "33-2718787-8" },
-                { id_label: "Philhealth Number", id_number: "0805-0230-0141" },
-                { id_label: "Pag-ibig Number", id_number: "102000938994" },
-                { id_label: "TIN Number", id_number: "141-851-460" },
-            ],
-        },
     ];
 
-    console.log(`Start employing ...`);
+    // ==========================================
+    // 4. EXECUTE USER SEEDING
+    // ==========================================
+    console.log(`Start employing and enrolling...`);
 
     for (const data of seed) {
-        // 1. Identify if the user is an Employee, a Student, or both based on the data
+        // Identify if the user is an Employee, a Student, or both
         const isEmployee = Boolean(data.id_number && data.id_number.trim() !== "");
-        // @ts-ignore (we know student_id exists on some objects but not all)
+        // @ts-ignore
         const isStudent = Boolean(data.student_id && data.student_id.trim() !== "");
 
-        // Department is shared by both employees and students (for courses)
-        const deptStr = data.department || "Unassigned";
-        const department = await prisma.departments.upsert({
-            where: { department: deptStr },
-            update: {},
-            create: { department: deptStr },
-        });
-
-        // 2. Prepare Employee Payload & lookups
         let employeePayload = undefined;
+        let studentPayload = undefined;
+
+        // --- HANDLE EMPLOYEE LOGIC ---
         if (isEmployee) {
+            const deptStr = data.department || "Unassigned";
             const divisionStr = data.division || "Unassigned";
             const positionStr = data.position || "Unassigned";
 
+            const department = await prisma.departments.upsert({
+                where: { department: deptStr }, update: {}, create: { department: deptStr },
+            });
+
             const division = await prisma.divisions.upsert({
-                where: { division: divisionStr },
-                update: {},
-                create: { division: divisionStr },
+                where: { division: divisionStr }, update: {}, create: { division: divisionStr },
             });
 
             const position = await prisma.positions.upsert({
-                where: { position: positionStr },
-                update: {},
-                create: { position: positionStr },
+                where: { position: positionStr }, update: {}, create: { position: positionStr },
             });
 
             employeePayload = {
@@ -332,66 +322,84 @@ export async function main() {
                             start_at: new Date(),
                         }
                     },
-                    // Attach government IDs only if they exist and the user is an employee
                     ...(data.government_ids && data.government_ids.length > 0 && {
-                        government_ids: {
-                            create: data.government_ids,
-                        }
+                        government_ids: { create: data.government_ids }
                     })
                 }
             };
         }
 
-        // 3. Prepare Student Payload & lookups
-        let studentPayload = undefined;
+        // --- HANDLE STUDENT LOGIC ---
         if (isStudent) {
             // @ts-ignore
-            const semesterStr = data.semester || "Unassigned";
+            const semesterStr = data.semester || "";
             // @ts-ignore
-            const acadYearStr = data.acad_year || "Unassigned";
+            const acadYearStr = data.acad_year || "";
             // @ts-ignore
-            const acadLevelCodeStr = data.acad_level_code || "Unassigned";
+            const acadLevelCodeStr = data.acad_level_code || "";
             // @ts-ignore
-            const yearStr = data.year || "Unassigned";
+            const yearStr = data.year || "";
             // @ts-ignore
-            const courseCodeStr = data.course_code || "Unassigned";
+            const courseCodeStr = data.course_code || "";
             // @ts-ignore
-            const sectionStr = data.section || "Unassigned";
+            const sectionStr = data.section || "";
 
-            const semester = await prisma.semesters.upsert({
-                where: { semester: semesterStr }, update: {}, create: { semester: semesterStr }
-            });
-            const acad_year = await prisma.acad_years.upsert({
-                where: { acad_year: acadYearStr }, update: {}, create: { acad_year: acadYearStr }
-            });
-            const acad_level = await prisma.acad_level.upsert({
-                where: { acad_level_code: acadLevelCodeStr }, update: {}, create: { acad_level_code: acadLevelCodeStr }
-            });
-            const year_level = await prisma.year_level.upsert({
-                where: { year_level: yearStr }, update: {}, create: { acad_level_id: acad_level.id, year_level: yearStr }
-            });
-            const course = await prisma.courses.upsert({
-                where: { course_code: courseCodeStr }, update: {}, create: { department_id: department.id, course_code: courseCodeStr, created_by: "seeds" }
-            });
-            const section = await prisma.sections.upsert({
-                where: { section: sectionStr }, update: {}, create: { acad_level_id: acad_level.id, section: sectionStr }
-            });
+            // Safely find the records we pre-seeded earlier
+            const semester = await prisma.semesters.findUnique({ where: { semester: semesterStr } });
+            const acad_year = await prisma.acad_years.findUnique({ where: { acad_year: acadYearStr } });
+            const acad_level = await prisma.acad_level.findUnique({ where: { acad_level_code: acadLevelCodeStr } });
+            const year_level = await prisma.years.findUnique({ where: { year: yearStr } });
 
-            studentPayload = {
-                create: {
-                    // @ts-ignore
-                    id_number: data.student_id || "",
-                    semester_id: semester.id,
-                    acad_level_id: acad_level.id,
-                    acad_year_id: acad_year.id,
-                    course_id: course.id,
-                    year_level_id: year_level.id,
-                    sections_id: section.id,
+            if (!semester || !acad_year || !acad_level || !year_level) {
+                console.warn(`Missing required academic reference data for student ${data.student_id}. Skipping student profile creation.`);
+            } else {
+                // Section Logic (Only upsert if section string actually has content)
+                let section = null;
+                if (sectionStr.trim() !== "") {
+                    section = await prisma.sections.upsert({
+                        where: { section: sectionStr },
+                        update: {},
+                        create: { acad_level_id: acad_level.id, section: sectionStr }
+                    });
                 }
-            };
+
+                // Course Logic with Fallback
+                let course = await prisma.courses.findUnique({
+                    where: { course_code: courseCodeStr }
+                });
+
+                if (!course) {
+                    const fallbackDept = await prisma.departments.upsert({
+                        where: { department: "General Academics" },
+                        update: {},
+                        create: { department: "General Academics" }
+                    });
+
+                    course = await prisma.courses.create({
+                        data: {
+                            department_id: fallbackDept.id,
+                            course_code: courseCodeStr,
+                            created_by: "seeds"
+                        }
+                    });
+                }
+
+                studentPayload = {
+                    create: {
+                        // @ts-ignore
+                        id_number: data.student_id as string,
+                        semester_id: semester.id,
+                        acad_level_id: acad_level.id,
+                        acad_year_id: acad_year.id,
+                        course_id: course.id,
+                        year_level_id: year_level.id,
+                        ...(section && { sections_id: section.id }), // Only attach if a valid section exists
+                    }
+                };
+            }
         }
 
-        // 4. Create User, Personal Info, and conditionally attach employee/student tables
+        // --- CREATE USER RECORD ---
         const user = await prisma.user.upsert({
             where: { username: data.username },
             update: {},
@@ -413,7 +421,7 @@ export async function main() {
                                 nationality: data.nationality,
                             }
                         },
-                        // Conditionally attach the payloads (if undefined, Prisma cleanly ignores them)
+                        // Conditionally attach employee/student profiles if the payloads exist
                         ...(employeePayload && { employees: employeePayload }),
                         ...(studentPayload && { students: studentPayload })
                     }
@@ -421,7 +429,7 @@ export async function main() {
             },
         });
 
-        console.log(`Created user with id: ${user.id} (${data.firstname} ${data.surname}) - Employee: ${isEmployee}, Student: ${isStudent}`);
+        console.log(`Created user: ${user.id} (${data.firstname} ${data.surname}) - Employee: ${isEmployee}, Student: ${isStudent}`);
     }
 
     console.log(`Seeding finished successfully.`);

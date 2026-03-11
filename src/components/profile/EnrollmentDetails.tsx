@@ -1,16 +1,22 @@
-// src\components\profile\EnrollmentDetails.tsx
+// src/components/profile/EnrollmentDetails.tsx
 "use client";
 
 import { useState, useEffect } from "react";
+
 
 interface EnrollmentDetailsProps {
     mode?: "view" | "update" | "create";
     formData: any;
     onSave?: (updatedData: any) => void;
     onChange?: (updatedFields: any) => void;
-    activeSemester: string;
-    activeAcadYear: string;
+    onFilterChange?: (filters: { acad_year: string; semester: string }) => void;
+    acadYears: string[];
+    semesters: string[];
     acadLevel: string[];
+    courses: string[];
+    years: string[];
+    section: string[];
+    scholarship: string[];
 }
 
 export function EnrollmentDetails({
@@ -18,22 +24,30 @@ export function EnrollmentDetails({
     formData,
     onSave,
     onChange,
-    activeSemester,
-    activeAcadYear,
+    onFilterChange,
+    acadYears = [],
+    semesters = [],
     acadLevel = [],
+    courses = [],
+    years = [],
+    section = [],
+    scholarship = []
 }: EnrollmentDetailsProps) {
     const [isEditing, setIsEditing] = useState(mode === "create");
     const [draftData, setDraftData] = useState<any>({});
 
+    // --- Filter States ---
+    const [filterYear, setFilterYear] = useState(formData?.acad_year || "");
+    const [filterSemester, setFilterSemester] = useState(formData?.semester || "");
+
     // --- State Sync ---
     useEffect(() => {
         const initialData = formData || {};
+        setDraftData({ ...initialData });
 
-        setDraftData({
-            ...initialData,
-        });
+        if (initialData.acad_year) setFilterYear(initialData.acad_year);
+        if (initialData.semester) setFilterSemester(initialData.semester);
     }, [formData]);
-
 
     // --- Handlers ---
     const handleLocalChange = (field: string, value: any) => {
@@ -43,80 +57,130 @@ export function EnrollmentDetails({
         }
     };
 
+    const handleFilterChange = (field: "acad_year" | "semester", value: string) => {
+        if (field === "acad_year") setFilterYear(value);
+        if (field === "semester") setFilterSemester(value);
+
+        if (onFilterChange) {
+            onFilterChange({
+                acad_year: field === "acad_year" ? value : filterYear,
+                semester: field === "semester" ? value : filterSemester,
+            });
+        }
+    };
+
     // --- Save & Cancel Logic ---
     const handleCancel = () => {
-        const initialData = formData || {};
-
-        setDraftData({
-            ...initialData,
-        });
+        setDraftData({ ...(formData || {}) });
         setIsEditing(false);
     };
 
     const handleSaveClick = () => {
         setIsEditing(false);
         if (onSave) {
-            onSave(draftData);
+            onSave({
+                ...draftData,
+                acad_year: filterYear,
+                semester: filterSemester
+            });
         }
     };
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                <h1 className="text-xl font-bold text-gray-800 tracking-tight">Enrollment Details</h1>
 
-                {mode === "update" && (
-                    <button
-                        type="button"
-                        onClick={isEditing ? handleCancel : () => setIsEditing(true)}
-                        className="text-[#1a6b36] text-sm font-medium hover:underline"
-                    >
-                        {isEditing ? "Cancel" : "Edit"}
-                    </button>
-                )}
+            <div className="border-b border-gray-100 pb-6 space-y-4">
+                <div className="flex justify-between items-center">
+                    <h1 className="text-xl font-bold text-gray-800 tracking-tight">Enrollment Details</h1>
+                    {mode === "update" && (
+                        <button
+                            type="button"
+                            onClick={isEditing ? handleCancel : () => setIsEditing(true)}
+                            className="text-[#1a6b36] text-sm font-medium hover:underline"
+                        >
+                            {isEditing ? "Cancel" : "Edit Details"}
+                        </button>
+                    )}
+                </div>
+
+                {/* Always-on Term Filters (Locked during editing) */}
+                <div className="rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
+                            Filter by Academic Year
+                        </label>
+                        <select
+                            value={filterYear}
+                            onChange={(e) => handleFilterChange("acad_year", e.target.value)}
+                            disabled={isEditing}
+                            className={`w-full p-2 border border-gray-200 rounded-md text-sm outline-none shadow-sm transition-colors
+                                ${isEditing
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : "bg-white focus:ring-1 focus:border-green-500 text-gray-800"
+                                }`}
+                        >
+                            <option value="" disabled>Select Academic Year</option>
+                            {acadYears.map((opt: string) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
+                            Filter by Semester
+                        </label>
+                        <select
+                            value={filterSemester}
+                            onChange={(e) => handleFilterChange("semester", e.target.value)}
+                            disabled={isEditing}
+                            className={`w-full p-2 border border-gray-200 rounded-md text-sm outline-none shadow-sm transition-colors
+                                ${isEditing
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                    : "bg-white focus:ring-1 focus:border-green-500 text-gray-800"
+                                }`}
+                        >
+                            <option value="" disabled>Select Semester</option>
+                            {semesters.map((opt: string) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
             </div>
 
+            {/* Editable Details Form */}
             <div className="space-y-6">
-                {/* ID & Dept */}
 
-                <ProfileField
-                    label="Student ID Number"
-                    value={draftData.id_number}
-                    isEditing={isEditing}
-                    onChange={(e: any) => handleLocalChange("id_number", e.target.value)}
-                    required
-                    disabled={true}
-                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ProfileField
-                        label="Academic Year"
-                        value={activeAcadYear}
+                        label="Student ID Number"
+                        value={draftData.id_number}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("acad_year", e.target.value)}
+                        onChange={(e: any) => handleLocalChange("id_number", e.target.value)}
                         required
                         disabled={true}
                     />
+
                     <ProfileField
-                        label="Semester"
-                        value={activeSemester}
+                        label="Status"
+                        value={draftData.enrolled_at}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("semester", e.target.value)}
+                        onChange={(e: any) => handleLocalChange("enrolled_at", e.target.value)}
                         required
                         disabled={true}
                     />
                     <ProfileSelect
                         label="Academic Level"
-                        value={draftData.acad_level_name}
+                        value={draftData.acad_level}
                         options={acadLevel}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("acad_level_name", e.target.value)}
+                        onChange={(e: any) => handleLocalChange("acad_level", e.target.value)}
                         required
                     />
-                    {/*<ProfileSelect
+                    <ProfileSelect
                         label="Course"
                         value={draftData.course}
-                        options={""}
+                        options={courses}
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("course", e.target.value)}
                         required
@@ -124,7 +188,7 @@ export function EnrollmentDetails({
                     <ProfileSelect
                         label="Year"
                         value={draftData.year}
-                        options={""}
+                        options={years}
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("year", e.target.value)}
                         required
@@ -132,29 +196,20 @@ export function EnrollmentDetails({
                     <ProfileSelect
                         label="Section"
                         value={draftData.section}
-                        options={""}
+                        options={section}
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("section", e.target.value)}
                         required
                     />
                     <ProfileSelect
-                        label="Student Type"
-                        value={draftData.student_type}
-                        options={""}
-                        isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("student_type", e.target.value)}
-                        required
-                    />
-                    <ProfileSelect
                         label="Scholarship"
                         value={draftData.scholarship}
-                        options={""}
+                        options={scholarship}
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("scholarship", e.target.value)}
                         required
-                    />*/}
+                    />
                 </div>
-
             </div>
 
             {/* Save Button */}

@@ -14,7 +14,6 @@ export async function getAcadYears() {
                 id: true,
                 acad_year: true,
                 order: true,
-                is_active: true,
             },
             orderBy: { order: 'asc' },
         });
