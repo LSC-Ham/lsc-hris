@@ -64,11 +64,11 @@ export function EnrollmentDetails({
 
     const dynamicYears = selectedAcadLevelId
         ? years.filter(y => y.acad_level_id === selectedAcadLevelId).map(y => y.year)
-        : years.map(y => y.year);
+        : []; // 👈 Return empty if no acad level is chosen
 
     const dynamicSections = selectedAcadLevelId
         ? section.filter(s => s.acad_level_id === selectedAcadLevelId).map(s => s.section)
-        : section.map(s => s.section);
+        : []; // 👈 Return empty if no acad level is chosen
 
     const acadLevelNames = acadLevel.map(l => l.name);
 

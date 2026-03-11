@@ -24,10 +24,20 @@ export async function getStudentDetails(studentId: string, acadYear?: string, se
         const session = await getServerSession(authOptions);
         if (!session?.user) redirect("/login");
 
+        // STEP 1: Find the student's base record using the ID you passed
+        const baseRecord = await prisma.students.findUnique({
+            where: { id: studentId },
+            select: { id_number: true }
+        });
+
+        if (!baseRecord) return null;
+
+        // STEP 2: Now look up the NEW term using their shared id_number!
         const whereClause: any = {
-            id: studentId
+            id_number: baseRecord.id_number
         };
 
+        // (Using your original correct relationship filters here!)
         if (acadYear) {
             whereClause.acad_years = { acad_year: acadYear };
         }

@@ -147,8 +147,11 @@ export async function main() {
             course_code: "acad", acad_level_code: "shs", year: "grade 12", section: "faith",
         },
         {
+            //user
             username: "rasino", email: "rasino@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
+            //employee
             id_number: "CL04001", department: "College of Business and Accountancy", position: "Faculty", division: "Academics", hired_at: new Date(),
+            //personal information
             surname: "asiño", firstname: "roman", contact_number: "961 096 8091", birthdate: new Date("09/27/1960"),
             sex: "male", civil_status: "single", nationality: "Philippines",
             government_ids: [
@@ -157,6 +160,9 @@ export async function main() {
                 { id_label: "Pag-ibig Number", id_number: "121146788115" },
                 { id_label: "TIN Number", id_number: "135-233-141-000" },
             ],
+            //student
+            student_id: "2025-C2025", semester: "second semester", acad_year: "2025-2026", 
+            course_code: "bspsych", acad_level_code: "col", year: "first year", section: "",
         },
         {
             username: "jbinasoy", email: "jbinasoy@lakeshore.edu.ph", password: hashedPassword, role: "moderator",

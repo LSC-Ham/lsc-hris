@@ -58,6 +58,7 @@ const DEFAULT_PERSONAL_DATA = {
 const DEFAULT_STUDENT_DATA = {
     id_number: "",
     enrolled_at: "",
+    assessed_at: "",
     created_at: "",
     acad_level: "",
     course: "",
@@ -225,7 +226,7 @@ export default function StudentPage({
 
     const handleEnrollmentFilterChange = async (filters: { acad_year: string; semester: string }) => {
         try {
-            const newData = await getStudentDetails(studentData.id, filters.acad_year, filters.semester);
+            const newData = await getStudentDetails(student_details.id, filters.acad_year, filters.semester);
 
             if (newData) {
                 setStudentData((prev: any) => ({
@@ -233,18 +234,17 @@ export default function StudentPage({
                     ...newData
                 }));
             } else {
-
                 setStudentData((prev: any) => ({
                     ...prev,
-                    acad_level: null,
-                    course: null,
-
-                    acad_level_name: "",
-                    course_code: "",
+                    id: "",
+                    acad_level: "",
+                    enrolled_at: "",
+                    assed_at: "",
+                    created_at: "",
+                    course: "",
                     year: "",
                     section: "",
                     scholarship: "",
-
                     acad_year: filters.acad_year,
                     semester: filters.semester,
                 }));

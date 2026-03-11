@@ -42,7 +42,7 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     }
 
     const user = await getUsers(studentId?.biography?.users_id || "");
-    const student_details = await getStudentDetails(studentId?.id || "");
+    const student_details = await getStudentDetails(studentId?.id || "", );
     const personal_information = await getPersonalInformation(studentId?.id || "");
     const address = await getAddress(studentId?.id || "");
     const family_background = await getFamilyBackground(studentId?.id || "");
