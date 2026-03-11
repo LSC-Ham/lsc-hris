@@ -1,5 +1,5 @@
-// src/app/(protected)/(admin)/employees/page.tsx
 import StudentsTable from "@/components/sms/admission/students/StudentsTable";
+import StudentSearchClient from "@/components/sms/admission/StudentSearchClient";
 import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
@@ -7,21 +7,38 @@ import Link from "next/link";
 export default async function Page({
     searchParams,
 }: {
-    searchParams: Promise<{ page?: string }>;
+    searchParams: Promise<{ page?: string; search?: string }>; // Added search
 }) {
-    // 1. Await the searchParams Promise
     const resolvedSearchParams = await searchParams;
 
-    // 2. Pagination Setup
     const ITEMS_PER_PAGE = 10;
-
-    // 3. Use the awaited object
     const currentPage = Number(resolvedSearchParams?.page) || 1;
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
 
-    // 2. Fetch Data and Total Count simultaneously
+    // 1. Grab search term from URL
+    const searchQuery = resolvedSearchParams?.search || "";
+
+    // 2. Build the Prisma Where Condition
+    const whereCondition = searchQuery ? {
+        OR: [
+            { id_number: { contains: searchQuery, mode: "insensitive" as const } },
+            {
+                biography: {
+                    personal_information: {
+                        OR: [
+                            { firstname: { contains: searchQuery, mode: "insensitive" as const } },
+                            { surname: { contains: searchQuery, mode: "insensitive" as const } }
+                        ]
+                    }
+                }
+            }
+        ]
+    } : {};
+
+    // 3. Apply condition to findMany and count
     const [studentsList, totalStudents] = await Promise.all([
         prisma.students.findMany({
+            where: whereCondition,
             skip: skip,
             take: ITEMS_PER_PAGE,
             include: {
@@ -37,13 +54,14 @@ export default async function Page({
                         },
                     }
                 }
-
             },
             orderBy: {
                 created_at: "desc",
             },
         }),
-        prisma.students.count()
+        prisma.students.count({
+            where: whereCondition // Count must be filtered too!
+        })
     ]);
 
     const totalPages = Math.ceil(totalStudents / ITEMS_PER_PAGE);
@@ -64,10 +82,14 @@ export default async function Page({
                 </Link>
             </div>
 
+            <div className="">
+                <StudentSearchClient initialSearch={searchQuery} />
+
+            </div>
+
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <StudentsTable studentsList={studentsList} />
 
-                {/* Pagination rendered at the bottom of the table container */}
                 <Pagination
                     totalPages={totalPages}
                     currentPage={currentPage}

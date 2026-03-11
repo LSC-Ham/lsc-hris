@@ -57,9 +57,9 @@ export function SearchFilterBar({
     };
 
     return (
-        <div className="bg-white rounded-xl space-y-4 md:space-y-0 md:flex md:items-center md:gap-6">
+        <div className="rounded-xl space-y-4 md:space-y-0 md:flex md:items-center md:gap-6">
             {showSearch && (
-                <div className="flex-1">
+                <div className="w-full">
                     <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
                         Search
                     </label>

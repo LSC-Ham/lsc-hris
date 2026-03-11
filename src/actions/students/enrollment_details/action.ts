@@ -57,6 +57,7 @@ export async function getStudentDetails(studentId: string, acadYear?: string, se
             id: studentRecord.id,
             id_number: studentRecord.id_number || "",
             enrolled_at: studentRecord.enrolled_at || "",
+            created_at: studentRecord.created_at || "",
             acad_level: studentRecord.acad_level?.acad_level_name || "",
             course: studentRecord.course?.course_code || "",
             acad_year: studentRecord.acad_years?.acad_year || "",

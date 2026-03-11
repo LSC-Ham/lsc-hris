@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { SearchFilterBar } from "../sms/SearchFilter";
+import { SearchFilterBar } from "../../sms/SearchFilter";
 
 interface AcadLevelData { id: string; name: string; }
 interface YearData { id: string; year: string; acad_level_id: string; }
@@ -152,16 +152,13 @@ export function EnrollmentDetails({
                         value={draftData.id_number}
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("id_number", e.target.value)}
-                        required
                         disabled={true}
                     />
-
                     <ProfileField
                         label="Status"
-                        value={draftData.enrolled_at}
+                        value={draftData.created_at ? "applied" : ""}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("enrolled_at", e.target.value)}
-                        required
+                        onChange={(e: any) => handleLocalChange("created_at", e.target.value)}
                         disabled={true}
                     />
                     <ProfileSelect

@@ -8,7 +8,7 @@ import { EducationalBackground } from "@/components/profile/EducationalBackgroun
 
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
 import { useRouter } from "next/navigation";
-import { EnrollmentDetails } from "@/components/profile/EnrollmentDetails";
+import { EnrollmentDetails } from "@/components/profile/students/EnrollmentDetails";
 import { updatePersonalInformation } from "@/actions/students/personal_information/actions";
 import { updateAddress } from "@/actions/students/address/action";
 import { updateFamilyBackground } from "@/actions/students/family_background/action";
@@ -58,6 +58,7 @@ const DEFAULT_PERSONAL_DATA = {
 const DEFAULT_STUDENT_DATA = {
     id_number: "",
     enrolled_at: "",
+    created_at: "",
     acad_level: "",
     course: "",
     year: "",
@@ -154,7 +155,7 @@ export default function StudentPage({
 
     const handleAction = async (actionFn: Function, stateSetter: Function, data: any, successMsg: string) => {
         try {
-            stateSetter(data); 
+            stateSetter(data);
             const result = await actionFn(data);
             if (result.success) alert(successMsg);
             else alert("Error: " + result.error);
@@ -232,7 +233,7 @@ export default function StudentPage({
                     ...newData
                 }));
             } else {
-                
+
                 setStudentData((prev: any) => ({
                     ...prev,
                     acad_level: null,
@@ -264,7 +265,7 @@ export default function StudentPage({
                         mode={isMod ? "update" : "view"}
                         formData={studentData}
                         onSave={handleSaveEnrollmentDetails}
-                        onFilterChange={handleEnrollmentFilterChange} 
+                        onFilterChange={handleEnrollmentFilterChange}
                         acadYears={acadYears}
                         semesters={semesters}
                         acadLevel={acadLevel}
