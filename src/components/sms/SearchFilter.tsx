@@ -121,7 +121,6 @@ export function SearchFilterBar({
                     </select>
                 </div>
             )}
-
         </div>
     );
 }

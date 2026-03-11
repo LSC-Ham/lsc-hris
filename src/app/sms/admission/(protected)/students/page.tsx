@@ -7,7 +7,7 @@ import Link from "next/link";
 export default async function Page({
     searchParams,
 }: {
-    searchParams: Promise<{ page?: string; search?: string }>; // Added search
+    searchParams: Promise<{ page?: string; search?: string }>;
 }) {
     const resolvedSearchParams = await searchParams;
 
@@ -15,10 +15,8 @@ export default async function Page({
     const currentPage = Number(resolvedSearchParams?.page) || 1;
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
 
-    // 1. Grab search term from URL
     const searchQuery = resolvedSearchParams?.search || "";
 
-    // 2. Build the Prisma Where Condition
     const whereCondition = searchQuery ? {
         OR: [
             { id_number: { contains: searchQuery, mode: "insensitive" as const } },
@@ -35,10 +33,10 @@ export default async function Page({
         ]
     } : {};
 
-    // 3. Apply condition to findMany and count
-    const [studentsList, totalStudents] = await Promise.all([
+    const [studentsList] = await Promise.all([
         prisma.students.findMany({
             where: whereCondition,
+            distinct: ['id_number'],
             skip: skip,
             take: ITEMS_PER_PAGE,
             include: {
@@ -58,13 +56,10 @@ export default async function Page({
             orderBy: {
                 created_at: "desc",
             },
-        }),
-        prisma.students.count({
-            where: whereCondition // Count must be filtered too!
         })
     ]);
 
-    const totalPages = Math.ceil(totalStudents / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(studentsList.length / ITEMS_PER_PAGE);
 
     return (
         <div className="space-y-6">
@@ -93,7 +88,7 @@ export default async function Page({
                 <Pagination
                     totalPages={totalPages}
                     currentPage={currentPage}
-                    totalItems={totalStudents}
+                    totalItems={studentsList.length}
                     itemName="students"
                 />
             </div>

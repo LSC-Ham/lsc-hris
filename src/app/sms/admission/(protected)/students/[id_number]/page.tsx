@@ -26,8 +26,6 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
         return null;
     }
 
-    const userId = (session.user as any).id || "";
-
     const studentId = await prisma.students.findFirst({
         where: { id_number: id_number },
         select: {
