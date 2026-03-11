@@ -15,6 +15,7 @@ import { getSemesters } from "@/actions/admin/settings/sms/semesters/action";
 import { getYears } from "@/actions/admin/settings/sms/years/action";
 import { getSections } from "@/actions/admin/settings/sms/sections/action";
 import { getScholarships } from "@/actions/admin/settings/scholarship/action";
+import { getCourses } from "@/actions/admin/settings/sms/courses/action";
 
 export default async function Page({ params }: { params: Promise<{ id_number: string }> }) {
     const { id_number } = await params;
@@ -26,39 +27,6 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     }
 
     const userId = (session.user as any).id || "";
-
-    const department = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-            biography: {
-                select: {
-                    employees: {
-                        select: {
-                            departments: {
-                                select: {
-                                    id: true,
-                                    department: true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    const userDeptName = department?.biography?.employees?.departments?.department?.toLowerCase();
-    const userDeptId = department?.biography?.employees?.departments?.id;
-
-    const coursesData = await prisma.courses.findMany({
-        where: {
-            department_id: userDeptId
-        },
-        select: {
-            course_code: true,
-        }
-    });
-    const courseCodes = coursesData.map((course) => course.course_code);
 
     const studentId = await prisma.students.findFirst({
         where: { id_number: id_number },
@@ -86,33 +54,19 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const semesters = await getSemesters();
     const semesterNames = semesters.map((s) => s.semester);
 
-    const acadLevels = await getAcadLevel();
-    let acadLevelNames = acadLevels.map((l) => l.acad_level_name);
-
-    const years = await getYears();
-    let yearNames = years.map((y) => y.year);
-
-    const sections = await getSections();
-    let sectionNames = sections.map((section) => section.section);
-
     const scholarships = await getScholarships();
-    let scholarshipNames = scholarships.map((scholarship) => scholarship.scholarship);
+    const scholarshipNames = scholarships.map((scholarship) => scholarship.scholarship);
 
-    if (userDeptName === "basic education") {
-        acadLevelNames = acadLevelNames.filter(level =>
-            level?.toLowerCase().includes("jhs") ||
-            level?.toLowerCase().includes("shs") ||
-            level?.toLowerCase().includes("junior") ||
-            level?.toLowerCase().includes("senior")
-        );
-    } else {
-        acadLevelNames = acadLevelNames.filter(level =>
-            !level?.toLowerCase().includes("jhs") &&
-            !level?.toLowerCase().includes("shs") &&
-            !level?.toLowerCase().includes("junior") &&
-            !level?.toLowerCase().includes("senior")
-        );
-    }
+    const acadLevels = await getAcadLevel();
+    const courses = await getCourses();
+    const years = await getYears();
+    const sections = await getSections();
+
+    const courseCodes = courses.map(c => c.course_code)
+    const acadLevelData = acadLevels.map(l => ({ id: l.id, name: l.acad_level_name }));
+    const yearsData = years.map(y => ({ id: y.id, year: y.year, acad_level_id: y.acad_level_id }));
+    const sectionsData = sections.map(s => ({ id: s.id, section: s.section, acad_level_id: s.acad_level_id }));
+
     return (
         <StudentPage
             role="moderator"
@@ -124,10 +78,10 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
             educational_background={educational_background}
             acadYears={acadYearNames}
             semesters={semesterNames}
-            acadLevel={acadLevelNames}
+            acadLevel={acadLevelData}
             courses={courseCodes}
-            years={yearNames}
-            sections={sectionNames}
+            years={yearsData}
+            sections={sectionsData}
             scholarships={scholarshipNames}
         />
     );

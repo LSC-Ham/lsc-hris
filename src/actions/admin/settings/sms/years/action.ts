@@ -15,7 +15,8 @@ export async function getYears() {
                 id: true,
                 year: true,
                 order: true,
-                description: true
+                description: true,
+                acad_level_id: true,
             },
             orderBy: { order: 'asc' },
         });

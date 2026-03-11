@@ -92,12 +92,10 @@ export default function StudentPage({
     const [personalData, setPersonalData] = useState({ ...DEFAULT_PERSONAL_DATA, ...(personal_information || {}) });
     const [studentData, setStudentData] = useState({ ...DEFAULT_STUDENT_DATA, ...(student_details || {}) });
 
-    // CLEANUP: Extract helpers to build the complex state objects cleanly
     const buildAddressState = () => {
         const addrArray = address?.address || [];
         const getAddr = (type: string) => addrArray.find((a: any) => a.address_type === type) || {};
 
-        // We only call getAddr once per type now!
         const res = getAddr("residential");
         const perm = getAddr("permanent");
 

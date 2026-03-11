@@ -32,6 +32,7 @@ export default async function Page({
                                 firstname: true,
                                 middlename: true,
                                 surname: true,
+                                mobile_no: true,
                             }
                         },
                     }

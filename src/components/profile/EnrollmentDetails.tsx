@@ -3,6 +3,10 @@
 
 import { useState, useEffect } from "react";
 
+// 1. Update your interfaces to accept objects instead of just strings
+interface AcadLevelData { id: string; name: string; }
+interface YearData { id: string; year: string; acad_level_id: string; }
+interface SectionData { id: string; section: string; acad_level_id: string; }
 
 interface EnrollmentDetailsProps {
     mode?: "view" | "update" | "create";
@@ -12,10 +16,10 @@ interface EnrollmentDetailsProps {
     onFilterChange?: (filters: { acad_year: string; semester: string }) => void;
     acadYears: string[];
     semesters: string[];
-    acadLevel: string[];
+    acadLevel: AcadLevelData[]; // Updated
     courses: string[];
-    years: string[];
-    section: string[];
+    years: YearData[];          // Updated
+    section: SectionData[];     // Updated
     scholarship: string[];
 }
 
@@ -36,11 +40,9 @@ export function EnrollmentDetails({
     const [isEditing, setIsEditing] = useState(mode === "create");
     const [draftData, setDraftData] = useState<any>({});
 
-    // --- Filter States ---
     const [filterYear, setFilterYear] = useState(formData?.acad_year || "");
     const [filterSemester, setFilterSemester] = useState(formData?.semester || "");
 
-    // --- State Sync ---
     useEffect(() => {
         const initialData = formData || {};
         setDraftData({ ...initialData });
@@ -49,9 +51,40 @@ export function EnrollmentDetails({
         if (initialData.semester) setFilterSemester(initialData.semester);
     }, [formData]);
 
-    // --- Handlers ---
+
+    const selectedAcadLevelObj = acadLevel.find(level => level.name === draftData.acad_level);
+    const selectedAcadLevelId = selectedAcadLevelObj?.id;
+
+    const selectedLevelName = draftData.acad_level?.toLowerCase() || "";
+    const isCollegeLevel = selectedLevelName !== "" &&
+        !selectedLevelName.includes("jhs") &&
+        !selectedLevelName.includes("shs") &&
+        !selectedLevelName.includes("junior") &&
+        !selectedLevelName.includes("senior");
+
+    const dynamicYears = selectedAcadLevelId
+        ? years.filter(y => y.acad_level_id === selectedAcadLevelId).map(y => y.year)
+        : years.map(y => y.year);
+
+    const dynamicSections = selectedAcadLevelId
+        ? section.filter(s => s.acad_level_id === selectedAcadLevelId).map(s => s.section)
+        : section.map(s => s.section);
+
+    const acadLevelNames = acadLevel.map(l => l.name);
+
     const handleLocalChange = (field: string, value: any) => {
-        setDraftData((prev: any) => ({ ...prev, [field]: value }));
+        setDraftData((prev: any) => {
+            const newData = { ...prev, [field]: value };
+
+            if (field === "acad_level") {
+                newData.year = "";
+                newData.section = "";
+                newData.course = ""; // Clear the course too!
+            }
+
+            return newData;
+        });
+
         if (onChange) {
             onChange({ [field]: value });
         }
@@ -69,7 +102,6 @@ export function EnrollmentDetails({
         }
     };
 
-    // --- Save & Cancel Logic ---
     const handleCancel = () => {
         setDraftData({ ...(formData || {}) });
         setIsEditing(false);
@@ -103,7 +135,6 @@ export function EnrollmentDetails({
                     )}
                 </div>
 
-                {/* Always-on Term Filters (Locked during editing) */}
                 <div className="rounded-lg grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
@@ -150,7 +181,6 @@ export function EnrollmentDetails({
 
             {/* Editable Details Form */}
             <div className="space-y-6">
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ProfileField
                         label="Student ID Number"
@@ -172,23 +202,24 @@ export function EnrollmentDetails({
                     <ProfileSelect
                         label="Academic Level"
                         value={draftData.acad_level}
-                        options={acadLevel}
+                        options={acadLevelNames} // Pass mapped names
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("acad_level", e.target.value)}
                         required
                     />
-                    <ProfileSelect
-                        label="Course"
-                        value={draftData.course}
-                        options={courses}
-                        isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("course", e.target.value)}
-                        required
-                    />
+                        <ProfileSelect
+                            label="Course"
+                            value={draftData.course}
+                            options={courses}
+                            isEditing={isEditing}
+                            onChange={(e: any) => handleLocalChange("course", e.target.value)}
+                            required={isCollegeLevel}
+                            disabled={!isCollegeLevel}
+                        />
                     <ProfileSelect
                         label="Year"
                         value={draftData.year}
-                        options={years}
+                        options={dynamicYears} // Now perfectly reactive!
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("year", e.target.value)}
                         required
@@ -196,7 +227,7 @@ export function EnrollmentDetails({
                     <ProfileSelect
                         label="Section"
                         value={draftData.section}
-                        options={section}
+                        options={dynamicSections} // Now perfectly reactive!
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("section", e.target.value)}
                         required
@@ -227,7 +258,6 @@ export function EnrollmentDetails({
         </div>
     );
 }
-
 // ----------------------------------------------------------------------
 // HELPER COMPONENTS (Unchanged)
 // ----------------------------------------------------------------------
