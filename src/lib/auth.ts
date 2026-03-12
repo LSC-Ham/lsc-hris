@@ -24,18 +24,8 @@ export const authOptions: NextAuthOptions = {
                 const user = await prisma.user.findFirst({
                     where: {
                         OR: [
-                            // 1. Check if it matches the 'username' column in User table
                             { username: credentials?.username },
-
-                            // 2. Check if it matches the 'id_number' in the related Employees table
-                            // (Assuming your User model has a relation to employees)
-                            {
-                                biography: {
-                                    employees: {
-                                        id_number: credentials?.username,
-                                    }
-                                }
-                            }
+                            { biography: { employees: { id_number: credentials?.username, } } }
                         ]
                     },
                 });
@@ -62,34 +52,34 @@ export const authOptions: NextAuthOptions = {
                     },
                 });
 
+                const emp = await prisma.employees.findFirst({
+                    where: { biography: { users: { id: user.id } } },
+                    select: { departments: { select: { department: true } } }
+                });
+                
                 token.dbSessionToken = sessionToken;
                 token.userId = user.id;
                 token.role = (user as any).role;
+                token.department = emp?.departments?.department || null;
             }
             return token;
         },
         async session({ session, token }) {
-            // 2. STATEFUL CHECK: Look for this token in your Postgres table
             const dbSession = await prisma.session.findUnique({
                 where: { sessionToken: token.dbSessionToken as string },
             });
 
-            // 3. IF NOT IN DATABASE, INVALIDATE THE SESSION (Kicks user out)
             if (!dbSession) {
-                // FIX: Do not return null. NextAuth needs an object.
-                // Returning a session with no user gracefully tells NextAuth the user is logged out.
                 return { ...session, user: undefined } as any;
             }
 
             if (session.user) {
                 (session.user as any).id = token.userId;
                 (session.user as any).role = token.role;
+                (session.user as any).department = token.department;
             }
             return session;
         },
-    },
-    pages: {
-        signIn: "/hris/login",
     },
     events: {
 

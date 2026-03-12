@@ -33,7 +33,7 @@ export default async function Page({
         ]
     } : {};
 
-    const [studentsList] = await Promise.all([
+    const [students] = await Promise.all([
         prisma.students.findMany({
             where: whereCondition,
             distinct: ['id_number'],
@@ -59,7 +59,7 @@ export default async function Page({
         })
     ]);
 
-    const totalPages = Math.ceil(studentsList.length / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(students.length / ITEMS_PER_PAGE);
 
     return (
         <div className="space-y-6">
@@ -83,12 +83,12 @@ export default async function Page({
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                <StudentsTable studentsList={studentsList} />
+                <StudentsTable studentsList={students} />
 
                 <Pagination
                     totalPages={totalPages}
                     currentPage={currentPage}
-                    totalItems={studentsList.length}
+                    totalItems={students.length}
                     itemName="students"
                 />
             </div>

@@ -1,22 +1,26 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma"; // ✨ Added Prisma import
+import { prisma } from "@/lib/prisma";
 import { Sidebar } from "@/components/sms/admission/Sidebar";
+import { LogoutButton } from "@/components/sms/auth/LogoutButton";
+
+// Ensure your departments are exactly as they appear in the database
+const ALLOWED_DEPARTMENTS = ["office of the student affairs"];
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const session = await getServerSession(authOptions);
 
-    // Single, clean check for session existence
     if (!session || !session.user) {
-        redirect("/hris/login");
+        redirect("/sms/admission/login");
     }
 
     const userId = (session.user as any).id || "";
     const userRole = (session.user as any).role || "";
 
-    // ✨ Fetch the user's data from the database to get their profile picture
-    // Note: Adjust "user" to match your actual Prisma model name (e.g., User, user)
+    // Grab the department from the token/session
+    const userDepartment = (session.user as any).department || "";
+
     const userData = await prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -31,7 +35,6 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                     employees: {
                         select: {
                             id_number: true,
-
                             departments: {
                                 select: {
                                     department: true,
@@ -41,12 +44,14 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                     }
                 }
             }
-        } // Only grab what we need for performance
+        }
     });
+
+    // 🛡️ SECURITY CHECK: Normalize to lowercase to avoid case-sensitivity bugs (e.g. "Office" vs "office")
+    const isAllowed = ALLOWED_DEPARTMENTS.includes(userDepartment.toLowerCase().trim());
 
     return (
         <div className="flex min-h-screen bg-slate-50">
-            {/* ✨ Pass the fetched profile picture to the Sidebar */}
             <Sidebar
                 userRole={userRole}
                 userId={userId}
@@ -63,14 +68,27 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                         Welcome back, <span className="text-gray-900 capitalize">{userData?.biography?.personal_information?.surname}</span>
                     </h2>
 
-                    { 
-                    //<LogoutButton />
-                    }
+                    <LogoutButton />
                 </header>
 
-                {/* Page Content */}
                 <main className="p-8">
-                    {children}
+                    {/* 🚦 CONDITIONAL RENDERING HERE */}
+                    {isAllowed ? (
+                        children
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-[60vh] bg-white rounded-xl border border-gray-200 shadow-sm text-center p-8">
+                            <div className="bg-red-50 p-4 rounded-full mb-4">
+                                {/* Simple SVG lock/shield icon */}
+                                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                            </div>
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Restricted</h1>
+                            <p className="text-gray-500 max-w-md">
+                                You do not have permission to view the Admission Dashboard. This area is strictly restricted to personnel in the <span className="font-semibold text-gray-700 capitalize">{ALLOWED_DEPARTMENTS.join(", ")}</span>.
+                            </p>
+                        </div>
+                    )}
                 </main>
             </div>
         </div>

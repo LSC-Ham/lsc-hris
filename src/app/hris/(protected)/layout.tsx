@@ -16,8 +16,6 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     const userId = (session.user as any).id || "";
     const userRole = (session.user as any).role || "";
 
-    // ✨ Fetch the user's data from the database to get their profile picture
-    // Note: Adjust "user" to match your actual Prisma model name (e.g., User, user)
     const userData = await prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -42,12 +40,11 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                     }
                 }
             }
-        } // Only grab what we need for performance
+        } 
     });
 
     return (
         <div className="flex min-h-screen bg-slate-50">
-            {/* ✨ Pass the fetched profile picture to the Sidebar */}
             <Sidebar
                 userRole={userRole}
                 userId={userId}
@@ -67,7 +64,6 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                     <LogoutButton />
                 </header>
 
-                {/* Page Content */}
                 <main className="p-8">
                     {children}
                 </main>

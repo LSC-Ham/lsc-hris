@@ -190,7 +190,7 @@ export async function main() {
         },
         {
             username: "ddadis", email: "ddadis@lakeshore.edu.ph", password: hashedPassword, role: "user",
-            id_number: "CL04010", department: "College", position: "Faculty", division: "Academics", hired_at: new Date(),
+            id_number: "CL04010", department: "office of the student affairs", position: "Faculty", division: "Academics", hired_at: new Date(),
             surname: "dadis", firstname: "dailene", contact_number: "09985741401", birthdate: new Date("01/29/1998"),
             sex: "female", civil_status: "single", nationality: "Philippines",
             government_ids: [

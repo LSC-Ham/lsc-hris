@@ -1,128 +1,167 @@
-'use client';
+//src\app\sms\admission\login\page.tsx
+"use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+import { signIn, useSession } from "next-auth/react"; // ✨ Added useSession
+import { useState, useEffect } from "react"; // ✨ Added useEffect
+import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function Page() {
+    const { status } = useSession(); // ✨ Grab the auth status
+    const router = useRouter();
+
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const currentYear = new Date().getFullYear();
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.replace("/sms/admission/dashboard");
+        }
+    }, [status, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setError("");
 
-        // Simulating a network request
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setIsLoading(false);
+        try {
+            const result = await signIn("credentials", {
+                username,
+                password,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                setError("Invalid username or password. Please try again.");
+                setIsLoading(false);
+            } else {
+                router.push("/sms/admission/dashboard");
+                router.refresh();
+            }
+        } catch (err) {
+            setError("Something went wrong. Please try again.");
+            setIsLoading(false);
+        }
     };
 
-    return (
-        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f5f7fa] to-[#e4efe9] p-4 md:p-5">
-
-            {/* Background Image Overlay */}
-            <div
-                className="absolute inset-0 z-0 bg-cover bg-center brightness-105"
-                style={{
-                    backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.92)), url('/lsc_background.jpg')`
-                }}
-            />
-
-            {/* LSC Background Text */}
-            <div className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center opacity-10">
-                <h1 className="mb-5 text-center font-[Times_New_Roman] text-[2.5rem] font-bold uppercase leading-tight tracking-[2px] text-[#2d6a4f] md:text-6xl md:tracking-[4px]">
-                    LAKE<br />SHORE<br />COLLEGES
-                </h1>
-                <div className="font-serif text-lg italic tracking-[2px] text-[#1b4332] md:text-3xl">PRO PATRIA</div>
-                <div className="mt-2.5 font-sans text-sm tracking-[1px] text-[#40916c] md:text-lg">FOUNDED A.D. 1931</div>
+    if (status === "loading" || status === "authenticated") {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
+                <svg className="animate-spin h-8 w-8 text-[#1a6b36]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
             </div>
+        );
+    }
 
-            {/* Login Form Container */}
-            <div className="relative z-20 w-full max-w-[420px]">
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50/50 p-6">
+            <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
 
-                {/* Login Card */}
-                <div className="rounded-[20px] border border-[#40916c]/20 bg-white/95 p-6 shadow-[0_15px_35px_rgba(45,106,79,0.1),0_5px_15px_rgba(0,0,0,0.07),inset_0_1px_0_rgba(255,255,255,0.8)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(45,106,79,0.15),0_8px_20px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.9)] sm:p-8 md:px-[35px] md:py-[40px]">
-
-                    {/* Logo */}
-                    <div className="mb-[30px] flex justify-center">
-                        <img
-                            src="/logo-sidebar.png"
-                            alt="Lake Shore Colleges Logo"
-                            className="h-[75px] w-[75px] object-contain drop-shadow-[0_4px_6px_rgba(45,106,79,0.2)] md:h-[90px] md:w-[90px]"
-                        />
+                {/* Header / Logo Area */}
+                <div className="px-8 pt-8 pb-6 text-center">
+                    <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-4 text-[#1a6b36] shadow-sm transform rotate-3">
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
                     </div>
+                    <h1 className="text-xl font-bold text-gray-800 tracking-tight">Welcome Back</h1>
+                    <p className="text-sm text-gray-500 mt-2">
+                        Sign in to access your dashboard
+                    </p>
+                </div>
 
-                    {/* Title */}
-                    <h2 className="relative mb-[30px] pb-[15px] text-center text-[1.4rem] font-semibold text-[#2d6a4f] after:absolute after:bottom-0 after:left-1/2 after:h-[3px] after:w-[60px] after:-translate-x-1/2 after:rounded-sm after:bg-gradient-to-r after:from-[#2d6a4f] after:to-[#52b788] md:text-[1.8rem]">
-                        Welcome Back
-                    </h2>
+                {/* Form Section */}
+                <div className="px-8 pb-8">
+                    <form onSubmit={handleSubmit} className="space-y-5">
 
-                    {/* Login Form */}
-                    <form onSubmit={handleSubmit}>
+                        {/* Error Message */}
+                        {error && (
+                            <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs font-medium flex items-center gap-2 animate-in slide-in-from-top-1">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {error}
+                            </div>
+                        )}
 
-                        {/* Username Field */}
-                        <div className="mb-[25px]">
-                            <label className="mb-2 flex items-center gap-2 text-[0.95rem] font-medium text-[#2d6a4f]" htmlFor="username">
-                                <i className="fa-regular fa-user text-[1rem] text-[#40916c]"></i> Username
+                        {/* Username Input */}
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Username or ID Number
                             </label>
-                            <input
-                                type="text"
-                                id="username"
-                                name="username"
-                                placeholder="Enter your username"
-                                required
-                                className="w-full rounded-xl border-2 border-[#e9f5ec] bg-[#f8fdf9] px-[14px] py-[12px] text-base text-[#2d6a4f] transition-all duration-300 placeholder:text-[#95d5b2] focus:border-[#52b788] focus:bg-white focus:outline-none focus:ring-[3px] focus:ring-[#52b788]/20 md:px-[16px] md:py-[14px]"
-                            />
+                            <div className="relative">
+                                <span className="absolute left-3 top-2.5 text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </span>
+                                <input
+                                    type="text"
+                                    required
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    placeholder="Enter your username"
+                                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-[#1a6b36] focus:ring-1 focus:ring-[#1a6b36] outline-none transition-all placeholder:text-gray-400"
+                                />
+                            </div>
                         </div>
 
-                        {/* Password Field */}
-                        <div className="mb-[25px]">
-                            <label className="mb-2 flex items-center gap-2 text-[0.95rem] font-medium text-[#2d6a4f]" htmlFor="password">
-                                <i className="fa-solid fa-lock text-[1rem] text-[#40916c]"></i> Password
-                            </label>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                placeholder="Enter your password"
-                                required
-                                className="w-full rounded-xl border-2 border-[#e9f5ec] bg-[#f8fdf9] px-[14px] py-[12px] text-base text-[#2d6a4f] transition-all duration-300 placeholder:text-[#95d5b2] focus:border-[#52b788] focus:bg-white focus:outline-none focus:ring-[3px] focus:ring-[#52b788]/20 md:px-[16px] md:py-[14px]"
-                            />
+                        {/* Password Input */}
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center">
+                                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                    Password
+                                </label>
+                                <a href="#" className="text-xs text-[#1a6b36] hover:underline hover:text-[#155a2b]">
+                                    Forgot password?
+                                </a>
+                            </div>
+                            <div className="relative">
+                                <span className="absolute left-3 top-2.5 text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </span>
+                                <input
+                                    type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-[#1a6b36] focus:ring-1 focus:ring-[#1a6b36] outline-none transition-all placeholder:text-gray-400"
+                                />
+                            </div>
                         </div>
 
-                        {/* Login Button */}
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="mt-2.5 flex w-full items-center justify-center gap-[10px] rounded-xl bg-gradient-to-br from-[#2d6a4f] to-[#40916c] p-[14px] text-[1rem] font-semibold text-white shadow-[0_4px_15px_rgba(45,106,79,0.3)] transition-all duration-300 hover:-translate-y-[2px] hover:bg-gradient-to-br hover:from-[#1b4332] hover:to-[#2d6a4f] hover:shadow-[0_6px_20px_rgba(45,106,79,0.4)] active:translate-y-0 md:p-[16px] md:text-[1.05rem]"
-                            >
-                                {isLoading ? (
-                                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                                ) : (
-                                    <>
-                                        <i className="fa-solid fa-right-to-bracket text-[1.1rem]"></i> Login
-                                    </>
-                                )}
-                            </button>
-                        </div>
-
-                    </form>
-
-                    {/* Forgot Password */}
-                    <div className="mt-[25px] border-t border-[#40916c]/10 pt-[20px] text-center">
-                        <Link
-                            href="/forgot-password"
-                            className="text-[0.9rem] text-[#40916c] transition-colors duration-300 hover:text-[#2d6a4f] hover:underline"
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full bg-[#1a6b36] text-white font-medium py-2.5 px-4 rounded-lg hover:bg-[#155a2b] active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-sm flex justify-center items-center gap-2 mt-2"
                         >
-                            Forgot Password?
-                        </Link>
-                    </div>
+                            {isLoading ? (
+                                <>
+                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Signing in...
+                                </>
+                            ) : (
+                                "Sign In"
+                            )}
+                        </button>
+                    </form>
+                </div>
 
-                    {/* Footer */}
-                    <div className="mt-[30px] text-center text-[0.85rem] text-[#74c69d] opacity-80">
-                        &copy; {currentYear} Lake Shore Colleges. All rights reserved.
-                    </div>
-
+                {/* Footer (Optional) */}
+                <div className="bg-gray-50 px-8 py-4 border-t border-gray-100 text-center">
+                    <p className="text-xs text-gray-500">
+                        Don't have an account? <span className="text-[#1a6b36] font-medium cursor-pointer hover:underline">Contact Admin</span>
+                    </p>
                 </div>
             </div>
         </div>
