@@ -28,12 +28,10 @@ export function EmploymentDetails({
     const [isEditing, setIsEditing] = useState(mode === "create");
     const [draftData, setDraftData] = useState<any>({});
 
-    // ADDED: is_active to the state
     const [assignedPosition, setAssignedPosition] = useState({
         position: "", status: "", description: "", start_at: "", end_at: "", is_active: false
     });
 
-    // --- Formatters ---
     const formatDateForInput = (dateVal: any) => {
         if (!dateVal) return "";
         if (typeof dateVal === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(dateVal)) {
@@ -68,11 +66,8 @@ export function EmploymentDetails({
         });
     };
 
-    // --- State Sync ---
     useEffect(() => {
         const initialData = formData || {};
-
-        // Ensure positions are sorted on initial load (Active on top)
         const sortedPositions = [...(initialData.positions || [])].sort((a, b) =>
             (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1)
         );
@@ -84,8 +79,6 @@ export function EmploymentDetails({
         });
     }, [formData]);
 
-
-    // --- Handlers ---
     const handleLocalChange = (field: string, value: any) => {
         setDraftData((prev: any) => ({ ...prev, [field]: value }));
         if (onChange) {
@@ -93,28 +86,23 @@ export function EmploymentDetails({
         }
     };
 
-    // CHANGED: Value parameter accepts `any` now to support the checkbox boolean
     const handleAssignedChange = (field: string, value: any) => {
         setAssignedPosition((prev) => ({ ...prev, [field]: value }));
     };
 
-    // --- POSITIONS LOGIC ---
     const handleAddPositionObj = () => {
         if (!assignedPosition.position || !assignedPosition.status) return;
 
         let updatedPositions = [...(draftData.positions || [])];
 
-        // 1. Enforce uniqueness: If the new position is active, deactivate the rest
         if (assignedPosition.is_active) {
             updatedPositions = updatedPositions.map(p => ({ ...p, is_active: false }));
         } else if (updatedPositions.length === 0) {
-            // Quality of life: If it's the very first position being added, make it active by default
             assignedPosition.is_active = true;
         }
 
         updatedPositions.push({ ...assignedPosition });
 
-        // 2. Sort so the active position is always at index 0
         updatedPositions.sort((a, b) => (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1));
 
         handleLocalChange("positions", updatedPositions);
@@ -122,13 +110,11 @@ export function EmploymentDetails({
     };
 
     const handleSetActivePosition = (indexToActivate: number) => {
-        // Map through and set ONLY the target index to true, the rest to false
         let updatedPositions = (draftData.positions || []).map((p: any, i: number) => ({
             ...p,
             is_active: i === indexToActivate
         }));
 
-        // Re-sort to put the active one on top
         updatedPositions.sort((a: any, b: any) => (a.is_active === b.is_active ? 0 : a.is_active ? -1 : 1));
 
         handleLocalChange("positions", updatedPositions);
@@ -139,7 +125,6 @@ export function EmploymentDetails({
         handleLocalChange("positions", updatedPositions);
     };
 
-    // --- Save & Cancel Logic ---
     const handleCancel = () => {
         const initialData = formData || {};
         const sortedPositions = [...(initialData.positions || [])].sort((a, b) =>
@@ -164,7 +149,6 @@ export function EmploymentDetails({
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                 <h1 className="text-xl font-bold text-gray-800 tracking-tight">Employment Details</h1>
 
@@ -180,7 +164,6 @@ export function EmploymentDetails({
             </div>
 
             <div className="space-y-6">
-                {/* ID & Dept */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ProfileField
                         label="Employee ID Number"
@@ -224,13 +207,11 @@ export function EmploymentDetails({
                     />
                 </div>
 
-                {/* Positions Logic */}
                 <div className="border-t border-gray-100 pt-6 space-y-4">
                     <label className="block text-xs font-semibold text-gray-500 uppercase mb-4">
                         Assigned Positions & History
                     </label>
 
-                    {/* List */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         {draftData.positions && draftData.positions.length > 0 ? (
                             draftData.positions.map((pos: any, index: number) => (
@@ -241,14 +222,12 @@ export function EmploymentDetails({
                                             : 'bg-gray-50 border-gray-200 opacity-75'
                                         }`}
                                 >
-                                    {/* Left Side: Position Info */}
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
                                             <h4 className={`font-bold text-sm ${pos.is_active ? 'text-gray-900' : 'text-gray-600'}`}>
                                                 {pos.position}
                                             </h4>
 
-                                            {/* ACTIVE BADGE */}
                                             {pos.is_active && (
                                                 <span className="px-2 py-[2px] rounded text-[9px] uppercase font-bold tracking-wider border bg-green-50 text-green-700 border-green-200">
                                                     Active Role
@@ -279,10 +258,8 @@ export function EmploymentDetails({
                                         </div>
                                     </div>
 
-                                    {/* Right Side: Actions */}
                                     {isEditing && (
                                         <div className="flex items-center gap-4 mt-3 sm:mt-0">
-                                            {/* SET ACTIVE BUTTON */}
                                             {!pos.is_active && (
                                                 <button
                                                     type="button"
@@ -314,7 +291,6 @@ export function EmploymentDetails({
                         )}
                     </div>
 
-                    {/* Add Form */}
                     {isEditing && (
                         <div className="bg-green-50/50 border border-green-100 rounded-xl p-4 space-y-4">
                             <h4 className="text-xs font-bold text-[#1a6b36] uppercase">Add New Position</h4>
@@ -361,7 +337,6 @@ export function EmploymentDetails({
                                 />
                             </div>
 
-                            {/* ACTIVE CHECKBOX & ADD BUTTON */}
                             <div className="flex justify-between items-center border-t border-green-100 pt-4 mt-2">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
@@ -417,10 +392,6 @@ export function EmploymentDetails({
         </div>
     );
 }
-
-// ----------------------------------------------------------------------
-// HELPER COMPONENTS (Unchanged)
-// ----------------------------------------------------------------------
 
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
     const displayValue = value instanceof Date ? value.toLocaleDateString() : value;

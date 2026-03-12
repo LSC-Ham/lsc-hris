@@ -1,8 +1,6 @@
 "use server";
 
 import { prisma } from "@/lib/prisma"; // Adjust this import to your actual Prisma client location
-import fs from 'fs/promises';
-import path from 'path';
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt"; // Requires: npm install bcryptjs\
 

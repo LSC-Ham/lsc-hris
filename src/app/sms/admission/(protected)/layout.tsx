@@ -72,13 +72,11 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                 </header>
 
                 <main className="p-8">
-                    {/* 🚦 CONDITIONAL RENDERING HERE */}
                     {isAllowed ? (
                         children
                     ) : (
                         <div className="flex flex-col items-center justify-center h-[60vh] bg-white rounded-xl border border-gray-200 shadow-sm text-center p-8">
                             <div className="bg-red-50 p-4 rounded-full mb-4">
-                                {/* Simple SVG lock/shield icon */}
                                 <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                 </svg>

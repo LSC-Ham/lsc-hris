@@ -271,7 +271,7 @@ export async function main() {
         },
         {
             username: "mdumaguing", email: "mdumaguing@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
-            id_number: "CL04013", department: "College", position: "Human Resource", division: "Academics", hired_at: new Date(),
+            id_number: "CL04013", department: "human resource", position: "hr officer", division: "Academics", hired_at: new Date(),
             surname: "dumaguing", firstname: "marife", contact_number: "09088150476", birthdate: new Date("05/07/1976"),
             sex: "female", civil_status: "single", nationality: "Philippines",
             government_ids: [

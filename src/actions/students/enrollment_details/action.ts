@@ -1,14 +1,17 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; // Adjust path if needed
-import { authOptions } from "@/lib/auth"; // Adjust path if needed
+import { prisma } from "@/lib/prisma"; 
+import { authOptions } from "@/lib/auth"; 
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export async function generateStudentID() {
     try {
-        const count = await prisma.students.count();
+        const student = await prisma.students.findMany({
+            distinct:['id_number']
+        })
+        const count = student.length
 
         const nextId = count + 1;
 

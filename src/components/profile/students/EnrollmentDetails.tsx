@@ -1,4 +1,4 @@
-// src/components/profile/EnrollmentDetails.tsx
+// src\components\profile\students\EnrollmentDetails.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,10 +16,10 @@ interface EnrollmentDetailsProps {
     onFilterChange?: (filters: { acad_year: string; semester: string }) => void;
     acadYears: string[];
     semesters: string[];
-    acadLevel: AcadLevelData[]; // Updated
+    acadLevel: AcadLevelData[];
     courses: string[];
-    years: YearData[];          // Updated
-    section: SectionData[];     // Updated
+    years: YearData[];         
+    section: SectionData[];    
     scholarship: string[];
 }
 
@@ -164,7 +164,7 @@ export function EnrollmentDetails({
                     <ProfileSelect
                         label="Academic Level"
                         value={draftData.acad_level}
-                        options={acadLevelNames} // Pass mapped names
+                        options={acadLevelNames}
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("acad_level", e.target.value)}
                         required
