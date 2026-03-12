@@ -1,7 +1,7 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; 
-import { authOptions } from "@/lib/auth"; 
+import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 export async function generateStudentID() {
     try {
         const student = await prisma.students.findMany({
-            distinct:['id_number']
+            distinct: ['id_number']
         })
         const count = student.length
 
@@ -22,30 +22,20 @@ export async function generateStudentID() {
     }
 }
 
-export async function getStudentDetails(studentId: string, acadYear?: string, semester?: string) {
+export async function getStudentDetails(idNumber: string, acadYearId?: string, semesterId?: string) {
     try {
         const session = await getServerSession(authOptions);
         if (!session?.user) redirect("/login");
 
-        // STEP 1: Find the student's base record using the ID you passed
-        const baseRecord = await prisma.students.findUnique({
-            where: { id: studentId },
-            select: { id_number: true }
-        });
-
-        if (!baseRecord) return null;
-
-        // STEP 2: Now look up the NEW term using their shared id_number!
         const whereClause: any = {
-            id_number: baseRecord.id_number
+            id_number: idNumber
         };
 
-        // (Using your original correct relationship filters here!)
-        if (acadYear) {
-            whereClause.acad_years = { acad_year: acadYear };
+        if (acadYearId) {
+            whereClause.acad_year_id = acadYearId;
         }
-        if (semester) {
-            whereClause.semesters = { semester: semester };
+        if (semesterId) {
+            whereClause.semester_id = semesterId;
         }
 
         const studentRecord = await prisma.students.findFirst({
@@ -71,6 +61,15 @@ export async function getStudentDetails(studentId: string, acadYear?: string, se
             id_number: studentRecord.id_number || "",
             enrolled_at: studentRecord.enrolled_at || "",
             created_at: studentRecord.created_at || "",
+
+            acad_level_id: studentRecord.acad_level_id || "",
+            course_id: studentRecord.course_id || "",
+            acad_year_id: studentRecord.acad_year_id || "",
+            semester_id: studentRecord.semester_id || "",
+            sections_id: studentRecord.sections_id || "",
+            year_level_id: studentRecord.year_level_id || "",
+            scholarship_id: studentRecord.scholarship_id || "",
+
             acad_level: studentRecord.acad_level?.acad_level_name || "",
             course: studentRecord.course?.course_code || "",
             acad_year: studentRecord.acad_years?.acad_year || "",
@@ -89,7 +88,6 @@ export async function getStudentDetails(studentId: string, acadYear?: string, se
 export async function updateEnrollmentDetails(studentId: string, formData: any) {
     try {
 
-        // Revalidate the cache so the UI updates immediately
         revalidatePath(`/sms/admission/student/${studentId}`);
         return { success: true };
 

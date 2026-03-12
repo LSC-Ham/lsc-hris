@@ -257,8 +257,6 @@ export default function EmployeePage({
 
     const handleSaveEmploymentDetails = (data: any) => {
         handleAction(
-            // 1. Extract the ID from the data and pass it as the first argument
-            // 2. Pass the rest of the form data as the second argument
             (formData: any) => updateEmploymentDetails(formData.id, formData),
             (d: any) => setEmploymentData((prev: any) => ({ ...prev, ...d })),
             data,

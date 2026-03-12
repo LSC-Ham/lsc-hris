@@ -3,9 +3,12 @@
 
 import { useState, useEffect } from "react";
 
+// 1. Create a flexible type that accepts EITHER a string OR our new object format
+export type FilterOption = string | { id: string; name: string };
+
 interface SearchFilterBarProps {
-    acadYears?: string[];
-    semesters?: string[];
+    acadYears?: FilterOption[]; // 👈 Now accepts both
+    semesters?: FilterOption[]; // 👈 Now accepts both
     initialSearch?: string;
     initialAcadYear?: string;
     initialSemester?: string;
@@ -13,7 +16,6 @@ interface SearchFilterBarProps {
     searchPlaceholder?: string;
     disabled?: boolean;
 
-    // NEW: Toggles to show/hide specific fields
     showSearch?: boolean;
     showAcadYear?: boolean;
     showSemester?: boolean;
@@ -28,8 +30,6 @@ export function SearchFilterBar({
     onFilterChange,
     searchPlaceholder = "Search...",
     disabled = false,
-
-    // Default them to true so they show up unless you explicitly say false
     showSearch = true,
     showAcadYear = true,
     showSemester = true
@@ -53,6 +53,21 @@ export function SearchFilterBar({
             search: field === "search" ? value : search,
             acad_year: field === "acad_year" ? value : acadYear,
             semester: field === "semester" ? value : semester,
+        });
+    };
+
+    // 2. Helper function to render options safely whether they are strings or objects
+    const renderOptions = (options: FilterOption[]) => {
+        return options.map((opt) => {
+            const isString = typeof opt === "string";
+            const value = isString ? opt : opt.id;
+            const label = isString ? opt : opt.name;
+
+            return (
+                <option key={value} value={value}>
+                    {label}
+                </option>
+            );
         });
     };
 
@@ -82,7 +97,6 @@ export function SearchFilterBar({
                 </div>
             )}
 
-            {/* Conditionally render Academic Year */}
             {showAcadYear && (
                 <div className="w-full">
                     <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
@@ -95,14 +109,12 @@ export function SearchFilterBar({
                         className={`w-full p-2.5 border border-gray-200 rounded-md text-sm outline-none shadow-sm transition-colors
                             ${disabled ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-white focus:ring-1 focus:border-[#1a6b36] text-gray-800"}`}
                     >
-                        {acadYears.map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                        ))}
+                        <option value="" disabled>Select Year</option>
+                        {renderOptions(acadYears)} {/* 👈 Uses the new smart helper */}
                     </select>
                 </div>
             )}
 
-            {/* Conditionally render Semester */}
             {showSemester && (
                 <div className="w-full">
                     <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
@@ -115,9 +127,8 @@ export function SearchFilterBar({
                         className={`w-full p-2.5 border border-gray-200 rounded-md text-sm outline-none shadow-sm transition-colors capitalize
                             ${disabled ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-white focus:ring-1 focus:border-[#1a6b36] text-gray-800"}`}
                     >
-                        {semesters.map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                        ))}
+                        <option value="" disabled>Select Semester</option>
+                        {renderOptions(semesters)} {/* 👈 Uses the new smart helper */}
                     </select>
                 </div>
             )}

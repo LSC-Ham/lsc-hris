@@ -1,10 +1,10 @@
-// src\components\profile\students\EnrollmentDetails.tsx
+// src/components/profile/students/EnrollmentDetails.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { SearchFilterBar } from "../../sms/SearchFilter";
 
-interface AcadLevelData { id: string; name: string; }
+interface GenericData { id: string; name: string; }
 interface YearData { id: string; year: string; acad_level_id: string; }
 interface SectionData { id: string; section: string; acad_level_id: string; }
 
@@ -13,14 +13,14 @@ interface EnrollmentDetailsProps {
     formData: any;
     onSave?: (updatedData: any) => void;
     onChange?: (updatedFields: any) => void;
-    onFilterChange?: (filters: { acad_year: string; semester: string }) => void;
-    acadYears: string[];
-    semesters: string[];
-    acadLevel: AcadLevelData[];
-    courses: string[];
-    years: YearData[];         
-    section: SectionData[];    
-    scholarship: string[];
+    onFilterChange?: (filters: { acad_year_id: string; semester_id: string }) => void;
+    acadYears: GenericData[];
+    semesters: GenericData[];
+    acadLevel: GenericData[];
+    courses: GenericData[];
+    years: YearData[];
+    section: SectionData[];
+    scholarship: GenericData[];
 }
 
 export function EnrollmentDetails({
@@ -40,46 +40,56 @@ export function EnrollmentDetails({
     const [isEditing, setIsEditing] = useState(mode === "create");
     const [draftData, setDraftData] = useState<any>({});
 
-    const [filterYear, setFilterYear] = useState(formData?.acad_year || "");
-    const [filterSemester, setFilterSemester] = useState(formData?.semester || "");
+    const [filterYear, setFilterYear] = useState(formData?.acad_year_id || "");
+    const [filterSemester, setFilterSemester] = useState(formData?.semester_id || "");
 
     useEffect(() => {
         const initialData = formData || {};
         setDraftData({ ...initialData });
 
-        if (initialData.acad_year) setFilterYear(initialData.acad_year);
-        if (initialData.semester) setFilterSemester(initialData.semester);
+        if (initialData.acad_year_id) setFilterYear(initialData.acad_year_id);
+        if (initialData.semester_id) setFilterSemester(initialData.semester_id);
     }, [formData]);
 
 
-    const selectedAcadLevelObj = acadLevel.find(level => level.name === draftData.acad_level);
-    const selectedAcadLevelId = selectedAcadLevelObj?.id;
+    // --- DYNAMIC DATA COMPUTATIONS ---
+    const selectedAcadLevelId = draftData.acad_level_id;
+    const selectedAcadLevelObj = acadLevel.find(level => level.id === selectedAcadLevelId);
+    const selectedLevelName = selectedAcadLevelObj?.name?.toLowerCase() || "";
 
-    const selectedLevelName = draftData.acad_level?.toLowerCase() || "";
     const isCollegeLevel = selectedLevelName !== "" &&
         !selectedLevelName.includes("jhs") &&
         !selectedLevelName.includes("shs") &&
         !selectedLevelName.includes("junior") &&
         !selectedLevelName.includes("senior");
 
+    // Helper to format raw data into { id, label } for our updated Select component
+    const formatOptions = (arr: any[], labelKey: string) =>
+        arr.map(item => ({ id: item.id, label: item[labelKey] }));
+
+    const acadLevelOptions = formatOptions(acadLevel, "name");
+    const courseOptions = formatOptions(courses, "name");
+    const scholarshipOptions = formatOptions(scholarship, "name");
+
     const dynamicYears = selectedAcadLevelId
-        ? years.filter(y => y.acad_level_id === selectedAcadLevelId).map(y => y.year)
-        : []; // 👈 Return empty if no acad level is chosen
+        ? formatOptions(years.filter(y => y.acad_level_id === selectedAcadLevelId), "year")
+        : [];
 
     const dynamicSections = selectedAcadLevelId
-        ? section.filter(s => s.acad_level_id === selectedAcadLevelId).map(s => s.section)
-        : []; // 👈 Return empty if no acad level is chosen
+        ? formatOptions(section.filter(s => s.acad_level_id === selectedAcadLevelId), "section")
+        : [];
 
-    const acadLevelNames = acadLevel.map(l => l.name);
 
+    // --- HANDLERS ---
     const handleLocalChange = (field: string, value: any) => {
         setDraftData((prev: any) => {
             const newData = { ...prev, [field]: value };
 
-            if (field === "acad_level") {
-                newData.year = "";
-                newData.section = "";
-                newData.course = ""; // Clear the course too!
+            // Cascade reset if Academic Level changes
+            if (field === "acad_level_id") {
+                newData.year_level_id = "";
+                newData.sections_id = "";
+                newData.course_id = "";
             }
 
             return newData;
@@ -90,14 +100,16 @@ export function EnrollmentDetails({
         }
     };
 
-    const handleFilterChange = (filters: { search: string; acad_year: string; semester: string }) => {
+    // Note: Assuming SearchFilterBar passes back IDs. If it passes names, it will need a slight update too.
+    const handleFilterChange = (filters: { search?: string; acad_year: string; semester: string }) => {
+        // Here we assume the filter bar gives us the IDs (mapped to acad_year/semester keys)
         setFilterYear(filters.acad_year);
         setFilterSemester(filters.semester);
 
         if (onFilterChange) {
             onFilterChange({
-                acad_year: filters.acad_year,
-                semester: filters.semester,
+                acad_year_id: filters.acad_year,
+                semester_id: filters.semester,
             });
         }
     };
@@ -112,15 +124,14 @@ export function EnrollmentDetails({
         if (onSave) {
             onSave({
                 ...draftData,
-                acad_year: filterYear,
-                semester: filterSemester
+                acad_year_id: filterYear,
+                semester_id: filterSemester
             });
         }
     };
 
     return (
         <div className="space-y-6">
-
             <div className="border-b border-gray-100 pb-6 space-y-4">
                 <div className="flex justify-between items-center">
                     <h1 className="text-xl font-bold text-gray-800 tracking-tight">Enrollment Details</h1>
@@ -156,50 +167,50 @@ export function EnrollmentDetails({
                     />
                     <ProfileField
                         label="Status"
-                        value={draftData.created_at ? "applied" : ""}
+                        value={draftData.created_at ? "Enrolled" : "Not Enrolled"}
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("created_at", e.target.value)}
                         disabled={true}
                     />
                     <ProfileSelect
                         label="Academic Level"
-                        value={draftData.acad_level}
-                        options={acadLevelNames}
+                        value={draftData.acad_level_id}
+                        options={acadLevelOptions}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("acad_level", e.target.value)}
+                        onChange={(e: any) => handleLocalChange("acad_level_id", e.target.value)}
                         required
                     />
                     <ProfileSelect
                         label="Course"
-                        value={draftData.course}
-                        options={courses}
+                        value={draftData.course_id}
+                        options={courseOptions}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("course", e.target.value)}
+                        onChange={(e: any) => handleLocalChange("course_id", e.target.value)}
                         required={isCollegeLevel}
                         disabled={!isCollegeLevel}
                     />
                     <ProfileSelect
                         label="Year"
-                        value={draftData.year}
-                        options={dynamicYears} // Now perfectly reactive!
+                        value={draftData.year_level_id}
+                        options={dynamicYears}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("year", e.target.value)}
+                        onChange={(e: any) => handleLocalChange("year_level_id", e.target.value)}
                         required
                     />
                     <ProfileSelect
                         label="Section"
-                        value={draftData.section}
-                        options={dynamicSections} // Now perfectly reactive!
+                        value={draftData.sections_id}
+                        options={dynamicSections}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("section", e.target.value)}
+                        onChange={(e: any) => handleLocalChange("sections_id", e.target.value)}
                         required
                     />
                     <ProfileSelect
                         label="Scholarship"
-                        value={draftData.scholarship}
-                        options={scholarship}
+                        value={draftData.scholarship_id}
+                        options={scholarshipOptions}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("scholarship", e.target.value)}
+                        onChange={(e: any) => handleLocalChange("scholarship_id", e.target.value)}
                         required
                     />
                 </div>
@@ -220,8 +231,9 @@ export function EnrollmentDetails({
         </div>
     );
 }
+
 // ----------------------------------------------------------------------
-// HELPER COMPONENTS (Unchanged)
+// HELPER COMPONENTS
 // ----------------------------------------------------------------------
 
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
@@ -241,10 +253,9 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
                     required={required}
                     disabled={disabled}
                     className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm outline-none 
-                    ${type === 'text'} 
                     ${disabled
                             ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
-                            : "bg-white focus:ring-1 " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
+                            : "bg-white focus:ring-1 " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-[#1a6b36]")
                         }`}
                 />
             ) : (
@@ -257,6 +268,10 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
 }
 
 function ProfileSelect({ label, value, options, isEditing, onChange, required, disabled }: any) {
+    // Find the readable label for the current value ID
+    const selectedOption = options.find((opt: any) => opt.id === value);
+    const displayLabel = selectedOption ? selectedOption.label : "";
+
     return (
         <div>
             <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
@@ -272,21 +287,23 @@ function ProfileSelect({ label, value, options, isEditing, onChange, required, d
                         className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm appearance-none
                         ${disabled
                                 ? "bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed"
-                                : "bg-white focus:ring-1 outline-none " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
+                                : "bg-white focus:ring-1 outline-none " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-[#1a6b36]")
                             }`}
                     >
                         <option value="" disabled>Select {label}</option>
-                        {options.map((opt: string) => (
-                            <option key={opt} value={opt}>{opt}</option>
+                        {options.map((opt: any) => (
+                            <option key={opt.id} value={opt.id}>{opt.label}</option>
                         ))}
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </div>
                 </div>
             ) : (
                 <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center uppercase">
-                    {value || <span className="text-gray-400 italic">Not set</span>}
+                    {displayLabel || <span className="text-gray-400 italic">Not set</span>}
                 </div>
             )}
         </div>
