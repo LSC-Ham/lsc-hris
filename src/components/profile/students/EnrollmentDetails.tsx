@@ -6,7 +6,7 @@ import { SearchFilterBar } from "../../sms/SearchFilter";
 
 interface GenericData { id: string; name: string; }
 interface YearData { id: string; year: string; acad_level_id: string; }
-interface SectionData { id: string; section: string; acad_level_id: string; }
+interface SectionData { id: string; section: string; acad_level_id: string; year_id: string }
 
 interface EnrollmentDetailsProps {
     mode?: "view" | "update" | "create";
@@ -54,6 +54,7 @@ export function EnrollmentDetails({
     const selectedAcadLevelId = draftData.acad_level_id;
     const selectedAcadLevelObj = acadLevel.find(level => level.id === selectedAcadLevelId);
     const selectedLevelName = selectedAcadLevelObj?.name?.toLowerCase() || "";
+    const selectedYearId = draftData.year_level_id;
 
     const isCollegeLevel = selectedLevelName !== "" &&
         !selectedLevelName.includes("junior") &&
@@ -70,8 +71,8 @@ export function EnrollmentDetails({
         ? formatOptions(years.filter(y => y.acad_level_id === selectedAcadLevelId), "year")
         : [];
 
-    const dynamicSections = selectedAcadLevelId
-        ? formatOptions(section.filter(s => s.acad_level_id === selectedAcadLevelId), "section")
+    const dynamicSections = selectedYearId
+        ? formatOptions(section.filter(s => s.year_id === selectedYearId), "section")
         : [];
 
 
@@ -83,6 +84,11 @@ export function EnrollmentDetails({
                 newData.year_level_id = "";
                 newData.sections_id = "";
                 newData.course_id = "";
+            }
+
+            // 👇 Add this new block
+            if (field === "year_level_id") {
+                newData.sections_id = "";
             }
 
             return newData;

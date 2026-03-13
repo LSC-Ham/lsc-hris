@@ -11,7 +11,8 @@ export async function getSections() {
                 id: true,
                 acad_level_id: true,
                 section: true,
-                description: true
+                description: true,
+                year_id: true,
             },
             orderBy: { acad_level_id: 'asc' },
         });

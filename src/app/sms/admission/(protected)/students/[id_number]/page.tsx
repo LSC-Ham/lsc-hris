@@ -70,7 +70,8 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const sectionsData = sections.map((s) => ({
         id: s.id,
         section: s.section || "",
-        acad_level_id: s.acad_level_id || ""
+        acad_level_id: s.acad_level_id || "",
+        year_id: s.year_id || ""
     }));
 
     return (

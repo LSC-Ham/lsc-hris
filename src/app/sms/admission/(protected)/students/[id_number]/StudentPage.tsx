@@ -28,7 +28,7 @@ interface StudentPageProps {
     acadLevel?: { id: string; name: string }[];
     courses?: { id: string; name: string }[];
     years?: { id: string; year: string; acad_level_id: string }[];
-    sections?: { id: string; section: string; acad_level_id: string }[];
+    sections?: { id: string; section: string; acad_level_id: string; year_id: string }[];
     scholarships?: { id: string; name: string }[];
 }
 
@@ -44,8 +44,8 @@ const DEFAULT_PERSONAL_DATA = {
 };
 
 const DEFAULT_STUDENT_DATA = {
-    id: "", 
-    id_number: "", 
+    id: "",
+    id_number: "",
     enrolled_at: "",
     assessed_at: "",
     created_at: "",
@@ -53,7 +53,7 @@ const DEFAULT_STUDENT_DATA = {
     course_id: "",
     year_level_id: "",
     scholarship_id: "",
-    sections_id: "", 
+    sections_id: "",
     acad_year_id: "",
     semester_id: "",
 };

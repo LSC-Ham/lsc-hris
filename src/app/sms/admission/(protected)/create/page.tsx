@@ -20,17 +20,15 @@ export default function CreateStudentPage() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // 1. FIX: Updated State Types to expect Objects instead of strings
     const [acadYears, setAcadYears] = useState<{ id: string; name: string; }[]>([]);
     const [semesters, setSemesters] = useState<{ id: string; name: string; }[]>([]);
     const [acadLevel, setAcadLevel] = useState<{ id: string; name: string; }[]>([]);
     const [courses, setCourses] = useState<{ id: string; name: string; }[]>([]);
     const [years, setYears] = useState<{ id: string; year: string; acad_level_id: string; }[]>([]);
-    const [sections, setSections] = useState<{ id: string; section: string; acad_level_id: string; }[]>([]);
+    const [sections, setSections] = useState<{ id: string; section: string; acad_level_id: string; year_id: string }[]>([]);
     const [scholarships, setScholarships] = useState<{ id: string; name: string; }[]>([]);
 
     const [formData, setFormData] = useState({
-        // Enrollment Details (These will now store the UUIDs from the dropdowns!)
         id_number: "",
         acad_year_id: "",
         semester_id: "",
@@ -40,7 +38,6 @@ export default function CreateStudentPage() {
         sections_id: "",
         scholarship_id: "",
 
-        // Personal Information
         firstname: "",
         surname: "",
         middlename: "",
@@ -93,7 +90,7 @@ export default function CreateStudentPage() {
                 setAcadLevel(rawAcadLevels.map((l: any) => ({ id: l.id, name: l.acad_level_name || "" })));
                 setCourses(rawCourses.map((c: any) => ({ id: c.id, name: c.course_code || "" })));
                 setYears(rawYears.map((y: any) => ({ id: y.id, year: y.year || "", acad_level_id: y.acad_level_id || "" })));
-                setSections(rawSections.map((s: any) => ({ id: s.id, section: s.section || "", acad_level_id: s.acad_level_id || "" })));
+                setSections(rawSections.map((s: any) => ({ id: s.id, section: s.section || "", acad_level_id: s.acad_level_id || "", year_id: s.year_id })));
                 setScholarships(rawScholarships.map((s: any) => ({ id: s.id, name: s.scholarship || "" })));
 
             } catch (error) {
