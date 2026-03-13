@@ -7,9 +7,6 @@ const SALT_ROUNDS = 10;
 export async function main() {
     const hashedPassword = await bcrypt.hash("@lakeshore123", SALT_ROUNDS);
 
-    // ==========================================
-    // 1. DEFINE FIXED REFERENCE DATA
-    // ==========================================
     const fixedColleges = [
         {
             department: "College of Business and Accountancy",
@@ -58,9 +55,6 @@ export async function main() {
         }
     ];
 
-    // ==========================================
-    // 2. EXECUTE PRE-SEEDING FOR REFERENCE DATA
-    // ==========================================
     console.log(`Pre-seeding fixed colleges and courses...`);
     for (const college of fixedColleges) {
         const dept = await prisma.departments.upsert({
@@ -117,9 +111,6 @@ export async function main() {
         }
     }
 
-    // ==========================================
-    // 3. DEFINE USER SEED DATA
-    // ==========================================
     const seed = [
         {
             // user
@@ -161,7 +152,7 @@ export async function main() {
                 { id_label: "TIN Number", id_number: "135-233-141-000" },
             ],
             //student
-            student_id: "2025-C2025", semester: "second semester", acad_year: "2025-2026", 
+            student_id: "2025-C2025", semester: "second semester", acad_year: "2025-2026",
             course_code: "bspsych", acad_level_code: "col", year: "first year", section: "",
         },
         {
@@ -350,7 +341,6 @@ export async function main() {
             // @ts-ignore
             const sectionStr = data.section || "";
 
-            // Safely find the records we pre-seeded earlier
             const semester = await prisma.semesters.findUnique({ where: { semester: semesterStr } });
             const acad_year = await prisma.acad_years.findUnique({ where: { acad_year: acadYearStr } });
             const acad_level = await prisma.acad_level.findUnique({ where: { acad_level_code: acadLevelCodeStr } });
@@ -359,13 +349,12 @@ export async function main() {
             if (!semester || !acad_year || !acad_level || !year_level) {
                 console.warn(`Missing required academic reference data for student ${data.student_id}. Skipping student profile creation.`);
             } else {
-                // Section Logic (Only upsert if section string actually has content)
                 let section = null;
                 if (sectionStr.trim() !== "") {
                     section = await prisma.sections.upsert({
                         where: { section: sectionStr },
                         update: {},
-                        create: { acad_level_id: acad_level.id, section: sectionStr }
+                        create: { acad_level_id: acad_level.id, year_id: year_level.id, section: sectionStr }
                     });
                 }
 
@@ -398,14 +387,13 @@ export async function main() {
                         acad_level_id: acad_level.id,
                         acad_year_id: acad_year.id,
                         course_id: course.id,
-                        year_level_id: year_level.id,
+                        year_id: year_level.id,
                         ...(section && { sections_id: section.id }), // Only attach if a valid section exists
                     }
                 };
             }
         }
 
-        // --- CREATE USER RECORD ---
         const user = await prisma.user.upsert({
             where: { username: data.username },
             update: {},
@@ -427,7 +415,6 @@ export async function main() {
                                 nationality: data.nationality,
                             }
                         },
-                        // Conditionally attach employee/student profiles if the payloads exist
                         ...(employeePayload && { employees: employeePayload }),
                         ...(studentPayload && { students: studentPayload })
                     }

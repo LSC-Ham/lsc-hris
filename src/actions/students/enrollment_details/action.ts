@@ -45,7 +45,7 @@ export async function getStudentDetails(idNumber: string, acadYearId?: string, s
                 semesters: true,
                 acad_level: true,
                 course: true,
-                year_level: true,
+                year: true,
                 sections: true,
                 scholarships: true,
             },
@@ -67,7 +67,7 @@ export async function getStudentDetails(idNumber: string, acadYearId?: string, s
             acad_year_id: studentRecord.acad_year_id || "",
             semester_id: studentRecord.semester_id || "",
             sections_id: studentRecord.sections_id || "",
-            year_level_id: studentRecord.year_level_id || "",
+            year_id: studentRecord.year_id || "",
             scholarship_id: studentRecord.scholarship_id || "",
 
             acad_level: studentRecord.acad_level?.acad_level_name || "",
@@ -75,7 +75,7 @@ export async function getStudentDetails(idNumber: string, acadYearId?: string, s
             acad_year: studentRecord.acad_years?.acad_year || "",
             semester: studentRecord.semesters?.semester || "",
             section: studentRecord.sections?.section || "",
-            year: studentRecord.year_level?.year || "",
+            year: studentRecord.year?.year || "",
             scholarship: studentRecord.scholarships?.scholarship || "",
         };
 

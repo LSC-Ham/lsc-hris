@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcrypt"; // Assuming you use bcrypt for passwords. Adjust if using something else!
+import bcrypt from "bcrypt"; 
 
 export async function deactivateOrDeleteAccount(
     userId: string,
@@ -9,7 +9,6 @@ export async function deactivateOrDeleteAccount(
     passwordStr: string
 ) {
     try {
-        // 1. Fetch the user to verify they exist and get their hashed password
         const user = await prisma.user.findUnique({
             where: { id: userId }
         });
@@ -22,14 +21,12 @@ export async function deactivateOrDeleteAccount(
             return { error: "This account doesn't have a password set up." };
         }
 
-        // 2. Verify the provided password matches the database
         const isPasswordValid = await bcrypt.compare(passwordStr, user.password);
 
         if (!isPasswordValid) {
             return { error: "Incorrect password. Please try again." };
         }
 
-        // 3. Perform the requested database action
         if (action === "deactivate") {
             await prisma.user.update({
                 where: { id: userId },
@@ -38,9 +35,6 @@ export async function deactivateOrDeleteAccount(
             return { success: "Account successfully deactivated." };
 
         } else if (action === "delete") {
-            // Note: If you get a Prisma error here, ensure your schema relations 
-            // (accounts, sessions, biography) have `onDelete: Cascade` set up, 
-            // or manually delete those related records first!
             await prisma.user.delete({
                 where: { id: userId }
             });

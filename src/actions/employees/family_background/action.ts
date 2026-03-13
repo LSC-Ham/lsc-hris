@@ -66,13 +66,10 @@ export async function updateFamilyBackground(data: any) {
         await prisma.biography.update({
             where: { users_id: employee.biography.users_id },
             data: {
-                // Access your family background relation (adjust 'family_background' to match your schema)
                 family_background: {
-                    // 1. Clear out the existing family records for these specific relationships
                     deleteMany: {
                         relation_type: { in: ["guardian", "father", "mother"] }
                     },
-                    // 2. Insert the updated records
                     create: [
                         { relation_type: "guardian", ...data.guardian },
                         { relation_type: "father", ...data.father },

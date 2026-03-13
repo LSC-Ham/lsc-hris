@@ -43,18 +43,17 @@ const DEFAULT_PERSONAL_DATA = {
     email: "", nationality: "", height: "", weight: "", blood_type: ""
 };
 
-// --- FIX: EXACT MATCH TO DATABASE COLUMNS (using _id) ---
 const DEFAULT_STUDENT_DATA = {
-    id: "", // Enrollment Row ID
-    id_number: "", // Student Permanent ID
+    id: "", 
+    id_number: "", 
     enrolled_at: "",
     assessed_at: "",
     created_at: "",
     acad_level_id: "",
     course_id: "",
-    year_level_id: "", // Ensure this matches your DB (year_id or year_level_id)
+    year_level_id: "",
     scholarship_id: "",
-    sections_id: "", // Ensure this matches your DB (section_id or sections_id)
+    sections_id: "", 
     acad_year_id: "",
     semester_id: "",
 };
@@ -228,7 +227,6 @@ export default function StudentPage({
 
     return (
         <div className="space-y-6">
-            {/* PAGE HEADER */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 tracking-tight">

@@ -51,19 +51,14 @@ export function EnrollmentDetails({
         if (initialData.semester_id) setFilterSemester(initialData.semester_id);
     }, [formData]);
 
-
-    // --- DYNAMIC DATA COMPUTATIONS ---
     const selectedAcadLevelId = draftData.acad_level_id;
     const selectedAcadLevelObj = acadLevel.find(level => level.id === selectedAcadLevelId);
     const selectedLevelName = selectedAcadLevelObj?.name?.toLowerCase() || "";
 
     const isCollegeLevel = selectedLevelName !== "" &&
-        !selectedLevelName.includes("jhs") &&
-        !selectedLevelName.includes("shs") &&
         !selectedLevelName.includes("junior") &&
         !selectedLevelName.includes("senior");
 
-    // Helper to format raw data into { id, label } for our updated Select component
     const formatOptions = (arr: any[], labelKey: string) =>
         arr.map(item => ({ id: item.id, label: item[labelKey] }));
 
@@ -80,12 +75,10 @@ export function EnrollmentDetails({
         : [];
 
 
-    // --- HANDLERS ---
     const handleLocalChange = (field: string, value: any) => {
         setDraftData((prev: any) => {
             const newData = { ...prev, [field]: value };
 
-            // Cascade reset if Academic Level changes
             if (field === "acad_level_id") {
                 newData.year_level_id = "";
                 newData.sections_id = "";
@@ -100,9 +93,7 @@ export function EnrollmentDetails({
         }
     };
 
-    // Note: Assuming SearchFilterBar passes back IDs. If it passes names, it will need a slight update too.
     const handleFilterChange = (filters: { search?: string; acad_year: string; semester: string }) => {
-        // Here we assume the filter bar gives us the IDs (mapped to acad_year/semester keys)
         setFilterYear(filters.acad_year);
         setFilterSemester(filters.semester);
 
@@ -155,7 +146,7 @@ export function EnrollmentDetails({
                     initialSemester={filterSemester}
                     onFilterChange={handleFilterChange}
                     showSearch={false}
-                    disabled={isEditing}
+                    disabled={mode === "create" ? false : isEditing}
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <ProfileField
@@ -167,7 +158,7 @@ export function EnrollmentDetails({
                     />
                     <ProfileField
                         label="Status"
-                        value={draftData.created_at ? "Enrolled" : "Not Enrolled"}
+                        value={draftData.created_at ? "applied" : "Not Enrolled"}
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("created_at", e.target.value)}
                         disabled={true}
@@ -216,7 +207,6 @@ export function EnrollmentDetails({
                 </div>
             </div>
 
-            {/* Save Button */}
             {mode !== "create" && isEditing && (
                 <div className="flex justify-end pt-6 border-t border-gray-100 mt-6">
                     <button
@@ -231,10 +221,6 @@ export function EnrollmentDetails({
         </div>
     );
 }
-
-// ----------------------------------------------------------------------
-// HELPER COMPONENTS
-// ----------------------------------------------------------------------
 
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
     const displayValue = value instanceof Date ? value.toLocaleDateString() : value;
@@ -268,7 +254,6 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
 }
 
 function ProfileSelect({ label, value, options, isEditing, onChange, required, disabled }: any) {
-    // Find the readable label for the current value ID
     const selectedOption = options.find((opt: any) => opt.id === value);
     const displayLabel = selectedOption ? selectedOption.label : "";
 

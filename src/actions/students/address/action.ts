@@ -1,7 +1,7 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; // Adjust path if needed
-import { authOptions } from "@/lib/auth"; // Adjust path if needed
+import { prisma } from "@/lib/prisma"; 
+import { authOptions } from "@/lib/auth"; 
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -65,13 +65,10 @@ export async function updateAddress(data: any) {
         await prisma.biography.update({
             where: { users_id: student?.biography.users_id },
             data: {
-                // Access the related address table
                 address: {
-                    // 1. Remove the old addresses of these specific types
                     deleteMany: {
                         address_type: { in: ["residential", "permanent"] }
                     },
-                    // 2. Insert the newly updated ones
                     create: [
                         {
                             address_type: "residential",

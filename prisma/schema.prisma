@@ -321,19 +321,22 @@ model years {
   updated_at    DateTime?    @updatedAt @db.Timestamp(6)
   checklists    checklists[]
 
-  acad_level acad_level @relation(fields: [acad_level_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  acad_level acad_level @relation(fields: [acad_level_id], references: [id])
   students   students[]
+  sections   sections[]
 }
 
 model sections {
   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   acad_level_id String    @db.Uuid
+  year_id       String    @db.Uuid
   section       String    @unique
   description   String?
   created_at    DateTime  @default(now()) @db.Timestamp(6)
   updated_at    DateTime? @updatedAt @db.Timestamp(6)
 
-  acad_level acad_level @relation(fields: [acad_level_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  acad_level acad_level @relation(fields: [acad_level_id], references: [id])
+  year       years      @relation(fields: [year_id], references: [id])
   students   students[]
 }
 
@@ -345,7 +348,7 @@ model students {
   acad_year_id   String?   @db.Uuid
   acad_level_id  String?   @db.Uuid
   course_id      String?   @db.Uuid
-  year_level_id  String?   @db.Uuid
+  year_id        String?   @db.Uuid
   sections_id    String?   @db.Uuid
   student_type   String?
   scholarship_id String?   @db.Uuid
@@ -356,10 +359,10 @@ model students {
   updated_at     DateTime? @updatedAt @db.Timestamp(6)
 
   semesters    semesters?    @relation(fields: [semester_id], references: [id])
-  acad_years   acad_years?   @relation(fields: [acad_year_id], references: [id])
+  acad_years   acad_years?   @relation(fields: [acad_year_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   acad_level   acad_level?   @relation(fields: [acad_level_id], references: [id])
   course       courses?      @relation(fields: [course_id], references: [id])
-  year_level   years?        @relation(fields: [year_level_id], references: [id])
+  year         years?        @relation(fields: [year_id], references: [id])
   sections     sections?     @relation(fields: [sections_id], references: [id])
   biography    biography     @relation(fields: [biography_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   scholarships scholarships? @relation(fields: [scholarship_id], references: [id])
@@ -393,26 +396,26 @@ model courses {
 }
 
 model checklists {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  acad_year_id  String    @db.Uuid
-  semester_id   String    @db.Uuid
-  course_id     String    @db.Uuid
-  year_level_id String    @db.Uuid
-  sections_id   String?   @db.Uuid
-  time          String?
-  room          String?
-  professor     String?
-  subject_code  String
-  subject_name  String
-  unit          String?
-  created_by    String
-  created_at    DateTime  @default(now()) @db.Timestamp(6)
-  updated_at    DateTime? @updatedAt @db.Timestamp(6)
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  acad_year_id String    @db.Uuid
+  semester_id  String    @db.Uuid
+  course_id    String    @db.Uuid
+  year_id      String    @db.Uuid
+  sections_id  String?   @db.Uuid
+  time         String?
+  room         String?
+  professor    String?
+  subject_code String
+  subject_name String
+  unit         String?
+  created_by   String
+  created_at   DateTime  @default(now()) @db.Timestamp(6)
+  updated_at   DateTime? @updatedAt @db.Timestamp(6)
 
   courses    courses    @relation(fields: [course_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   semesters  semesters  @relation(fields: [semester_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   acad_years acad_years @relation(fields: [acad_year_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  year_level years      @relation(fields: [year_level_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  year       years      @relation(fields: [year_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model student_subjects {

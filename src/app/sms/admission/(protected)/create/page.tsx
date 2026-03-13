@@ -1,5 +1,4 @@
 // src/app/sms/admission/(protected)/students/create/page.tsx
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -21,25 +20,25 @@ export default function CreateStudentPage() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Dropdown Data States matching EnrollmentDetails props
-    const [acadYears, setAcadYears] = useState<string[]>([]);
-    const [semesters, setSemesters] = useState<string[]>([]);
+    // 1. FIX: Updated State Types to expect Objects instead of strings
+    const [acadYears, setAcadYears] = useState<{ id: string; name: string; }[]>([]);
+    const [semesters, setSemesters] = useState<{ id: string; name: string; }[]>([]);
     const [acadLevel, setAcadLevel] = useState<{ id: string; name: string; }[]>([]);
-    const [courses, setCourses] = useState<string[]>([]);
+    const [courses, setCourses] = useState<{ id: string; name: string; }[]>([]);
     const [years, setYears] = useState<{ id: string; year: string; acad_level_id: string; }[]>([]);
     const [sections, setSections] = useState<{ id: string; section: string; acad_level_id: string; }[]>([]);
-    const [scholarships, setScholarships] = useState<string[]>([]);
+    const [scholarships, setScholarships] = useState<{ id: string; name: string; }[]>([]);
 
     const [formData, setFormData] = useState({
-        // Enrollment Details
+        // Enrollment Details (These will now store the UUIDs from the dropdowns!)
         id_number: "",
-        acad_year: "",
-        semester: "",
-        acad_level: "",
-        course: "",
-        year: "",
-        section: "",
-        scholarship: "",
+        acad_year_id: "",
+        semester_id: "",
+        acad_level_id: "",
+        course_id: "",
+        year_level_id: "",
+        sections_id: "",
+        scholarship_id: "",
 
         // Personal Information
         firstname: "",
@@ -61,7 +60,6 @@ export default function CreateStudentPage() {
 
     useEffect(() => {
         const loadInitialData = async () => {
-            // 1. Fetch the Auto-generated Student ID
             try {
                 const autoId = await generateStudentID();
                 if (autoId) {
@@ -71,7 +69,6 @@ export default function CreateStudentPage() {
                 console.error("Failed to generate Student ID:", error);
             }
 
-            // 2. Fetch all dropdown data simultaneously and map it exactly like the server component
             try {
                 const [
                     rawAcadYears,
@@ -91,14 +88,13 @@ export default function CreateStudentPage() {
                     getScholarships()
                 ]);
 
-                // Map the raw database data to match the component props perfectly!
-                setAcadYears(rawAcadYears.map((y: any) => y.acad_year));
-                setSemesters(rawSemesters.map((s: any) => s.semester));
-                setAcadLevel(rawAcadLevels.map((l: any) => ({ id: l.id, name: l.acad_level_name })));
-                setCourses(rawCourses.map((c: any) => c.course_code));
-                setYears(rawYears.map((y: any) => ({ id: y.id, year: y.year, acad_level_id: y.acad_level_id })));
-                setSections(rawSections.map((s: any) => ({ id: s.id, section: s.section, acad_level_id: s.acad_level_id })));
-                setScholarships(rawScholarships.map((s: any) => s.scholarship));
+                setAcadYears(rawAcadYears.map((y: any) => ({ id: y.id, name: y.acad_year || "" })));
+                setSemesters(rawSemesters.map((s: any) => ({ id: s.id, name: s.semester || "" })));
+                setAcadLevel(rawAcadLevels.map((l: any) => ({ id: l.id, name: l.acad_level_name || "" })));
+                setCourses(rawCourses.map((c: any) => ({ id: c.id, name: c.course_code || "" })));
+                setYears(rawYears.map((y: any) => ({ id: y.id, year: y.year || "", acad_level_id: y.acad_level_id || "" })));
+                setSections(rawSections.map((s: any) => ({ id: s.id, section: s.section || "", acad_level_id: s.acad_level_id || "" })));
+                setScholarships(rawScholarships.map((s: any) => ({ id: s.id, name: s.scholarship || "" })));
 
             } catch (error) {
                 console.error("Failed to load dropdown options:", error);
@@ -108,14 +104,12 @@ export default function CreateStudentPage() {
         loadInitialData();
     }, []);
 
-    // Helper function to let child components update the form data
     const handleFormUpdate = (newData: any) => {
         setFormData(prev => ({ ...prev, ...newData }));
     };
 
     const handleCreateAccount = async () => {
-        // Basic validation
-        if (!formData.id_number || !formData.surname || !formData.firstname || !formData.acad_level) {
+        if (!formData.id_number || !formData.surname || !formData.firstname || !formData.acad_level_id) {
             alert("Please fill in the required fields (ID, Surname, First Name, Academic Level).");
             return;
         }
@@ -130,7 +124,7 @@ export default function CreateStudentPage() {
                 alert(result.error);
             } else {
                 alert("Student Created Successfully!");
-                router.push("./"); // Redirect to student list (update path as needed)
+                router.push("./students");
             }
         } catch (error) {
             console.error("Error creating student:", error);
@@ -170,12 +164,11 @@ export default function CreateStudentPage() {
 
             <div className="flex flex-col gap-6">
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 md:p-8">
-                    {/* Enrollment Details Replaces Employment Details */}
                     <EnrollmentDetails
                         mode="create"
                         formData={formData}
                         onChange={handleFormUpdate}
-                        onFilterChange={(filters) => handleFormUpdate(filters)} // Handles acad_year & semester changes
+                        onFilterChange={(filters) => handleFormUpdate(filters)}
                         acadYears={acadYears}
                         semesters={semesters}
                         acadLevel={acadLevel}

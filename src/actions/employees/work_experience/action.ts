@@ -1,14 +1,11 @@
 "use server"
 
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth"; // Make sure this path is correct
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma"; // Adjust path if needed
+import { prisma } from "@/lib/prisma"; 
 
 export async function getWorkExperience(employeeId: string) {
     try {
 
-        // Query the work_experience table directly
         const workRecords = await prisma.work_experience.findMany({
             where: {
                 biography: {
@@ -18,20 +15,17 @@ export async function getWorkExperience(employeeId: string) {
                 }
             },
             orderBy: {
-                date_from: 'desc' // ISO standard: show most recent experience first
+                date_from: 'desc' 
             }
         });
 
-        // Map and format for frontend state
         const formattedWorkExperience = workRecords.map((work: any) => ({
             id: work.id,
             position_title: work.position_title || "",
             company: work.company || "",
-            // Convert Decimal to Number for frontend state
             monthly_salary: work.monthly_salary ? Number(work.monthly_salary) : 0,
             appointment_status: work.appointment_status || "",
             gov_service: work.gov_service || false,
-            // Format DateTime to "YYYY-MM-DD" for <input type="date" />
             date_from: work.date_from ? work.date_from.toISOString().split('T')[0] : "",
             date_to: work.date_to ? work.date_to.toISOString().split('T')[0] : "",
         }));
@@ -40,7 +34,7 @@ export async function getWorkExperience(employeeId: string) {
 
     } catch (error) {
         console.error("Error fetching work experience:", error);
-        return []; // Return empty array to prevent frontend .map() crashes
+        return []; 
     }
 }
 
@@ -65,17 +59,14 @@ export async function updateWorkExperience(data: any) {
             },
             data: {
                 work_experience: {
-                    // 1. Wipe existing records to sync with the new list
                     deleteMany: {},
 
-                    // 2. Create the new records
                     create: data.records.map((record: any) => ({
                         date_from: record.date_from ? new Date(record.date_from) : null,
                         date_to: record.date_to ? new Date(record.date_to) : null,
                         position_title: record.position_title || null,
                         company: record.company || null,
 
-                        // Convert string/number to Prisma Decimal
                         monthly_salary: record.monthly_salary != null && record.monthly_salary !== ""
                             ? parseFloat(record.monthly_salary)
                             : null,

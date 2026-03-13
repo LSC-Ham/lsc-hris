@@ -61,7 +61,6 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const courseData = courses.map((c) => ({ id: c.id, name: c.course_code || "" }));
     const acadLevelData = acadLevels.map((l) => ({ id: l.id, name: l.acad_level_name || "" }));
 
-    // Keep parent IDs for dependent dropdowns (add fallbacks here too, just in case!)
     const yearsData = years.map((y) => ({
         id: y.id,
         year: y.year || "",

@@ -4,12 +4,6 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-/**
- * FETCH: Returns full objects for the Settings Table
- * To get only names for dropdowns, use: 
- * const data = await getDivisions();
- * const names = data.map(d => d.division);
- */
 export async function getDivisions() {
     try {
         return await prisma.divisions.findMany({
@@ -26,7 +20,6 @@ export async function getDivisions() {
     }
 }
 
-// CREATE
 export async function addDivision(formData: FormData) {
     const division = formData.get("division") as string;
     const description = formData.get("description") as string;
@@ -38,7 +31,6 @@ export async function addDivision(formData: FormData) {
     revalidatePath("/hris/settings");
 }
 
-// UPDATE
 export async function updateDivision(id: string, formData: FormData) {
     const division = formData.get("division") as string;
     const description = formData.get("description") as string;
@@ -51,7 +43,6 @@ export async function updateDivision(id: string, formData: FormData) {
     revalidatePath("/hris/settings");
 }
 
-// DELETE
 export async function deleteDivision(id: string) {
     await prisma.divisions.delete({
         where: { id },

@@ -4,9 +4,6 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-/**
- * FETCH: Full objects for the management table.
- */
 export async function getCourses() {
     try {
         return await prisma.courses.findMany({

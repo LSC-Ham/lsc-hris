@@ -1,16 +1,20 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; // Adjust this import to your actual Prisma client location
-import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { revalidatePath } from "next/cache";
 
 export async function createStudent(data: any) {
     try {
+        console.log("Raw Data received by createStudent:", data);
+
+        if (!data.id_number || !data.firstname || !data.surname || !data.acad_level_id) {
+            return { error: "Missing required fields. Please ensure ID, Name, and Academic Level are provided." };
+        }
+
         const hashedPassword = await bcrypt.hash("lakeshore123", 10);
 
         const newStudentId = await prisma.$transaction(async (tx) => {
-
-            // 1. Create the base User account
             const newUser = await tx.user.create({
                 data: {
                     password: hashedPassword,
@@ -18,10 +22,23 @@ export async function createStudent(data: any) {
                 }
             });
 
-            // 2. Create Biography, Personal Info, and the Student record all at once
             const biographyRecord = await tx.biography.create({
                 data: {
                     users_id: newUser.id,
+
+                    students: {
+                        create: {
+                            id_number: data.id_number,
+                            acad_level_id: data.acad_level_id || data.acad_level || null,
+                            course_id: data.course_id || data.course || null,
+                            acad_year_id: data.acad_year_id || data.acad_year || null,
+                            semester_id: data.semester_id || data.semester || null,
+                            year_id: data.year_level_id || data.year || null,
+                            sections_id: data.sections_id || data.section_id || data.section || null,
+                            scholarship_id: data.scholarship_id || data.scholarship || null,
+                        }
+                    },
+
                     personal_information: {
                         create: {
                             firstname: data.firstname,
@@ -40,20 +57,6 @@ export async function createStudent(data: any) {
                             weight: data.weight,
                             blood_type: data.blood_type,
                         }
-                    },
-                    // Create the student profile directly attached to this biography
-                    students: {
-                        create: {
-                            id_number: data.id_number,
-                            // Map your form data to the specific schema foreign keys
-                            acad_year_id: data.acad_year || null,
-                            semester_id: data.semester || null,
-                            acad_level_id: data.acad_level || null,
-                            course_id: data.course || null,
-                            year_level_id: data.year || null,
-                            sections_id: data.section || null,
-                            scholarship_id: data.scholarship || null,
-                        }
                     }
                 },
                 include: {
@@ -61,18 +64,17 @@ export async function createStudent(data: any) {
                 }
             });
 
-            // biographyRecord.students is an array because the schema is `students[]`
-            const createdStudentId = biographyRecord.students[0]?.id;
+            const realStudentId = biographyRecord.students[0].id;
 
-            if (!createdStudentId) {
-                throw new Error("Failed to retrieve generated Student ID");
+            if (!realStudentId) {
+                throw new Error("Failed to create the student relation.");
             }
 
-            return createdStudentId;
+            return realStudentId;
         });
 
-        // Revalidate the cache so the new student shows up immediately
-        revalidatePath("/sms/admission/students"); // Adjust to your actual path
+        revalidatePath("/students");
+        revalidatePath("/sms/admission/students");
 
         return { success: true, id: newStudentId };
 

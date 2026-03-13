@@ -1,23 +1,20 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; // Adjust this import to your actual Prisma client location
-import { authOptions } from "@/lib/auth"; // Make sure this path is correct
+import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export async function getPersonalInformation(employeeId: string) {
     try {
-        // 2. Keep the session check! This ensures anonymous visitors 
-        // can't just type in a URL and steal employee data.
         const session = await getServerSession(authOptions);
         if (!session?.user) {
             redirect("/login");
         }
 
-        // 3. Search database using the employeeId from the URL, NOT the session ID
         const employee = await prisma.employees.findUnique({
-            where: { id: employeeId }, // 👈 This is the magic change
+            where: { id: employeeId },
             include: {
                 biography: {
                     select: {
@@ -44,9 +41,6 @@ export async function updatePersonalInformation(data: any) {
     try {
         const { id, ...updateData } = data;
 
-        // --- THE FIX: Format the birthdate ---
-        // If there's a date, convert it to a true Date object. If it's "", make it null or undefined.
-        // (Note: use `undefined` instead of `null` if your Prisma schema marks birthdate as required).
         const validBirthdate = updateData.birthdate
             ? new Date(updateData.birthdate).toISOString()
             : null;
@@ -63,7 +57,7 @@ export async function updatePersonalInformation(data: any) {
                             firstname: updateData.firstname,
                             middlename: updateData.middlename,
                             extension: updateData.extension,
-                            birthdate: validBirthdate, // <-- Pass the formatted date here
+                            birthdate: validBirthdate, 
                             birthplace: updateData.birthplace,
                             sex: updateData.sex,
                             civil_status: updateData.civil_status,
@@ -80,7 +74,7 @@ export async function updatePersonalInformation(data: any) {
                             firstname: updateData.firstname,
                             middlename: updateData.middlename,
                             extension: updateData.extension,
-                            birthdate: validBirthdate, // <-- And pass it here
+                            birthdate: validBirthdate, 
                             birthplace: updateData.birthplace,
                             sex: updateData.sex,
                             civil_status: updateData.civil_status,
