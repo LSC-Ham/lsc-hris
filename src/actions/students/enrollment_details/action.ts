@@ -87,12 +87,36 @@ export async function getStudentDetails(idNumber: string, acadYearId?: string, s
 
 export async function updateEnrollmentDetails(studentId: string, formData: any) {
     try {
+        if (!studentId) {
+            return { error: "Student ID is required." };
+        }
 
+        // Helper function: if a field is an empty string, turn it into null for Prisma
+        const cleanId = (value: string) => (value && value.trim() !== "" ? value : null);
+
+        // Update the student record in the database
+        await prisma.students.update({
+            where: {
+                id: studentId
+            },
+            data: {
+                acad_year_id: cleanId(formData.acad_year_id),
+                semester_id: cleanId(formData.semester_id),
+                acad_level_id: cleanId(formData.acad_level_id),
+                course_id: cleanId(formData.course_id),
+                year_id: cleanId(formData.year_id),
+                sections_id: cleanId(formData.sections_id),
+                scholarship_id: cleanId(formData.scholarship_id),
+            }
+        });
+
+        // Refresh the page data to show the new changes
         revalidatePath(`/sms/admission/student/${studentId}`);
+
         return { success: true };
 
     } catch (error) {
-        console.error("Update Error:", error);
-        return { error: "Failed to update employment details." };
+        console.error("Update Enrollment Details Error:", error);
+        return { error: "Failed to update enrollment details. Please try again." };
     }
 }

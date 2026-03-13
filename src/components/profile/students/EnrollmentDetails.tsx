@@ -54,7 +54,7 @@ export function EnrollmentDetails({
     const selectedAcadLevelId = draftData.acad_level_id;
     const selectedAcadLevelObj = acadLevel.find(level => level.id === selectedAcadLevelId);
     const selectedLevelName = selectedAcadLevelObj?.name?.toLowerCase() || "";
-    const selectedYearId = draftData.year_level_id;
+    const selectedYearId = draftData.year_id;
 
     const isCollegeLevel = selectedLevelName !== "" &&
         !selectedLevelName.includes("junior") &&
@@ -81,13 +81,12 @@ export function EnrollmentDetails({
             const newData = { ...prev, [field]: value };
 
             if (field === "acad_level_id") {
-                newData.year_level_id = "";
+                newData.year_id = "";
                 newData.sections_id = "";
                 newData.course_id = "";
             }
 
-            // 👇 Add this new block
-            if (field === "year_level_id") {
+            if (field === "year_id") {
                 newData.sections_id = "";
             }
 
@@ -188,10 +187,10 @@ export function EnrollmentDetails({
                     />
                     <ProfileSelect
                         label="Year"
-                        value={draftData.year_level_id}
+                        value={draftData.year_id}
                         options={dynamicYears}
                         isEditing={isEditing}
-                        onChange={(e: any) => handleLocalChange("year_level_id", e.target.value)}
+                        onChange={(e: any) => handleLocalChange("year_id", e.target.value)}
                         required
                     />
                     <ProfileSelect

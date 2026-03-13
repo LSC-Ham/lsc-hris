@@ -34,7 +34,7 @@ export default function CreateStudentPage() {
         semester_id: "",
         acad_level_id: "",
         course_id: "",
-        year_level_id: "",
+        year_id: "",
         sections_id: "",
         scholarship_id: "",
 

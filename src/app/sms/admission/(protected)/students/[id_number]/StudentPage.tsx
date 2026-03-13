@@ -51,7 +51,7 @@ const DEFAULT_STUDENT_DATA = {
     created_at: "",
     acad_level_id: "",
     course_id: "",
-    year_level_id: "",
+    year_id: "",
     scholarship_id: "",
     sections_id: "",
     acad_year_id: "",
