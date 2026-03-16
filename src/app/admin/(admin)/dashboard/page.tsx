@@ -1,19 +1,15 @@
 import { prisma } from "@/lib/prisma";
 
 export default async function Dashboard() {
-    // Fetch all queries simultaneously for maximum performance
     const [totalUsers, totalLoggedIn, recentUsers, departments] = await Promise.all([
-        // 1. Total Employees
         prisma.user.count(),
 
-        // 2. Employees in Administration (Logged In / Password Changed)
         prisma.user.count({
             where: { password_changed: true }
         }),
 
-        // 3. Fetch Users with their roles and personal info
         prisma.user.findMany({
-            take: 10, // Removed the duplicate 'take: 5'
+            take: 10, 
             select: {
                 id: true,
                 role: true,
@@ -30,7 +26,6 @@ export default async function Dashboard() {
             orderBy: { id: 'desc' }
         }),
 
-        // 4. Fetch Departments
         prisma.departments.findMany({
             take: 5,
             select: {
@@ -43,7 +38,6 @@ export default async function Dashboard() {
 
     return (
         <div className="space-y-6">
-            {/* 1. PAGE HEADER */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
@@ -55,7 +49,6 @@ export default async function Dashboard() {
                 </div>
             </div>
 
-            {/* 2. PAGE CONTENT - Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 {/* COLUMN 1: Key Metrics */}

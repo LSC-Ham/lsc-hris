@@ -30,16 +30,14 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
                     employeesList.map((emp: any) => (
                         <div
                             key={emp.id}
-                            onClick={() => handleRowClick(emp.id_number)} // <-- Added onClick
+                            onClick={() => handleRowClick(emp.id_number)} 
                             className="p-4 hover:bg-gray-50 transition-colors space-y-3 cursor-pointer">
-                            {/* Card Header */}
                             <div className="flex justify-between items-start gap-4">
                                 <div className="flex flex-col gap-2.5">
                                     <h3 className="font-bold text-gray-900 text-lg leading-tight capitalize">
                                         {emp.biography?.personal_information?.surname}, {emp.biography?.personal_information?.firstname} {emp.biography?.personal_information?.middlename}
                                     </h3>
 
-                                    {/* Badges Container */}
                                     <div className="flex flex-wrap items-center gap-2 mt-0.5">
                                         <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-gray-50 border border-gray-200 text-gray-600 text-xs font-semibold shadow-sm">
                                             ID: {emp.id_number}
@@ -56,7 +54,6 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
                                 </div>
                             </div>
 
-                            {/* Card Body */}
                             <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm text-gray-600 pt-2 border-t border-gray-50">
                                 <div className="col-span-2">
                                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-0.5">Division / Dept</span>
@@ -73,7 +70,6 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
                 )}
             </div>
 
-            {/* 💻 DESKTOP VIEW: Full Original Table Layout */}
             <div className="hidden md:block overflow-x-auto">
                 <table className="w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
@@ -92,7 +88,7 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
                             employeesList.map((emp: any) => (
                                 <tr
                                     key={emp.id}
-                                    onClick={() => handleRowClick(emp.id_number)} // <-- Added onClick
+                                    onClick={() => handleRowClick(emp.id_number)} 
                                     className="hover:bg-gray-50 transition-colors cursor-pointer">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 uppercase">{emp.id_number}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
