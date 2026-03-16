@@ -1,8 +1,9 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; 
+// Add bcrypt import if you don't have it
+import bcrypt from "bcrypt";
+import { prisma } from "@/lib/prisma"; // Adjust this import based on your setup
 import { revalidatePath } from "next/cache";
-import bcrypt from "bcrypt"; 
 
 export async function createEmployee(data: any) {
     try {
@@ -18,31 +19,22 @@ export async function createEmployee(data: any) {
             return { error: "Invalid Division or Department selected." };
         }
 
-        const positionNames = data.positions?.map((p: any) => p.position) || [];
-        const foundPositions = await prisma.positions.findMany({
-            where: { position: { in: positionNames } },
-        });
-        const positionMap = new Map(foundPositions.map((p) => [p.position, p.id]));
+        // Generate the temporary password
+        const rawPassword = "lakeshore123";
+        const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
-        const govIdInserts: any[] = [];
-        if (data.gsis_no) govIdInserts.push({ id_label: "GSIS No.", id_number: data.gsis_no });
-        if (data.pagibig_no) govIdInserts.push({ id_label: "Pag-IBIG No.", id_number: data.pagibig_no });
-        if (data.philhealth_no) govIdInserts.push({ id_label: "PhilHealth No.", id_number: data.philhealth_no });
-        if (data.sss_no) govIdInserts.push({ id_label: "SSS No.", id_number: data.sss_no });
-        if (data.tin_no) govIdInserts.push({ id_label: "TIN No.", id_number: data.tin_no });
-        if (data.agency_no) govIdInserts.push({ id_label: "Agency No.", id_number: data.agency_no });
-
-        const hashedPassword = await bcrypt.hash("lakeshore123", 10);
-
-        const newEmployeeId = await prisma.$transaction(async (tx) => {
-
+        const result = await prisma.$transaction(async (tx) => {
+            // 1. Create User with Username and Email
             const newUser = await tx.user.create({
                 data: {
+                    username: data.id_number,
+                    email: data.email || null, // Ensure email is saved to the User model
                     password: hashedPassword,
                     password_changed: false,
                 }
             });
 
+            // 2. Create Biography and Employee (Your existing logic)
             const biographyRecord = await tx.biography.create({
                 data: {
                     users_id: newUser.id,
@@ -67,7 +59,7 @@ export async function createEmployee(data: any) {
                             civil_status: data.civil_status,
                             telephone_no: data.telephone_no,
                             mobile_no: data.mobile_no,
-                            email: data.email,
+                            email: data.email, // Kept here as well based on your previous schema
                             nationality: data.nationality,
                             height: data.height,
                             weight: data.weight,
@@ -75,16 +67,18 @@ export async function createEmployee(data: any) {
                         }
                     }
                 },
-                include: {
-                    employees: true
-                }
+                include: { employees: true }
             });
 
             const realEmployeeId = biographyRecord.employees?.id;
+            if (!realEmployeeId) throw new Error("Failed to create the employee relation.");
 
-            if (!realEmployeeId) {
-                throw new Error("Failed to create the employee relation.");
-            }
+            // 3. Handle Positions (Your existing logic)
+            const positionNames = data.positions?.map((p: any) => p.position) || [];
+            const foundPositions = await tx.positions.findMany({
+                where: { position: { in: positionNames } },
+            });
+            const positionMap = new Map(foundPositions.map((p) => [p.position, p.id]));
 
             const positionInserts = (data.positions || [])
                 .map((p: any) => {
@@ -95,7 +89,7 @@ export async function createEmployee(data: any) {
                         positions_id: posId,
                         status: p.status,
                         description: p.description,
-                        is_active: Boolean(p.is_active), 
+                        is_active: Boolean(p.is_active),
                         start_at: p.start_at ? new Date(p.start_at) : null,
                         end_at: p.end_at ? new Date(p.end_at) : null,
                     };
@@ -106,20 +100,38 @@ export async function createEmployee(data: any) {
                 await tx.employees_positions.createMany({ data: positionInserts });
             }
 
-            const mappedGovIds = govIdInserts.map(g => ({ ...g, employees_id: realEmployeeId }));
-            if (mappedGovIds.length > 0) {
-                await tx.employees_govIDs.createMany({ data: mappedGovIds });
+            // 4. Handle Gov IDs (Your existing logic)
+            const govIdInserts: any[] = [];
+            if (data.gsis_no) govIdInserts.push({ id_label: "GSIS No.", id_number: data.gsis_no, employees_id: realEmployeeId });
+            if (data.pagibig_no) govIdInserts.push({ id_label: "Pag-IBIG No.", id_number: data.pagibig_no, employees_id: realEmployeeId });
+            if (data.philhealth_no) govIdInserts.push({ id_label: "PhilHealth No.", id_number: data.philhealth_no, employees_id: realEmployeeId });
+            if (data.sss_no) govIdInserts.push({ id_label: "SSS No.", id_number: data.sss_no, employees_id: realEmployeeId });
+            if (data.tin_no) govIdInserts.push({ id_label: "TIN No.", id_number: data.tin_no, employees_id: realEmployeeId });
+            if (data.agency_no) govIdInserts.push({ id_label: "Agency No.", id_number: data.agency_no, employees_id: realEmployeeId });
+
+            if (govIdInserts.length > 0) {
+                await tx.employees_govIDs.createMany({ data: govIdInserts });
             }
 
-            return realEmployeeId;
+            return {
+                id: realEmployeeId,
+                username: newUser.username,
+                email: newUser.email
+            };
         });
 
         revalidatePath("/employees");
 
-        return { success: true, id: newEmployeeId };
+        return {
+            success: true,
+            id: result.id,
+            username: result.username,
+            email: result.email,
+            tempPassword: rawPassword
+        };
 
     } catch (error) {
         console.error("Create Employee Error:", error);
-        return { error: "Failed to create employee account. Please check your inputs and try again." };
+        return { error: "Failed to create employee account." };
     }
 }

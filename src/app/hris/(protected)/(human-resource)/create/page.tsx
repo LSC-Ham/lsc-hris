@@ -115,8 +115,15 @@ export default function Page() {
             } else {
                 toast.success("Employee Created Successfully!");
                 setShowConfirmModal(false);
-                router.push("./employees");
-                router.refresh();
+
+                const params = new URLSearchParams({
+                    name: `${formData.firstname} ${formData.surname}`.trim(),
+                    username: result.username || formData.id_number,
+                    email: result.email || formData.email || "N/A",
+                    password: result.tempPassword || "lakeshore123"
+                });
+
+                router.push(`/hris/create/success?${params.toString()}`);
             }
         } catch (error) {
             console.error("Error creating employee:", error);
@@ -149,7 +156,7 @@ export default function Page() {
                         divisions={divisions}
                         departments={departments}
                         availablePositions={positions}
-                        
+
                     />
                 </div>
 
