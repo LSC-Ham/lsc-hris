@@ -1,12 +1,12 @@
 //src\app\hris\login\page.tsx
 "use client";
 
-import { signIn, useSession } from "next-auth/react"; // ✨ Added useSession
-import { useState, useEffect } from "react"; // ✨ Added useEffect
+import { signIn, useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Page() {
-    const { status } = useSession(); // ✨ Grab the auth status
+    const { status } = useSession();
     const router = useRouter();
 
     const [username, setUsername] = useState("");
@@ -14,7 +14,6 @@ export default function Page() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    // ✨ Redirect if already logged in
     useEffect(() => {
         if (status === "authenticated") {
             router.replace("/hris/dashboard");
@@ -46,7 +45,6 @@ export default function Page() {
         }
     };
 
-    // ✨ Prevent the login form from flashing while NextAuth checks the session
     if (status === "loading" || status === "authenticated") {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
@@ -62,7 +60,6 @@ export default function Page() {
         <div className="min-h-screen flex items-center justify-center bg-gray-50/50 p-6">
             <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
 
-                {/* Header / Logo Area */}
                 <div className="px-8 pt-8 pb-6 text-center">
                     <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-4 text-[#1a6b36] shadow-sm transform rotate-3">
                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,11 +72,9 @@ export default function Page() {
                     </p>
                 </div>
 
-                {/* Form Section */}
                 <div className="px-8 pb-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
 
-                        {/* Error Message */}
                         {error && (
                             <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs font-medium flex items-center gap-2 animate-in slide-in-from-top-1">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -89,7 +84,6 @@ export default function Page() {
                             </div>
                         )}
 
-                        {/* Username Input */}
                         <div className="space-y-1.5">
                             <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                 Username or ID Number
@@ -111,15 +105,17 @@ export default function Page() {
                             </div>
                         </div>
 
-                        {/* Password Input */}
                         <div className="space-y-1.5">
                             <div className="flex justify-between items-center">
                                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
                                     Password
                                 </label>
-                                <a href="#" className="text-xs text-[#1a6b36] hover:underline hover:text-[#155a2b]">
-                                    Forgot password?
-                                </a>
+                                {/* 
+                                    not yet available
+                                    <a href="#" className="text-xs text-[#1a6b36] hover:underline hover:text-[#155a2b]">
+                                        Forgot password?
+                                    </a>
+                                */}
                             </div>
                             <div className="relative">
                                 <span className="absolute left-3 top-2.5 text-gray-400">

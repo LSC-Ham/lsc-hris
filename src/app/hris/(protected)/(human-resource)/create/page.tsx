@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
 
@@ -11,15 +11,24 @@ import { getPositions } from "@/actions/admin/settings/positions/action";
 import { generateEmployeeID } from "@/actions/employees/employment_details/action";
 import { createEmployee } from "@/actions/employees/users/action";
 
+import { toast } from "sonner";
+
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+
 export default function Page() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // 2. Add state to control the modal
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+
     const [departments, setDepartments] = useState<string[]>([]);
     const [divisions, setDivisions] = useState<string[]>([]);
     const [positions, setPositions] = useState<string[]>([]);
 
     const [formData, setFormData] = useState({
         id_number: "",
+        hired_at: new Date(),
         division: "",
         department: "",
         positions: [],
@@ -80,18 +89,22 @@ export default function Page() {
         };
 
         fetchDynamicId();
-    }, [formData.division]); 
+    }, [formData.division]);
 
     const handleFormUpdate = (newData: any) => {
         setFormData(prev => ({ ...prev, ...newData }));
     };
 
-    const handleCreateAccount = async () => {
+    const handleInitialSubmit = () => {
         if (!formData.id_number || !formData.surname || !formData.firstname) {
-            alert("Please fill in the required fields (ID, Surname, First Name).");
+            toast.error("Please fill in the required fields (ID, Surname, First Name).");
             return;
         }
 
+        setShowConfirmModal(true);
+    };
+
+    const handleConfirmCreate = async () => {
         setIsSubmitting(true);
         console.log("Creating Account with FINAL Data:", formData);
 
@@ -99,22 +112,25 @@ export default function Page() {
             const result = await createEmployee(formData);
 
             if (result?.error) {
-                alert(result.error);
+                toast.error(result.error);
+                setShowConfirmModal(false);
             } else {
-                alert("Employee Created Successfully!");
-                router.push("./employees"); 
-                router.refresh(); 
+                toast.success("Employee Created Successfully!");
+                setShowConfirmModal(false);
+                router.push("./employees");
+                router.refresh();
             }
         } catch (error) {
             console.error("Error creating employee:", error);
-            alert("Failed to create employee.");
+            toast.error("Failed to create employee.");
+            setShowConfirmModal(false);
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="space-y-6 pb-12">
+        <div className="space-y-6 pb-12 relative">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
@@ -124,21 +140,6 @@ export default function Page() {
                         Please provide the basic identity details to initialize the profile.
                     </p>
                 </div>
-
-                <button
-                    onClick={handleCreateAccount}
-                    disabled={isSubmitting}
-                    className="bg-[#1a6b36] text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#155a2b] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
-                >
-                    {isSubmitting ? (
-                        <>
-                            <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-                            Creating...
-                        </>
-                    ) : (
-                        "Create Account"
-                    )}
-                </button>
             </div>
 
             <div className="flex flex-col gap-6">
@@ -161,6 +162,29 @@ export default function Page() {
                     />
                 </div>
             </div>
+
+            <button
+                onClick={handleInitialSubmit}
+                disabled={isSubmitting}
+                className="bg-[#1a6b36] text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-[#155a2b] shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+            >
+                Create Account
+            </button>
+
+            <ConfirmModal
+                isOpen={showConfirmModal}
+                onClose={() => setShowConfirmModal(false)}
+                onConfirm={handleConfirmCreate}
+                isConfirming={isSubmitting}
+                title="Confirm Employee Creation"
+                subtitle="Please review before submitting."
+                message={
+                    <p>
+                        Are you sure you want to create a new profile for <strong>{formData.firstname} {formData.surname}</strong>? Verify that the identity details and generated ID (<strong>{formData.id_number}</strong>) are correct.
+                    </p>
+                }
+                confirmText="Yes, Create Profile"
+            />
         </div>
     );
 }

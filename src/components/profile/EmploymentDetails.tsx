@@ -28,8 +28,16 @@ export function EmploymentDetails({
     const [isEditing, setIsEditing] = useState(mode === "create");
     const [draftData, setDraftData] = useState<any>({});
 
+    const getTodayDateString = () => {
+        const d = new Date();
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`; // Returns "2024-03-16"
+    };
+
     const [assignedPosition, setAssignedPosition] = useState({
-        position: "", status: "", description: "", start_at: "", end_at: "", is_active: false
+        position: "", status: "", description: "", start_at: getTodayDateString(), end_at: "", is_active: false
     });
 
     const formatDateForInput = (dateVal: any) => {
@@ -218,8 +226,8 @@ export function EmploymentDetails({
                                 <div
                                     key={pos.id || index}
                                     className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-lg border transition-all ${pos.is_active
-                                            ? 'bg-white border-green-300 shadow-sm ring-1 ring-green-100'
-                                            : 'bg-gray-50 border-gray-200 opacity-75'
+                                        ? 'bg-white border-green-300 shadow-sm ring-1 ring-green-100'
+                                        : 'bg-gray-50 border-gray-200 opacity-75'
                                         }`}
                                 >
                                     <div className="space-y-1">
