@@ -385,7 +385,6 @@ export function EmploymentDetails({
                 </div>
             </div>
 
-            {/* Save Button */}
             {mode !== "create" && isEditing && (
                 <div className="flex justify-end pt-6 border-t border-gray-100 mt-6">
                     <button

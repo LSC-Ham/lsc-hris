@@ -41,8 +41,6 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const eligibility = await getEligibility(employeeId?.id || "");
     const work_experience = await getWorkExperience(employeeId?.id || "");
 
-
-    // 3. Pass the fetched data to the Client Component
     return <EmployeePage
         role={null}
         user={user}

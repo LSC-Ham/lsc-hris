@@ -19,7 +19,6 @@ export default function Page() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // 2. Add state to control the modal
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     const [departments, setDepartments] = useState<string[]>([]);
@@ -106,7 +105,6 @@ export default function Page() {
 
     const handleConfirmCreate = async () => {
         setIsSubmitting(true);
-        console.log("Creating Account with FINAL Data:", formData);
 
         try {
             const result = await createEmployee(formData);

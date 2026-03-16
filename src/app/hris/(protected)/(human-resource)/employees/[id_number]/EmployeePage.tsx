@@ -19,6 +19,7 @@ import { updateEligibility } from "@/actions/employees/eligibility/action";
 import { updateWorkExperience } from "@/actions/employees/work_experience/action";
 import { deleteEmployee } from "@/actions/employees/action";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface EmployeePageProps {
     role: null | "moderator";
@@ -162,13 +163,13 @@ export default function EmployeePage({
 
     const handleAction = async (actionFn: Function, stateSetter: Function, data: any, successMsg: string) => {
         try {
-            stateSetter(data); // Optimistic UI update
+            stateSetter(data);
             const result = await actionFn(data);
-            if (result.success) alert(successMsg);
-            else alert("Error: " + result.error);
+            if (result.success) toast.success(successMsg);
+            else toast.error("Error: " + result.error);
         } catch (error) {
             console.error(`Failed to save ${successMsg}:`, error);
-            alert("An unexpected error occurred.");
+            toast.error("An unexpected error occurred.");
         }
     };
 
@@ -367,14 +368,14 @@ export default function EmployeePage({
                                 const result = await deleteEmployee(employmentData.id_number);
 
                                 if (result.success) {
-                                    alert("Employee profile deleted successfully!");
+                                    toast.success("Employee profile deleted successfully!");
                                     router.push("/hris/employees");
                                 } else {
-                                    alert("Error: " + result.error);
+                                    toast.error("Error: " + result.error);
                                 }
                             } catch (error) {
                                 console.error("Delete Error:", error);
-                                alert("An unexpected error occurred while deleting.");
+                                toast.error("An unexpected error occurred while deleting.");
                             }
                         }}
                         className="bg-[#1a6b36] hover:bg-[#155a2b] text-white px-4 py-2 rounded-lg text-sm"
