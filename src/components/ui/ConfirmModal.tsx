@@ -7,12 +7,12 @@ interface ConfirmModalProps {
     onClose: () => void;
     onConfirm: () => void;
     title: string;
-    subtitle?: string; // Optional subtitle to match the danger modal's header
+    subtitle?: string; 
     message: React.ReactNode;
     confirmText?: string;
     cancelText?: string;
-    isConfirming?: boolean; // Useful to show a loading state
-    confirmColorClass?: string; // e.g., "bg-[#1a6b36] hover:bg-[#155a2b]"
+    isConfirming?: boolean; 
+    confirmColorClass?: string; 
 }
 
 export function ConfirmModal({
@@ -25,7 +25,7 @@ export function ConfirmModal({
     confirmText = "Confirm",
     cancelText = "Cancel",
     isConfirming = false,
-    confirmColorClass = "bg-[#1a6b36] hover:bg-[#155a2b]", // Defaults to your brand green
+    confirmColorClass = "bg-[#1a6b36] hover:bg-[#155a2b]",
 }: ConfirmModalProps) {
 
     if (!isOpen) return null;
@@ -34,7 +34,6 @@ export function ConfirmModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
 
-                {/* Header (Matching your danger modal) */}
                 <div className="p-6 border-b border-gray-100 flex justify-between items-start">
                     <div>
                         <h2 className="text-xl font-bold text-gray-900">{title}</h2>
@@ -49,13 +48,11 @@ export function ConfirmModal({
                     </button>
                 </div>
 
-                {/* Body */}
                 <div className="p-6 space-y-6">
                     <div className="text-sm text-gray-600 leading-relaxed">
                         {message}
                     </div>
 
-                    {/* Footer Buttons (Matching your danger modal's flex layout) */}
                     <div className="flex gap-3 pt-2">
                         <button
                             type="button"

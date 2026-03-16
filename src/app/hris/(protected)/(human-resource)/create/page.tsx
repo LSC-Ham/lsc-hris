@@ -149,6 +149,7 @@ export default function Page() {
                         divisions={divisions}
                         departments={departments}
                         availablePositions={positions}
+                        
                     />
                 </div>
 

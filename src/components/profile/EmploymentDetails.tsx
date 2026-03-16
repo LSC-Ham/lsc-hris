@@ -369,7 +369,6 @@ export function EmploymentDetails({
                     )}
                 </div>
 
-                {/* Government IDs */}
                 <div>
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">
                         Government Identifiers
