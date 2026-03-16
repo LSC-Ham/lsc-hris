@@ -1,8 +1,7 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // Make sure this path is correct
+import { authOptions } from "@/lib/auth"; 
 import { redirect } from "next/navigation";
 
-// Define which roles are allowed to enter this zone
 const ALLOWED_ROLES = ["admin", "moderator"];
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {

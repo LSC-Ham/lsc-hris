@@ -92,7 +92,6 @@ export default function EmployeePage({
 
     const [activeTab, setActiveTab] = useState("Employment Details");
 
-    // --- 1. STATES ---
     const [educationData, setEducationData] = useState(Array.isArray(educational_background) ? educational_background : []);
     const [eligibilityData, setEligibilityData] = useState(Array.isArray(eligibility) ? eligibility : []);
     const [workExperienceData, setWorkExperienceData] = useState(Array.isArray(work_experience) ? work_experience : []);
@@ -101,12 +100,10 @@ export default function EmployeePage({
     const [personalData, setPersonalData] = useState({ ...DEFAULT_PERSONAL_DATA, ...(personal_information || {}) });
     const [employmentData, setEmploymentData] = useState({ ...DEFAULT_EMPLOYMENT_DATA, ...(employment_details || {}) });
 
-    // CLEANUP: Extract helpers to build the complex state objects cleanly
     const buildAddressState = () => {
         const addrArray = address?.address || [];
         const getAddr = (type: string) => addrArray.find((a: any) => a.address_type === type) || {};
 
-        // We only call getAddr once per type now!
         const res = getAddr("residential");
         const perm = getAddr("permanent");
 
@@ -163,8 +160,6 @@ export default function EmployeePage({
     const [addressData, setAddressData] = useState(buildAddressState());
     const [familyData, setFamilyData] = useState(buildFamilyState());
 
-    // --- 2. HANDLERS ---
-    // CLEANUP: Use a generic helper to reduce the repetitive try/catch blocks
     const handleAction = async (actionFn: Function, stateSetter: Function, data: any, successMsg: string) => {
         try {
             stateSetter(data); // Optimistic UI update
@@ -264,7 +259,6 @@ export default function EmployeePage({
         );
     };
 
-    // --- 3. DYNAMIC RENDERING LOGIC ---
     const renderContent = () => {
         const isMod = role === "moderator";
         const isUser = role === null;

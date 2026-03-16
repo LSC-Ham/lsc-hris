@@ -11,17 +11,13 @@ export default async function Page({
 }: {
     searchParams: Promise<{ page?: string }>;
 }) {
-    // 1. Await the searchParams Promise
     const resolvedSearchParams = await searchParams;
 
-    // 2. Pagination Setup
     const ITEMS_PER_PAGE = 10;
 
-    // 3. Use the awaited object
     const currentPage = Number(resolvedSearchParams?.page) || 1;
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
 
-    // 2. Fetch Data and Total Count simultaneously
     const [employeesList, totalEmployees] = await Promise.all([
         prisma.employees.findMany({
             skip: skip,
@@ -78,7 +74,6 @@ export default async function Page({
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <EmployeesTable employeesList={employeesList} />
 
-                {/* Pagination rendered at the bottom of the table container */}
                 <Pagination
                     totalPages={totalPages}
                     currentPage={currentPage}

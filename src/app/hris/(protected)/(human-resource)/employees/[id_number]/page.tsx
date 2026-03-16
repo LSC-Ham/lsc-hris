@@ -54,7 +54,6 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const positionNames = positions.map((pos) => pos.position);
 
 
-    // 3. Pass the fetched data to the Client Component
     return <EmployeePage role="moderator"
         user={user} personal_information={personal_information}
         employment_details={employment_details} address={address}

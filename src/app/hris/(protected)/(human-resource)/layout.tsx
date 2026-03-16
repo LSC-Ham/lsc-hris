@@ -1,9 +1,8 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // Make sure this path is correct
+import { authOptions } from "@/lib/auth"; 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
-// Define which roles are allowed to enter this zone
 const ALLOWED_DEPARTMENTS = ["human resource"];
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
@@ -31,7 +30,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                 }
             }
 
-        } // Only grab what we need for performance
+        } 
     });
 
     const role = ALLOWED_DEPARTMENTS.includes(userData?.biography?.employees?.departments?.department.toLowerCase() || "")

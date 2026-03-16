@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Added router for redirection
+import { useRouter } from "next/navigation"; 
 import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
 
@@ -49,13 +49,11 @@ export default function Page() {
 
     useEffect(() => {
         const loadInitialData = async () => {
-            // Fetch the ID
             const autoId = await generateEmployeeID();
             if (autoId) {
                 setFormData(prev => ({ ...prev, id_number: autoId }));
             }
 
-            // 2. Fetch all dropdown data at the same time
             try {
                 const [fetchedDepts, fetchedDivs, fetchedPos] = await Promise.all([
                     (await getDepartments()).map((dept) => dept.department),
@@ -63,7 +61,6 @@ export default function Page() {
                     (await getPositions()).map((pos) => pos.position),
                 ]);
 
-                // Update the state (make sure your getter functions return simple arrays of strings!)
                 setDepartments(fetchedDepts || []);
                 setDivisions(fetchedDivs || []);
                 setPositions(fetchedPos || []);
@@ -86,13 +83,11 @@ export default function Page() {
         fetchAutoId();
     }, []);
 
-    // Add this helper function to let child components update the form data
     const handleFormUpdate = (newData: any) => {
         setFormData(prev => ({ ...prev, ...newData }));
     };
 
     const handleCreateAccount = async () => {
-        // Basic validation
         if (!formData.id_number || !formData.surname || !formData.firstname) {
             alert("Please fill in the required fields (ID, Surname, First Name).");
             return;
@@ -102,14 +97,13 @@ export default function Page() {
         console.log("Creating Account with FINAL Data:", formData);
 
         try {
-            // Call your actual server action instead of the timeout
             const result = await createEmployee(formData);
 
             if (result?.error) {
                 alert(result.error);
             } else {
                 alert("Employee Created Successfully!");
-                router.push("./employees"); // Redirect to employee list or profile
+                router.push("./employees"); 
             }
         } catch (error) {
             console.error("Error creating employee:", error);
