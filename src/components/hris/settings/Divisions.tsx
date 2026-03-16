@@ -2,10 +2,10 @@
 "use client";
 
 import { addDivision, deleteDivision, updateDivision } from "@/actions/admin/settings/divisions/action";
-import { useState } from "react";
-// Import your server actions (adjust the path if necessary)
+import { useState, useRef } from "react";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { toast } from "sonner";
 
-// Define the shape of the data we expect to receive
 type Division = {
     id: string;
     division: string;
@@ -16,13 +16,104 @@ interface DivisionsTemplateProps {
     data: Division[];
 }
 
+type ActionType = "add" | "update" | "delete";
+
+interface PendingAction {
+    type: ActionType;
+    id?: string;
+    formData?: FormData;
+    divisionName?: string;
+}
+
 export default function Divisions({ data }: DivisionsTemplateProps) {
     const [editingId, setEditingId] = useState<string | null>(null);
+    const addFormRef = useRef<HTMLFormElement>(null);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+
+    const handleAddClick = (formData: FormData) => {
+        setPendingAction({ type: "add", formData });
+        setIsModalOpen(true);
+    };
+
+    const handleUpdateClick = (id: string, formData: FormData) => {
+        setPendingAction({ type: "update", id, formData });
+        setIsModalOpen(true);
+    };
+
+    const handleDeleteClick = (id: string, name: string) => {
+        setPendingAction({ type: "delete", id, divisionName: name });
+        setIsModalOpen(true);
+    };
+
+    const confirmExecuteAction = async () => {
+        if (!pendingAction) return;
+        setIsSubmitting(true);
+
+        try {
+            if (pendingAction.type === "add" && pendingAction.formData) {
+                await addDivision(pendingAction.formData);
+                addFormRef.current?.reset();
+                toast.success("Division added successfully");
+            }
+            else if (pendingAction.type === "update" && pendingAction.id && pendingAction.formData) {
+                await updateDivision(pendingAction.id, pendingAction.formData);
+                setEditingId(null);
+                toast.success("Division updated successfully");
+            }
+            else if (pendingAction.type === "delete" && pendingAction.id) {
+                await deleteDivision(pendingAction.id);
+                toast.success("Division deleted successfully");
+            }
+        } catch (error) {
+            console.error(`Failed to process ${pendingAction.type}:`, error);
+            toast.error("An error occurred. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+            setIsModalOpen(false);
+            setPendingAction(null);
+        }
+    };
+
+    const getModalConfig = () => {
+        switch (pendingAction?.type) {
+            case "add":
+                return {
+                    title: "Add Division",
+                    message: "Are you sure you want to add this new division?",
+                    confirmText: "Add Division",
+                    colorClass: "bg-[#1a6b36] hover:bg-[#155a2b]"
+                };
+            case "update":
+                return {
+                    title: "Update Division",
+                    message: "Are you sure you want to save these changes?",
+                    confirmText: "Save Changes",
+                    colorClass: "bg-[#1a6b36] hover:bg-[#155a2b]"
+                };
+            case "delete":
+                return {
+                    title: "Delete Division",
+                    message: (
+                        <>
+                            Are you sure you want to permanently delete the <strong>{pendingAction.divisionName}</strong> division? This action cannot be undone.
+                        </>
+                    ),
+                    confirmText: "Delete",
+                    colorClass: "bg-red-600 hover:bg-red-700"
+                };
+            default:
+                return { title: "", message: "", confirmText: "", colorClass: "" };
+        }
+    };
+
+    const modalConfig = getModalConfig();
 
     return (
         <div className="space-y-4">
-            {/* 1. ADD NEW DIVISION FORM */}
-            <form action={addDivision} className="flex flex-col sm:flex-row gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <form ref={addFormRef} action={handleAddClick} className="flex flex-col sm:flex-row gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <input
                     type="text"
                     name="division"
@@ -56,10 +147,7 @@ export default function Divisions({ data }: DivisionsTemplateProps) {
                                 {editingId === div.id ? (
                                     <td colSpan={3} className="px-4 py-3">
                                         <form
-                                            action={(formData) => {
-                                                updateDivision(div.id, formData);
-                                                setEditingId(null);
-                                            }}
+                                            action={(formData) => handleUpdateClick(div.id, formData)}
                                             className="flex gap-2"
                                         >
                                             <input type="text" name="division" defaultValue={div.division} required className="flex-1 border rounded px-2 py-1 text-sm" />
@@ -69,17 +157,15 @@ export default function Divisions({ data }: DivisionsTemplateProps) {
                                         </form>
                                     </td>
                                 ) : (
-                                    /* NORMAL ROW DISPLAY */
                                     <>
                                         <td className="px-4 py-3 font-medium text-gray-900">{div.division}</td>
                                         <td className="px-4 py-3 text-gray-500">{div.description || "—"}</td>
                                         <td className="px-4 py-3 text-right space-x-3">
                                             <button onClick={() => setEditingId(div.id)} className="text-blue-600 hover:underline text-xs font-medium">Edit</button>
-                                            <button onClick={() => {
-                                                if (confirm("Are you sure you want to delete this division?")) {
-                                                    deleteDivision(div.id);
-                                                }
-                                            }} className="text-red-600 hover:underline text-xs font-medium">
+                                            <button
+                                                onClick={() => handleDeleteClick(div.id, div.division)}
+                                                className="text-red-600 hover:underline text-xs font-medium"
+                                            >
                                                 Delete
                                             </button>
                                         </td>
@@ -97,6 +183,22 @@ export default function Divisions({ data }: DivisionsTemplateProps) {
                     </tbody>
                 </table>
             </div>
+
+            <ConfirmModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    if (!isSubmitting) {
+                        setIsModalOpen(false);
+                        setPendingAction(null);
+                    }
+                }}
+                onConfirm={confirmExecuteAction}
+                isConfirming={isSubmitting}
+                title={modalConfig.title}
+                message={<p>{modalConfig.message}</p>}
+                confirmText={modalConfig.confirmText}
+                confirmColorClass={modalConfig.colorClass}
+            />
         </div>
     );
 }

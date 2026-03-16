@@ -10,7 +10,7 @@ export async function getPositions() {
             select: {
                 id: true,
                 position: true,
-                departments_id: true, 
+                departments_id: true,
                 description: true
             },
             orderBy: { position: 'asc' },
@@ -23,7 +23,7 @@ export async function getPositions() {
 
 export async function addPosition(formData: FormData) {
     const position = formData.get("position") as string;
-    const department = formData.get("department") as string; 
+    const department = formData.get("department") as string;
     const description = formData.get("description") as string;
 
     await prisma.positions.create({
@@ -35,7 +35,7 @@ export async function addPosition(formData: FormData) {
 
 export async function updatePosition(id: string, formData: FormData) {
     const position = formData.get("position") as string;
-    const department = formData.get("department") as string; 
+    const department = formData.get("department") as string;
     const description = formData.get("description") as string;
 
     await prisma.positions.update({
@@ -47,11 +47,26 @@ export async function updatePosition(id: string, formData: FormData) {
 }
 
 export async function deletePosition(id: string) {
-    await prisma.positions.delete({
-        where: { id },
-    });
+    try {
+        await prisma.positions.delete({
+            where: { id },
+        });
 
-    revalidatePath("/hris/settings");
+        revalidatePath("/hris/settings");
+        return { success: true };
+    } catch (error: any) {
+        if (error.code === 'P2003') {
+            return {
+                success: false,
+                message: "Cannot delete this position because it is currently assigned to employees. Please reassign the employees first."
+            };
+        }
+
+        return {
+            success: false,
+            message: "An unexpected error occurred while trying to delete."
+        };
+    }
 }
 
 export async function getExistingStatuses() {

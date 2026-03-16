@@ -2,9 +2,10 @@
 "use client";
 
 import { addPosition, deletePosition, updatePosition } from "@/actions/admin/settings/positions/action";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { toast } from "sonner";
 
-// The Position type
 type Position = {
     id: string;
     position: string;
@@ -12,7 +13,6 @@ type Position = {
     description: string | null;
 };
 
-// CHANGED: 'name' is now 'department' to match the likely database structure
 type Department = {
     id: string;
     department: string;
@@ -23,17 +23,112 @@ interface PositionsTemplateProps {
     departments: Department[];
 }
 
+type ActionType = "add" | "update" | "delete";
+
+interface PendingAction {
+    type: ActionType;
+    id?: string;
+    formData?: FormData;
+    positionName?: string;
+}
+
 export default function Positions({ data, departments }: PositionsTemplateProps) {
     const [editingId, setEditingId] = useState<string | null>(null);
+    const addFormRef = useRef<HTMLFormElement>(null);
+
+    // --- MODAL STATES ---
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+
+    // 1. Intercept Add Action
+    const handleAddClick = (formData: FormData) => {
+        setPendingAction({ type: "add", formData });
+        setIsModalOpen(true);
+    };
+
+    // 2. Intercept Update Action
+    const handleUpdateClick = (id: string, formData: FormData) => {
+        setPendingAction({ type: "update", id, formData });
+        setIsModalOpen(true);
+    };
+
+    // 3. Intercept Delete Action
+    const handleDeleteClick = (id: string, name: string) => {
+        setPendingAction({ type: "delete", id, positionName: name });
+        setIsModalOpen(true);
+    };
+
+    // 4. Execute the staged action
+    const confirmExecuteAction = async () => {
+        if (!pendingAction) return;
+        setIsSubmitting(true);
+
+        try {
+            if (pendingAction.type === "delete" && pendingAction.id) {
+                const result = await deletePosition(pendingAction.id);
+
+                if (result?.success === false) {
+                    // Show the specific error message from the database
+                    toast.error(result.message);
+                } else {
+                    toast.success("Position deleted successfully");
+                }
+            }
+            // ... handle add/update similarly
+        } catch (error) {
+            toast.error("A network error occurred.");
+        } finally {
+            setIsSubmitting(false);
+            setIsModalOpen(false);
+            setPendingAction(null);
+        }
+    };
+
+    // --- Dynamic Modal Configuration ---
+    const getModalConfig = () => {
+        switch (pendingAction?.type) {
+            case "add":
+                return {
+                    title: "Add Position",
+                    message: "Are you sure you want to add this new position?",
+                    confirmText: "Add Position",
+                    colorClass: "bg-[#1a6b36] hover:bg-[#155a2b]"
+                };
+            case "update":
+                return {
+                    title: "Update Position",
+                    message: "Are you sure you want to save these changes?",
+                    confirmText: "Save Changes",
+                    colorClass: "bg-[#1a6b36] hover:bg-[#155a2b]"
+                };
+            case "delete":
+                return {
+                    title: "Delete Position",
+                    message: (
+                        <>
+                            Are you sure you want to permanently delete the <strong>{pendingAction.positionName}</strong> position? This action cannot be undone.
+                        </>
+                    ),
+                    confirmText: "Delete",
+                    colorClass: "bg-red-600 hover:bg-red-700"
+                };
+            default:
+                return { title: "", message: "", confirmText: "", colorClass: "" };
+        }
+    };
+
+    const modalConfig = getModalConfig();
 
     return (
         <div className="space-y-4">
-            <form action={addPosition} className="flex flex-col sm:flex-row gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            {/* ADD FORM */}
+            <form ref={addFormRef} action={handleAddClick} className="flex flex-col sm:flex-row gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <select
                     name="department"
                     required
                     defaultValue=""
-                    className="flex-1 border border-gray-300 px-3 py-2 rounded-md text-sm capitalize"
+                    className="flex-1 border border-gray-300 px-3 py-2 rounded-md text-sm capitalize bg-white"
                 >
                     <option value="" disabled>Select Department</option>
                     {departments?.map((dept) => (
@@ -60,7 +155,7 @@ export default function Positions({ data, departments }: PositionsTemplateProps)
                 </button>
             </form>
 
-            {/* 2. POSITIONS TABLE */}
+            {/* POSITIONS TABLE */}
             <div className="border border-gray-200 rounded-lg overflow-hidden">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
@@ -80,10 +175,7 @@ export default function Positions({ data, departments }: PositionsTemplateProps)
                                     {editingId === pos.id ? (
                                         <td colSpan={4} className="px-4 py-3">
                                             <form
-                                                action={(formData) => {
-                                                    updatePosition(pos.id, formData);
-                                                    setEditingId(null);
-                                                }}
+                                                action={(formData) => handleUpdateClick(pos.id, formData)}
                                                 className="flex gap-2"
                                             >
                                                 <input type="text" name="position" defaultValue={pos.position} required className="flex-1 border rounded px-2 py-1 text-sm" />
@@ -95,7 +187,6 @@ export default function Positions({ data, departments }: PositionsTemplateProps)
                                                     className="flex-1 border rounded px-2 py-1 text-sm bg-white"
                                                 >
                                                     <option value="" disabled>Select Department</option>
-                                                    {/* CHANGED: Now rendering dept.department */}
                                                     {departments?.map((dept) => (
                                                         <option key={dept.id} value={dept.id}>
                                                             {dept.department}
@@ -109,18 +200,16 @@ export default function Positions({ data, departments }: PositionsTemplateProps)
                                             </form>
                                         </td>
                                     ) : (
-                                        /* NORMAL ROW DISPLAY */
                                         <>
                                             <td className="px-4 py-3 font-medium text-gray-900">{pos.position}</td>
                                             <td className="px-4 py-3 font-medium text-gray-900">{departmentName}</td>
                                             <td className="px-4 py-3 text-gray-500">{pos.description || "—"}</td>
                                             <td className="px-4 py-3 text-right space-x-3">
                                                 <button onClick={() => setEditingId(pos.id)} className="text-blue-600 hover:underline text-xs font-medium">Edit</button>
-                                                <button onClick={() => {
-                                                    if (confirm("Are you sure you want to delete this position?")) {
-                                                        deletePosition(pos.id);
-                                                    }
-                                                }} className="text-red-600 hover:underline text-xs font-medium">
+                                                <button
+                                                    onClick={() => handleDeleteClick(pos.id, pos.position)}
+                                                    className="text-red-600 hover:underline text-xs font-medium"
+                                                >
                                                     Delete
                                                 </button>
                                             </td>
@@ -139,6 +228,23 @@ export default function Positions({ data, departments }: PositionsTemplateProps)
                     </tbody>
                 </table>
             </div>
+
+            {/* CONFIRMATION MODAL */}
+            <ConfirmModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    if (!isSubmitting) {
+                        setIsModalOpen(false);
+                        setPendingAction(null);
+                    }
+                }}
+                onConfirm={confirmExecuteAction}
+                isConfirming={isSubmitting}
+                title={modalConfig.title}
+                message={<p>{modalConfig.message}</p>}
+                confirmText={modalConfig.confirmText}
+                confirmColorClass={modalConfig.colorClass}
+            />
         </div>
     );
 }

@@ -20,6 +20,7 @@ import { updateWorkExperience } from "@/actions/employees/work_experience/action
 import { deleteEmployee } from "@/actions/employees/action";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ConfirmModal } from "@/components/ui/ConfirmModal"; // Make sure this path is correct!
 
 interface EmployeePageProps {
     role: null | "moderator";
@@ -75,6 +76,16 @@ const DEFAULT_EMPLOYMENT_DATA = {
     agency_no: ""
 };
 
+// Define a type for the pending action to keep TypeScript happy
+interface PendingAction {
+    actionFn: Function;
+    stateSetter: Function | null;
+    data: any;
+    successMsg: string;
+    actionName: string;
+    isDelete?: boolean;
+}
+
 export default function EmployeePage({
     role,
     user,
@@ -100,6 +111,11 @@ export default function EmployeePage({
     const [userData] = useState({ ...DEFAULT_USER_DATA, ...(user || {}) });
     const [personalData, setPersonalData] = useState({ ...DEFAULT_PERSONAL_DATA, ...(personal_information || {}) });
     const [employmentData, setEmploymentData] = useState({ ...DEFAULT_EMPLOYMENT_DATA, ...(employment_details || {}) });
+
+    // --- MODAL STATE ---
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
 
     const buildAddressState = () => {
         const addrArray = address?.address || [];
@@ -161,24 +177,60 @@ export default function EmployeePage({
     const [addressData, setAddressData] = useState(buildAddressState());
     const [familyData, setFamilyData] = useState(buildFamilyState());
 
-    const handleAction = async (actionFn: Function, stateSetter: Function, data: any, successMsg: string) => {
+    // --- REFACTORED handleAction ---
+    // Instead of executing the save immediately, we stage it and open the modal
+    const handleAction = (actionFn: Function, stateSetter: Function, data: any, successMsg: string, actionName: string) => {
+        setPendingAction({ actionFn, stateSetter, data, successMsg, actionName });
+        setIsModalOpen(true);
+    };
+
+    // --- EXECUTE SAVED ACTION ---
+    const confirmExecuteAction = async () => {
+        if (!pendingAction) return;
+        setIsSaving(true);
+
         try {
-            stateSetter(data);
-            const result = await actionFn(data);
-            if (result.success) toast.success(successMsg);
-            else toast.error("Error: " + result.error);
+            // Handle Delete Logic
+            if (pendingAction.isDelete) {
+                const result = await pendingAction.actionFn();
+                if (result.success) {
+                    toast.success(pendingAction.successMsg);
+                    router.push("/hris/employees");
+                } else {
+                    toast.error("Error: " + result.error);
+                }
+                return; // Exit early since we route away
+            }
+
+            // Handle Standard Save Logic
+            if (pendingAction.stateSetter) {
+                pendingAction.stateSetter(pendingAction.data); // Optimistic UI update
+            }
+
+            const result = await pendingAction.actionFn(pendingAction.data);
+            if (result.success) {
+                toast.success(pendingAction.successMsg);
+            } else {
+                toast.error("Error: " + result.error);
+            }
         } catch (error) {
-            console.error(`Failed to save ${successMsg}:`, error);
+            console.error(`Failed to process action:`, error);
             toast.error("An unexpected error occurred.");
+        } finally {
+            setIsSaving(false);
+            setIsModalOpen(false);
+            setPendingAction(null);
         }
     };
+
 
     const handleSavePersonalInfo = (data: any) => {
         handleAction(
             updatePersonalInformation,
             (d: any) => setPersonalData((prev: any) => ({ ...prev, ...d })),
             data,
-            "Personal Information updated successfully!"
+            "Personal Information updated successfully!",
+            "Personal Information"
         );
     };
 
@@ -190,7 +242,8 @@ export default function EmployeePage({
             },
             setAddressData,
             data,
-            "Address updated successfully!"
+            "Address updated successfully!",
+            "Address Details"
         );
     };
 
@@ -202,7 +255,8 @@ export default function EmployeePage({
             },
             setFamilyData,
             data,
-            "Family background updated successfully!"
+            "Family background updated successfully!",
+            "Family Background"
         );
     };
 
@@ -217,7 +271,8 @@ export default function EmployeePage({
             },
             setEducationData,
             data,
-            "Educational background updated successfully!"
+            "Educational background updated successfully!",
+            "Educational Background"
         );
     };
 
@@ -232,7 +287,8 @@ export default function EmployeePage({
             },
             setEligibilityData,
             data,
-            "Eligibility updated successfully!"
+            "Eligibility updated successfully!",
+            "Eligibility Records"
         );
     };
 
@@ -247,7 +303,8 @@ export default function EmployeePage({
             },
             setWorkExperienceData,
             data,
-            "Work Experience updated successfully!"
+            "Work Experience updated successfully!",
+            "Work Experience"
         );
     };
 
@@ -256,8 +313,22 @@ export default function EmployeePage({
             (formData: any) => updateEmploymentDetails(formData.id, formData),
             (d: any) => setEmploymentData((prev: any) => ({ ...prev, ...d })),
             data,
-            "Employment details updated successfully!"
+            "Employment details updated successfully!",
+            "Employment Details"
         );
+    };
+
+    // --- STAGE DELETE ACTION ---
+    const handleDeleteEmployeeClick = () => {
+        setPendingAction({
+            actionFn: () => deleteEmployee(employmentData.id_number),
+            stateSetter: null,
+            data: null,
+            successMsg: "Employee profile deleted successfully!",
+            actionName: "Delete Employee",
+            isDelete: true
+        });
+        setIsModalOpen(true);
     };
 
     const renderContent = () => {
@@ -361,24 +432,8 @@ export default function EmployeePage({
                 </div>
                 {role === "moderator" && (
                     <button
-                        onClick={async () => {
-                            if (!window.confirm("Are you sure you want to delete this employee's profile? This action cannot be undone.")) return;
-
-                            try {
-                                const result = await deleteEmployee(employmentData.id_number);
-
-                                if (result.success) {
-                                    toast.success("Employee profile deleted successfully!");
-                                    router.push("/hris/employees");
-                                } else {
-                                    toast.error("Error: " + result.error);
-                                }
-                            } catch (error) {
-                                console.error("Delete Error:", error);
-                                toast.error("An unexpected error occurred while deleting.");
-                            }
-                        }}
-                        className="bg-[#1a6b36] hover:bg-[#155a2b] text-white px-4 py-2 rounded-lg text-sm"
+                        onClick={handleDeleteEmployeeClick}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                     >
                         Delete Employee
                     </button>
@@ -386,9 +441,7 @@ export default function EmployeePage({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-                {/* === LEFT COLUMN (Sidebar) === */}
                 <div className="md:col-span-4 lg:col-span-3 space-y-6">
-                    {/* Profile Picture & Name Card */}
                     <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
                         <ProfilePictureUpload
                             userId={userData.id}
@@ -406,7 +459,7 @@ export default function EmployeePage({
                     {/* Navigation Menu */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden md:p-0">
 
-                        {/* 📱 MOBILE DROPDOWN (Visible only on small screens) */}
+                        {/* 📱 MOBILE DROPDOWN */}
                         <div className="md:hidden">
                             <select
                                 value={activeTab}
@@ -421,7 +474,7 @@ export default function EmployeePage({
                             </select>
                         </div>
 
-                        {/* 💻 DESKTOP SIDEBAR (Visible only on medium screens and up) */}
+                        {/* 💻 DESKTOP SIDEBAR */}
                         <nav className="hidden md:flex flex-col p-2 space-y-1">
                             {menuItems.map((item) => (
                                 <button
@@ -436,17 +489,46 @@ export default function EmployeePage({
                                 </button>
                             ))}
                         </nav>
-
                     </div>
                 </div>
 
-                {/* === RIGHT COLUMN (Dynamic Content) === */}
                 <div className="md:col-span-8 lg:col-span-9 space-y-6">
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-6">
                         {renderContent()}
                     </div>
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    if (!isSaving) {
+                        setIsModalOpen(false);
+                        setPendingAction(null);
+                    }
+                }}
+                onConfirm={confirmExecuteAction}
+                isConfirming={isSaving}
+                title={pendingAction?.isDelete ? "Delete Employee Profile" : "Confirm Changes"}
+                subtitle={
+                    pendingAction?.isDelete
+                        ? "Warning: This action cannot be undone."
+                        : `You are updating ${pendingAction?.actionName}`
+                }
+                message={
+                    pendingAction?.isDelete ? (
+                        <p>
+                            Are you absolutely sure you want to permanently delete the profile for <strong>{personalData.firstname} {personalData.surname}</strong>? All their records will be erased.
+                        </p>
+                    ) : (
+                        <p>
+                            Are you sure you want to save these changes? This will update the <strong>{pendingAction?.actionName}</strong> records for <strong>{personalData.firstname} {personalData.surname}</strong>.
+                        </p>
+                    )
+                }
+                confirmText={pendingAction?.isDelete ? "Delete Profile" : "Save Changes"}
+                confirmColorClass={pendingAction?.isDelete ? "bg-red-600 hover:bg-red-700" : "bg-[#1a6b36] hover:bg-[#155a2b]"}
+            />
         </div>
     );
 }

@@ -245,7 +245,7 @@ function FamilyFormSection({
                 />
                 <ProfileField
                     label="Contact No."
-                    value={data.contact_no} 
+                    value={data.contact_no}
                     isEditing={isEditing}
                     placeholder="09XX-XXX-XXXX"
                     onChange={(e: any) => onChange("contact_no", e.target.value)}
