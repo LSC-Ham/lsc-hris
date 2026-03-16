@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import fs from 'fs/promises';
 import path from 'path';
 import bcrypt from "bcrypt";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
 
 export async function getUsers(userId: string) {
     if (!userId || userId === "") {
@@ -113,10 +116,42 @@ export async function changePassword(userId: string, currentPassword: string, ne
             },
         });
 
+        revalidatePath("/hris");
+
         return { success: true };
     } catch (error) {
         console.error("Change Password Error:", error);
         return { error: "Something went wrong. Please try again." };
+    }
+}
+
+export async function setupFirstPassword(newPassword: string) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user) {
+            return { error: "Unauthorized" };
+        }
+
+        const userId = (session.user as any).id;
+
+        if (!newPassword || newPassword.length < 8) {
+            return { error: "Password must be at least 8 characters long." };
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                password: hashedPassword,
+                password_changed: true, // This unlocks their account!
+            },
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error("Setup password error:", error);
+        return { error: "Failed to update password. Please try again." };
     }
 }
 

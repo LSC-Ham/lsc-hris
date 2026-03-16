@@ -9,7 +9,7 @@ export default async function Dashboard() {
         }),
 
         prisma.user.findMany({
-            take: 10, 
+            take: 10,
             select: {
                 id: true,
                 role: true,
@@ -23,7 +23,7 @@ export default async function Dashboard() {
                     }
                 }
             },
-            orderBy: { id: 'desc' }
+            orderBy: { updated_at: 'desc' }
         }),
 
         prisma.departments.findMany({
@@ -51,9 +51,7 @@ export default async function Dashboard() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                {/* COLUMN 1: Key Metrics */}
                 <div className="flex flex-col gap-6">
-                    {/* Total Employees Card */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex items-center gap-4 transition-shadow hover:shadow-md h-full">
                         <div className="p-4 bg-[#1a6b36]/10 text-[#1a6b36] rounded-xl">
                             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -70,7 +68,6 @@ export default async function Dashboard() {
                         </div>
                     </div>
 
-                    {/* Administration Card */}
                     <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex items-center gap-4 transition-shadow hover:shadow-md h-full">
                         <div className="p-4 bg-blue-50 text-blue-600 rounded-xl">
                             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -88,10 +85,8 @@ export default async function Dashboard() {
                     </div>
                 </div>
 
-                {/* COLUMN 2: Departments List */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 transition-shadow hover:shadow-md flex flex-col">
                     <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        {/* Swapped to a 'building' icon for departments */}
                         <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z" />
                         </svg>
@@ -116,7 +111,6 @@ export default async function Dashboard() {
                     </div>
                 </div>
 
-                {/* COLUMN 3: Activation Status */}
                 <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 transition-shadow hover:shadow-md flex flex-col row-span-2">
                     <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -151,7 +145,6 @@ export default async function Dashboard() {
                     </div>
                 </div>
 
-                {/* BOTTOM ROW: Detailed Recent Users (Spans full width) */}
                 <div className="sm:col-span-2 lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-6 transition-shadow hover:shadow-md flex flex-col">
                     <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
                         <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

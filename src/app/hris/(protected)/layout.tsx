@@ -18,6 +18,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     const userData = await prisma.user.findUnique({
         where: { id: userId },
         select: {
+            password_changed: true, // <-- The crucial check
             profile_picture: true,
             biography: {
                 select: {
@@ -39,8 +40,12 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                     }
                 }
             }
-        } 
+        }
     });
+
+    if (userData && userData.password_changed === false) {
+        redirect("/hris/change-password");
+    }
 
     return (
         <div className="flex min-h-screen bg-slate-50">
