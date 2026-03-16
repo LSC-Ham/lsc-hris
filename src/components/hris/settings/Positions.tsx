@@ -28,8 +28,20 @@ export default function Positions({ data, departments }: PositionsTemplateProps)
 
     return (
         <div className="space-y-4">
-            {/* 1. ADD NEW POSITION FORM */}
             <form action={addPosition} className="flex flex-col sm:flex-row gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <select
+                    name="department"
+                    required
+                    defaultValue=""
+                    className="flex-1 border border-gray-300 px-3 py-2 rounded-md text-sm capitalize"
+                >
+                    <option value="" disabled>Select Department</option>
+                    {departments?.map((dept) => (
+                        <option key={dept.id} value={dept.id}>
+                            {dept.department}
+                        </option>
+                    ))}
+                </select>
                 <input
                     type="text"
                     name="position"
@@ -37,22 +49,6 @@ export default function Positions({ data, departments }: PositionsTemplateProps)
                     required
                     className="flex-1 border border-gray-300 px-3 py-2 rounded-md text-sm"
                 />
-
-                <select
-                    name="department"
-                    required
-                    defaultValue=""
-                    className="flex-1 border border-gray-300 px-3 py-2 rounded-md text-sm bg-white"
-                >
-                    <option value="" disabled>Select Department</option>
-                    {/* CHANGED: Now rendering dept.department */}
-                    {departments?.map((dept) => (
-                        <option key={dept.id} value={dept.id}>
-                            {dept.department}
-                        </option>
-                    ))}
-                </select>
-
                 <input
                     type="text"
                     name="description"
@@ -75,14 +71,12 @@ export default function Positions({ data, departments }: PositionsTemplateProps)
                             <th className="px-4 py-3 font-medium text-gray-700 w-32 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 capitalize">
                         {data.map((pos) => {
-                            // CHANGED: Now checking for d.department instead of d.name
                             const departmentName = departments?.find(d => d.id === pos.departments_id)?.department || pos.departments_id;
 
                             return (
                                 <tr key={pos.id}>
-                                    {/* IF EDITING THIS ROW */}
                                     {editingId === pos.id ? (
                                         <td colSpan={4} className="px-4 py-3">
                                             <form

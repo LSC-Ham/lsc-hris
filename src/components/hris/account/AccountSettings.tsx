@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import AccountDangerModal from "./AccountDangerModal";
 import { deactivateOrDeleteAccount } from "@/actions/admin/users/action";
 import { changePassword, updateEmail, updateRole, updateUsername } from "@/actions/users/action";
+import { signOut } from "next-auth/react";
 
 interface UserProps {
     user: any;
-    currentUserId: string;   // The ID of the logged-in user
-    currentUserRole: string; // The Role of the logged-in user
+    currentUserId: string;
+    currentUserRole: string;
 }
 
 const DEFAULT_USER_DATA = {
@@ -18,13 +19,10 @@ const DEFAULT_USER_DATA = {
 export default function AccountSettingsPage({ user, currentUserId, currentUserRole }: UserProps) {
     const [userData, setUserData] = useState({ ...DEFAULT_USER_DATA, ...(user || {}) });
 
-    // --- PERMISSION LOGIC ---
     const isEditingSelf = userData.id === currentUserId;
     const isCurrentUserAdmin = currentUserRole === "admin";
-    // They can edit the role IF they are an admin AND they are not editing themselves
     const canEditRole = isCurrentUserAdmin && !isEditingSelf;
 
-    // --- COMBINED STATE: Profile (Username & Role) ---
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [profileData, setProfileData] = useState({
         username: userData.username || "",
@@ -33,13 +31,11 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
     const [isProfileLoading, setIsProfileLoading] = useState(false);
     const [profileMessage, setProfileMessage] = useState({ type: "", text: "" });
 
-    // --- State for Email Form ---
     const [isEditingEmail, setIsEditingEmail] = useState(false);
     const [email, setEmail] = useState(userData.email || "");
     const [isEmailLoading, setIsEmailLoading] = useState(false);
     const [emailMessage, setEmailMessage] = useState({ type: "", text: "" });
 
-    // --- State for Password Form ---
     const [passwords, setPasswords] = useState({
         currentPassword: "",
         newPassword: "",
@@ -58,20 +54,17 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
         }
     }, [user]);
 
-    // --- HANDLERS ---
     const handleProfileUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsProfileLoading(true);
         setProfileMessage({ type: "", text: "" });
 
         try {
-            // 1. Update Username if changed
             if (profileData.username !== userData.username) {
                 const userRes = await updateUsername(user.id, profileData.username);
                 if (userRes?.error) throw new Error(userRes.error);
             }
 
-            // 2. Update Role if changed AND the user actually has permission
             if (profileData.role !== userData.role && canEditRole) {
                 const roleRes = await updateRole(user.id, profileData.role);
                 if (roleRes?.error) throw new Error(roleRes.error);
@@ -129,18 +122,13 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
         }
     };
 
-    // NEW: State for the Danger Modal
     const [isDangerModalOpen, setIsDangerModalOpen] = useState(false);
 
-    // NEW: Handler for the Danger Modal submission
-    // 2. Update the handler function
     const handleDangerAction = async (action: "deactivate" | "delete", password: string) => {
         try {
-            // Call the server action
             const res = await deactivateOrDeleteAccount(user.id, action, password);
 
             if (res.error) {
-                // You can replace this alert with a toast notification if you use something like sonner or react-hot-toast
                 alert(`Error: ${res.error}`);
                 return;
             }
@@ -148,12 +136,7 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
             alert(res.success);
             setIsDangerModalOpen(false);
 
-            // 3. Redirect the user! 
-            // If they are deactivated/deleted, they shouldn't be on the settings page anymore.
-            // You will likely want to sign them out and push them to the login page here.
-            // Example:
-            // await signOut({ callbackUrl: '/login' }); 
-            // OR window.location.href = '/login';
+            await signOut({ callbackUrl: '/login' });
 
         } catch (error: any) {
             alert("An unexpected error occurred.");

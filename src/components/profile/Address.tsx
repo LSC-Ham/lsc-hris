@@ -176,9 +176,6 @@ export function Address({ mode, formData, onSave }: AddressProps) {
     );
 }
 
-// ----------------------------------------------------------------------
-// INTERNAL HELPER COMPONENTS
-// ----------------------------------------------------------------------
 function AddressFormSection({
     data,
     isEditing,
@@ -190,7 +187,6 @@ function AddressFormSection({
     disabled?: boolean;
     onChange: (field: keyof AddressData, value: string) => void;
 }) {
-    // 1. Map Regions exactly using regCode and regionName
     const regionsRaw = useMemo(() => listRegions() || [], []);
     const regions = useMemo(() => regionsRaw.map((r: any) => ({
         label: r.regionName, value: r.regionName, id: r.regCode
@@ -198,7 +194,6 @@ function AddressFormSection({
 
     const selectedRegionCode = useMemo(() => regions.find(r => r.value === data.region)?.id, [data.region, regions]);
 
-    // 2. Map Provinces using provCode, provName, and cityClass for HUC logic
     const provincesRaw = useMemo(() => selectedRegionCode ? listProvinces(selectedRegionCode) : [], [selectedRegionCode]);
     const provinces = useMemo(() => provincesRaw.map((p: any) => ({
         label: p.provName, value: p.provName, id: p.provCode, isHUC: p.cityClass === 'HUC'
@@ -208,7 +203,6 @@ function AddressFormSection({
     const selectedProvinceCode = selectedProvObj?.id;
     const isHUC = selectedProvObj?.isHUC;
 
-    // 3. Map Cities using munCityCode and munCityName
     const citiesRaw = useMemo(() => selectedProvinceCode ? listMuncities(selectedProvinceCode) : [], [selectedProvinceCode]);
     const cities = useMemo(() => citiesRaw.map((c: any) => ({
         label: c.munCityName, value: c.munCityName, id: c.munCityCode
@@ -216,10 +210,8 @@ function AddressFormSection({
 
     const selectedCityCode = useMemo(() => cities.find(c => c.value === data.city)?.id, [data.city, cities]);
 
-    // Apply exact HUC logic from the documentation for Barangays
     const effectiveCityCode = isHUC ? (citiesRaw[0]?.munCityCode || selectedCityCode) : selectedCityCode;
 
-    // 4. Map Barangays using brgyCode, brgyName, and brgyOldName
     const barangaysRaw = useMemo(() => effectiveCityCode ? listBarangays(effectiveCityCode) : [], [effectiveCityCode]);
     const barangays = useMemo(() => barangaysRaw.map((b: any) => ({
         label: b.brgyOldName ? `${b.brgyName} (${b.brgyOldName})` : b.brgyName,
@@ -227,7 +219,6 @@ function AddressFormSection({
         id: b.brgyCode
     })), [barangaysRaw]);
 
-    // Handlers to clear downstream data when parents change
     const handleRegionChange = (e: any) => {
         onChange("region", e.target.value);
         onChange("province", "");
@@ -237,7 +228,6 @@ function AddressFormSection({
 
     const handleProvinceChange = (e: any) => {
         onChange("province", e.target.value);
-        // If it's an HUC with only 1 city option, auto-select it, otherwise clear it
         const newProvCode = provinces.find(p => p.value === e.target.value)?.id;
         const newCitiesRaw = newProvCode ? listMuncities(newProvCode) : [];
         if (provinces.find(p => p.value === e.target.value)?.isHUC && newCitiesRaw.length === 1) {
@@ -308,7 +298,6 @@ function AddressFormSection({
     );
 }
 
-// Updated ProfileField to handle standard `{ label, value, id }` options
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled, options = [] }: any) {
     return (
         <div>

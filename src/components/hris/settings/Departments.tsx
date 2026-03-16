@@ -21,7 +21,6 @@ export default function Departments({ data }: DepartmentsTemplateProps) {
 
     return (
         <div className="space-y-4">
-            {/* 1. ADD NEW DEPARTMENT FORM */}
             <form action={addDepartment} className="flex flex-col sm:flex-row gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <input
                     type="text"
@@ -41,7 +40,6 @@ export default function Departments({ data }: DepartmentsTemplateProps) {
                 </button>
             </form>
 
-            {/* 2. DEPARTMENTS TABLE */}
             <div className="border border-gray-200 rounded-lg overflow-hidden">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
@@ -51,10 +49,9 @@ export default function Departments({ data }: DepartmentsTemplateProps) {
                             <th className="px-4 py-3 font-medium text-gray-700 w-32 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 capitalize">
                         {data.map((dept) => (
                             <tr key={dept.id}>
-                                {/* IF EDITING THIS ROW */}
                                 {editingId === dept.id ? (
                                     <td colSpan={3} className="px-4 py-3">
                                         <form
@@ -71,7 +68,6 @@ export default function Departments({ data }: DepartmentsTemplateProps) {
                                         </form>
                                     </td>
                                 ) : (
-                                    /* NORMAL ROW DISPLAY */
                                     <>
                                         <td className="px-4 py-3 font-medium text-gray-900">{dept.department}</td>
                                         <td className="px-4 py-3 text-gray-500">{dept.description || "—"}</td>

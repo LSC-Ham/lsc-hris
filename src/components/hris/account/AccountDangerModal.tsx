@@ -12,7 +12,6 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm }: Accou
     const [selectedAction, setSelectedAction] = useState<"deactivate" | "delete" | null>(null);
     const [password, setPassword] = useState("");
 
-    // Reset state when closing
     const handleClose = () => {
         setSelectedAction(null);
         setPassword("");
@@ -23,7 +22,6 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm }: Accou
         e.preventDefault();
         if (selectedAction && password) {
             onConfirm(selectedAction, password);
-            // Don't close immediately here; wait for the parent to handle the API call
         }
     };
 
@@ -32,7 +30,6 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm }: Accou
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-                {/* Header */}
                 <div className="p-6 border-b border-gray-100 flex justify-between items-start">
                     <div>
                         <h2 className="text-xl font-bold text-gray-900">Account Management</h2>
@@ -46,12 +43,9 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm }: Accou
                     </button>
                 </div>
 
-                {/* Body */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
 
-                    {/* Action Selection */}
                     <div className="space-y-3">
-                        {/* Deactivate Option */}
                         <label className={`block border rounded-lg p-4 cursor-pointer transition-all ${selectedAction === "deactivate" ? "border-orange-500 bg-orange-50 ring-1 ring-orange-500" : "border-gray-200 hover:bg-gray-50"
                             }`}>
                             <div className="flex items-center gap-3">
@@ -70,7 +64,6 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm }: Accou
                             </div>
                         </label>
 
-                        {/* Delete Option */}
                         <label className={`block border rounded-lg p-4 cursor-pointer transition-all ${selectedAction === "delete" ? "border-red-500 bg-red-50 ring-1 ring-red-500" : "border-gray-200 hover:bg-gray-50"
                             }`}>
                             <div className="flex items-center gap-3">
@@ -90,7 +83,6 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm }: Accou
                         </label>
                     </div>
 
-                    {/* Password Confirmation (Only shows if an action is selected) */}
                     {selectedAction && (
                         <div className="space-y-2 animate-in slide-in-from-top-2 fade-in duration-300">
                             <label className="block text-xs font-semibold text-gray-700 uppercase">
@@ -106,8 +98,7 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm }: Accou
                             />
                         </div>
                     )}
-
-                    {/* Footer Actions */}
+                    
                     <div className="flex gap-3 pt-2">
                         <button
                             type="button"

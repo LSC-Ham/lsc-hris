@@ -139,7 +139,7 @@ export async function main() {
         },
         {
             //user
-            username: "rasino", email: "rasino@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
+            username: "rasino", email: "rasino@lakeshore.edu.ph", password: hashedPassword, role: "user",
             //employee
             id_number: "CL04001", department: "College of Business and Accountancy", position: "Faculty", division: "Academics", hired_at: new Date(),
             //personal information
@@ -156,7 +156,7 @@ export async function main() {
             course_code: "bspsych", acad_level_code: "col", year: "first year", section: "",
         },
         {
-            username: "jbinasoy", email: "jbinasoy@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
+            username: "jbinasoy", email: "jbinasoy@lakeshore.edu.ph", password: hashedPassword, role: "user",
             id_number: "CL04003", department: "College of Psychology", position: "Faculty", division: "Academics", hired_at: new Date(),
             surname: "binasoy", firstname: "juliet", contact_number: "09361428152", birthdate: new Date("07/03/1975"),
             sex: "female", civil_status: "single", nationality: "Philippines",
@@ -168,7 +168,7 @@ export async function main() {
             ],
         },
         {
-            username: "emantala", email: "emantala@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
+            username: "emantala", email: "emantala@lakeshore.edu.ph", password: hashedPassword, role: "user",
             id_number: "CL04004", department: "College of Criminology", position: "Faculty", division: "Academics", hired_at: new Date(),
             surname: "mantala", firstname: "emman", contact_number: "09359683330", birthdate: new Date("08/27/1983"),
             sex: "male", civil_status: "single", nationality: "Philippines",

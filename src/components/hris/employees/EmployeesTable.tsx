@@ -87,7 +87,7 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
                             <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Remarks</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-gray-200 capitalize">
                         {employeesList.length > 0 ? (
                             employeesList.map((emp: any) => (
                                 <tr

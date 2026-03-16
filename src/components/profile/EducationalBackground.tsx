@@ -25,7 +25,7 @@ export interface EducationRecord {
 interface EducationalBackgroundProps {
     mode?: "view",
     formData: EducationRecord[];
-    onSave?: (updatedData: EducationRecord[]) => void; // Changed to onSave and made async
+    onSave?: (updatedData: EducationRecord[]) => void; 
 }
 
 const emptyRecord: EducationRecord = {
@@ -43,7 +43,6 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [draftData, setDraftData] = useState<EducationRecord>(emptyRecord);
 
-    // NEW: Loading state for better UX
     const [isSaving, setIsSaving] = useState(false);
 
     const handleLocalChange = (field: string, value: any) => {
@@ -68,7 +67,6 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
         const updatedRecords = [...formData];
         updatedRecords.splice(index, 1);
 
-        // Await the parent's save function
         if (onSave) {
             await onSave(updatedRecords);
         }
@@ -81,30 +79,26 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
     };
 
     const handleSaveClick = async () => {
-        // Validation check
         if (!draftData.level || !draftData.school) {
             alert("Please fill in the required fields: Level and School.");
             return;
         }
 
-        setIsSaving(true); // Start loading spinner/state
+        setIsSaving(true); 
 
         const updatedRecords = [...formData];
 
         if (editingIndex !== null) {
             updatedRecords[editingIndex] = draftData;
         } else {
-            // Assign a temporary ID if inserting a new record (the database will assign the real one)
             updatedRecords.push({ ...draftData, id: draftData.id || crypto.randomUUID() });
         }
 
-        // Await the parent's server action to finish
         if (onSave) {
 
             await onSave(updatedRecords);
         }
 
-        // Reset UI
         setIsSaving(false);
         setIsFormOpen(false);
         setEditingIndex(null);
@@ -113,7 +107,6 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                 <h1 className="text-xl font-bold text-gray-800 tracking-tight">Educational Background</h1>
 
@@ -131,7 +124,6 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
                 )}
             </div>
 
-            {/* FORM VIEW */}
             {isFormOpen ? (
                 <div className="space-y-6 bg-gray-50/50 p-6 border border-gray-200 rounded-xl shadow-sm">
                     <div className="flex justify-between items-center mb-4">
@@ -180,7 +172,6 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
                     </div>
                 </div>
             ) : (
-                /* CARD VIEW */
                 <div className="space-y-4">
                     {formData.length === 0 ? (
                         <div className="p-8 text-center border border-dashed border-gray-300 rounded-xl bg-gray-50 text-gray-500 text-sm">

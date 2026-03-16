@@ -41,7 +41,6 @@ export default function Divisions({ data }: DivisionsTemplateProps) {
                 </button>
             </form>
 
-            {/* 2. DIVISIONS TABLE */}
             <div className="border border-gray-200 rounded-lg overflow-hidden">
                 <table className="w-full text-left text-sm">
                     <thead className="bg-gray-50 border-b border-gray-200">
@@ -51,10 +50,9 @@ export default function Divisions({ data }: DivisionsTemplateProps) {
                             <th className="px-4 py-3 font-medium text-gray-700 w-32 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
+                    <tbody className="divide-y divide-gray-200 capitalize">
                         {data.map((div) => (
                             <tr key={div.id}>
-                                {/* IF EDITING THIS ROW */}
                                 {editingId === div.id ? (
                                     <td colSpan={3} className="px-4 py-3">
                                         <form

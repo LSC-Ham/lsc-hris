@@ -12,30 +12,26 @@ const phData = countriesArray.find((item: any) => item.iso2 === "PH");
 const rawCities = phData ? phData.cities : [];
 const uniqueSortedCities = Array.from(new Set(rawCities)).sort((a: any, b: any) => a.localeCompare(b));
 
-// 3. Process Nationalities (Extract all country names using countriesArray)
 const rawNationalities = countriesArray.map((item: any) => item.country);
 const uniqueSortedNationalities = Array.from(new Set(rawNationalities)).sort((a: any, b: any) => a.localeCompare(b));
 
 interface PersonalInformationProps {
     mode?: "view" | "create";
     formData: any;
-    onSave?: (data: any) => void; // <--- CHANGE THIS LINE
-    onChange?: (updatedFields: any) => void; // 👈 ADD THIS
+    onSave?: (data: any) => void; 
+    onChange?: (updatedFields: any) => void;
 }
 
 export function PersonalInformation({ mode = "view", formData, onSave, onChange }: PersonalInformationProps) {
     const [isEditing, setIsEditing] = useState(mode === "create");
 
-    // 1. Create a local draft to hold typed text safely
     const [draftData, setDraftData] = useState(formData);
 
-    // 2. Keep the draft fresh if parent data updates
     useEffect(() => {
         setDraftData(formData);
     }, [formData]);
 
 
-    // --- Formatters ---
     const formatDate = (dateString: Date) => {
         if (!dateString) return "Present";
         return new Date(dateString).toLocaleDateString('en-US', {
@@ -43,7 +39,6 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
         });
     };
 
-    // 3. Local handler: updates the draft, NOT the parent
     const handleLocalChange = (field: string, value: any) => {
         setDraftData((prev: any) => ({ ...prev, [field]: value }));
 
@@ -52,15 +47,11 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
         }
     };
 
-    // 4. Cancel: Throw away the typed text and reset to original
     const handleCancel = () => {
         setDraftData(formData);
         setIsEditing(false);
     };
-
-    // 5. Save: Send the draft to the parent's handleInputChange function
     const handleSaveClick = () => {
-        // Loop through the draft and update the parent only for changed fields
         Object.keys(draftData).forEach((key) => {
             if (draftData[key] !== formData[key]) {
             }
@@ -68,13 +59,12 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
 
         setIsEditing(false);
         if (onSave) {
-            onSave(draftData); // <--- REMOVE setTimeout AND PASS draftData
+            onSave(draftData); 
         }
     };
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                 <h1 className="text-xl font-bold text-gray-800 tracking-tight">Personal Information</h1>
 
@@ -89,7 +79,6 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
                 )}
             </div>
 
-            {/* Form Fields - Now wired to 'draftData' and 'handleLocalChange' */}
             <div className="space-y-6">
                 <ProfileField label="Surname" value={draftData.surname} isEditing={isEditing} placeholder="DELA CRUZ" onChange={(e: any) => handleLocalChange("surname", e.target.value)} required />
                 <ProfileField label="First Name" value={draftData.firstname} isEditing={isEditing} placeholder="JUAN" onChange={(e: any) => handleLocalChange("firstname", e.target.value)} required />
@@ -129,7 +118,6 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
                 </div>
             </div>
 
-            {/* Save Button */}
             {mode !== "create" && isEditing && (
                 <div className="flex justify-end pt-6 border-t border-gray-100 mt-6">
                     <button
@@ -144,10 +132,6 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
         </div>
     );
 }
-
-// ----------------------------------------------------------------------
-// HELPER COMPONENTS
-// ----------------------------------------------------------------------
 
 function ProfileField({ label, value, isEditing, type = "text", placeholder, onChange, required, disabled }: any) {
     return (

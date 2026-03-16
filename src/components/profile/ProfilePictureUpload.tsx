@@ -10,27 +10,23 @@ interface ProfilePictureProps {
     userId: string;
     initialImage?: string | null;
     size?: 'sm' | 'lg';
-    isEditable?: boolean; // ✨ 1. Added this new prop
+    isEditable?: boolean; 
 }
 
 export default function ProfilePictureUpload({
     userId,
     initialImage,
     size = 'lg',
-    isEditable = true // ✨ 2. Default is true, so it doesn't break your existing editable pages
+    isEditable = true 
 }: ProfilePictureProps) {
 
-    // ✨ HERE IS THE EDIT: Format the image URL for the API
     const [imagePreview, setImagePreview] = useState<string | null>(() => {
         if (!initialImage) return null;
 
-        // If it's a blob from the cropper (unsaved), use it directly
         if (initialImage.startsWith('blob:') || initialImage.startsWith('http')) {
             return initialImage;
         }
 
-        // FORCE IT TO USE THE API ROUTE
-        // initialImage is your DB path like "/uploads/profile-xxx.jpg"
         return `/api/profile_picture?fileName=${initialImage}`;
     });
 
@@ -57,7 +53,7 @@ export default function ProfilePictureUpload({
         if (file) {
             const previewUrl = URL.createObjectURL(file);
             setRawImage(previewUrl);
-            e.target.value = ''; // Reset input
+            e.target.value = ''; 
         }
     };
 
@@ -140,7 +136,6 @@ export default function ProfilePictureUpload({
         }
     };
 
-    // ✨ 3. Extracted the inner image/SVG so we don't repeat code
     const AvatarImage = (
         <>
             {imagePreview ? (
@@ -157,7 +152,6 @@ export default function ProfilePictureUpload({
     return (
         <div className="flex flex-col items-center">
 
-            {/* ✨ 4. Check if it should be interactive or not */}
             {isEditable ? (
                 <button
                     onClick={() => setShowOptions(true)}
@@ -175,7 +169,6 @@ export default function ProfilePictureUpload({
                 </div>
             )}
 
-            {/* HIDDEN FILE INPUT */}
             <input
                 type="file"
                 accept="image/*"
@@ -184,7 +177,6 @@ export default function ProfilePictureUpload({
                 onChange={handleImageChange}
             />
 
-            {/* OPTIONS MENU MODAL */}
             {showOptions && isEditable && (
                 <div
                     className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 transition-opacity"
@@ -227,7 +219,6 @@ export default function ProfilePictureUpload({
                 </div>
             )}
 
-            {/* THE CROPPER MODAL */}
             {rawImage && isEditable && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 p-4">
                     <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md flex flex-col items-center">

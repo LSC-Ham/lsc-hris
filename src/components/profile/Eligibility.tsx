@@ -93,7 +93,6 @@ export function Eligibility({ mode, formData = [], onSave }: EligibilityProps) {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                 <h1 className="text-xl font-bold text-gray-800 tracking-tight">Eligibility</h1>
 
@@ -111,7 +110,6 @@ export function Eligibility({ mode, formData = [], onSave }: EligibilityProps) {
                 )}
             </div>
 
-            {/* FORM VIEW */}
             {isFormOpen ? (
                 <div className="space-y-6 bg-gray-50/50 p-6 border border-gray-200 rounded-xl shadow-sm">
                     <div className="flex justify-between items-center mb-4">
@@ -195,7 +193,6 @@ export function Eligibility({ mode, formData = [], onSave }: EligibilityProps) {
                     </div>
                 </div>
             ) : (
-                /* CARD VIEW */
                 <div className="space-y-4">
                     {formData.length === 0 ? (
                         <div className="p-8 text-center border border-dashed border-gray-300 rounded-xl bg-gray-50 text-gray-500 text-sm">

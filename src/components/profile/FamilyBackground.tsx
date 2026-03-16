@@ -20,19 +20,16 @@ interface FamilyBackgroundProps {
         father: FamilyMemberData;
         mother: FamilyMemberData;
     };
-    // 1. Removed onChange, updated onSave to accept the full payload
     onSave?: (data: { guardian: FamilyMemberData; father: FamilyMemberData; mother: FamilyMemberData }) => void;
 }
 
 export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundProps) {
-    // Separate edit states for each family member type
     const [editMode, setEditMode] = useState({
         guardian: false,
         father: false,
         mother: false
     });
 
-    // Local draft state
     const [draftData, setDraftData] = useState(formData);
 
     useEffect(() => {
@@ -50,7 +47,6 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
     };
 
     const handleCancel = (type: "guardian" | "father" | "mother") => {
-        // Revert only the specific family member being cancelled
         setDraftData((prev) => ({
             ...prev,
             [type]: formData[type]
@@ -58,10 +54,8 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
         setEditMode((prev) => ({ ...prev, [type]: false }));
     };
 
-    // 2. Updated Save Action to pass draftData directly
     const handleSaveClick = (type: "guardian" | "father" | "mother") => {
         setEditMode((prev) => ({ ...prev, [type]: false }));
-        // Pass the whole draft up to the parent
         if (onSave) {
             onSave(draftData);
         }
@@ -185,9 +179,6 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
     );
 }
 
-// ----------------------------------------------------------------------
-// INTERNAL HELPER COMPONENTS
-// ----------------------------------------------------------------------
 function FamilyFormSection({
     data,
     isEditing,
@@ -254,7 +245,7 @@ function FamilyFormSection({
                 />
                 <ProfileField
                     label="Contact No."
-                    value={data.contact_no} // FIX: Changed from data.employer to data.contact_no
+                    value={data.contact_no} 
                     isEditing={isEditing}
                     placeholder="09XX-XXX-XXXX"
                     onChange={(e: any) => onChange("contact_no", e.target.value)}

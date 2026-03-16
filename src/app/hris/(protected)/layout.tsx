@@ -3,12 +3,11 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/hris/Sidebar";
 import { LogoutButton } from "@/components/hris/auth/LogoutButton";
-import { prisma } from "@/lib/prisma"; // ✨ Added Prisma import
+import { prisma } from "@/lib/prisma";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const session = await getServerSession(authOptions);
 
-    // Single, clean check for session existence
     if (!session || !session.user) {
         redirect("/hris/login");
     }

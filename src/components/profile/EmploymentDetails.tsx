@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 
 const POSITION_STATUSES = ["Full-Time", "Part-Time"];
-const EMPLOYMENT_STATUSES = ["Probationary", "Regular", "Resigned"];
+const EMPLOYMENT_STATUSES = ["Probationary", "Regular", "Resigned", "Terminated"];
 
 interface EmploymentDetailsProps {
     mode?: "view" | "update" | "create";
@@ -207,7 +207,7 @@ export function EmploymentDetails({
                     />
                 </div>
 
-                <div className="border-t border-gray-100 pt-6 space-y-4">
+                <div className="border-t border-gray-100 pt-6 space-y-4 capitalize">
                     <label className="block text-xs font-semibold text-gray-500 uppercase mb-4">
                         Assigned Positions & History
                     </label>
