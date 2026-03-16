@@ -1,18 +1,18 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; 
-import { authOptions } from "@/lib/auth"; 
+import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-export async function generateEmployeeID() {
+export async function generateEmployeeID(division: string) {
     try {
         const count = await prisma.employees.count();
 
         const nextId = count + 1;
 
-        return nextId.toString().padStart(4, '0');
+        return division.substring(0,2).toLowerCase() + nextId.toString().padStart(4, '0');
     } catch (error) {
         console.error("Error generating ID:", error);
         return "";
@@ -56,10 +56,10 @@ export async function getEmployeeDetails(employeeId: string) {
             division: employee.divisions?.division || "",
             department: employee.departments?.department || "",
             govt_ids: employee.government_ids,
-            ...flatGovIds, 
+            ...flatGovIds,
 
             positions: employee.positions.map(({ positions, ...record }) => ({
-                ...record, 
+                ...record,
                 position_id: positions.id,
                 position: positions.position,
             })),
@@ -103,12 +103,12 @@ export async function updateEmploymentDetails(employeeId: string, formData: any)
                     positions_id: posId,
                     status: p.status,
                     description: p.description,
-                    is_active: Boolean(p.is_active), 
+                    is_active: Boolean(p.is_active),
                     start_at: p.start_at ? new Date(p.start_at) : null,
                     end_at: p.end_at ? new Date(p.end_at) : null,
                 };
             })
-            .filter(Boolean); 
+            .filter(Boolean);
 
         const govIdInserts: any[] = [];
 

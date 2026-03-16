@@ -49,11 +49,6 @@ export default function Page() {
 
     useEffect(() => {
         const loadInitialData = async () => {
-            const autoId = await generateEmployeeID();
-            if (autoId) {
-                setFormData(prev => ({ ...prev, id_number: autoId }));
-            }
-
             try {
                 const [fetchedDepts, fetchedDivs, fetchedPos] = await Promise.all([
                     (await getDepartments()).map((dept) => dept.department),
@@ -73,15 +68,19 @@ export default function Page() {
     }, []);
 
     useEffect(() => {
-        const fetchAutoId = async () => {
-            const autoId = await generateEmployeeID();
-            if (autoId) {
-                setFormData(prev => ({ ...prev, id_number: autoId }));
+        const fetchDynamicId = async () => {
+            if (formData.division) {
+                const dynamicId = await generateEmployeeID(formData.division);
+                if (dynamicId) {
+                    setFormData((prev) => ({ ...prev, id_number: dynamicId }));
+                }
+            } else {
+                setFormData((prev) => ({ ...prev, id_number: "" }));
             }
         };
 
-        fetchAutoId();
-    }, []);
+        fetchDynamicId();
+    }, [formData.division]); 
 
     const handleFormUpdate = (newData: any) => {
         setFormData(prev => ({ ...prev, ...newData }));
@@ -104,6 +103,7 @@ export default function Page() {
             } else {
                 alert("Employee Created Successfully!");
                 router.push("./employees"); 
+                router.refresh(); 
             }
         } catch (error) {
             console.error("Error creating employee:", error);
