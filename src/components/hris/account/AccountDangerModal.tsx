@@ -6,7 +6,7 @@ interface AccountDangerModalProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: (action: "deactivate" | "delete", confirmText: string) => void;
-    targetUsername: string; // NEW: We need to know who we are deleting
+    targetUsername: string;
 }
 
 export default function AccountDangerModal({ isOpen, onClose, onConfirm, targetUsername }: AccountDangerModalProps) {
@@ -28,7 +28,6 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm, targetU
 
     if (!isOpen) return null;
 
-    // GitHub style check: Button is disabled until the text matches exactly
     const isTextMatching = confirmText === targetUsername;
 
     return (
@@ -46,7 +45,6 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm, targetU
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     <div className="space-y-3">
-                        {/* DEACTIVATE OPTION */}
                         <label className={`block border rounded-lg p-4 cursor-pointer transition-all ${selectedAction === "deactivate" ? "border-orange-500 bg-orange-50 ring-1 ring-orange-500" : "border-gray-200 hover:bg-gray-50"}`}>
                             <div className="flex items-center gap-3">
                                 <input type="radio" name="account_action" value="deactivate" checked={selectedAction === "deactivate"} onChange={() => setSelectedAction("deactivate")} className="w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300" />
@@ -57,7 +55,6 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm, targetU
                             </div>
                         </label>
 
-                        {/* DELETE OPTION */}
                         <label className={`block border rounded-lg p-4 cursor-pointer transition-all ${selectedAction === "delete" ? "border-red-500 bg-red-50 ring-1 ring-red-500" : "border-gray-200 hover:bg-gray-50"}`}>
                             <div className="flex items-center gap-3">
                                 <input type="radio" name="account_action" value="delete" checked={selectedAction === "delete"} onChange={() => setSelectedAction("delete")} className="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300" />
@@ -69,7 +66,6 @@ export default function AccountDangerModal({ isOpen, onClose, onConfirm, targetU
                         </label>
                     </div>
 
-                    {/* GITHUB STYLE CONFIRMATION INPUT */}
                     {selectedAction && (
                         <div className="space-y-2 animate-in slide-in-from-top-2 fade-in duration-300 bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <label className="block text-sm text-gray-700">

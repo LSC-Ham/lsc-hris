@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import AccountDangerModal from "./AccountDangerModal";
 import { deactivateOrDeleteAccount } from "@/actions/admin/users/action";
 import { changePassword, updateEmail, updateRole, updateUsername } from "@/actions/users/action";
-import { signOut } from "next-auth/react";
+import { toast } from "sonner";
 
 interface UserProps {
     user: any;
@@ -126,22 +126,21 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
 
     const handleDangerAction = async (action: "deactivate" | "delete", confirmText: string) => {
         try {
-            // Pass the target ID, action, Admin ID, and the typed confirmation text
             const res = await deactivateOrDeleteAccount(user.id, action, currentUserId, confirmText);
 
             if (res.error) {
-                alert(`Error: ${res.error}`);
+                toast.error(`Error: ${res.error}`);
                 return;
             }
 
-            alert(res.success);
+            toast.success(res.success);
             setIsDangerModalOpen(false);
             // await signOut({ callbackUrl: '/hris/login' }); 
 
             window.location.href = '/admin/users';
 
         } catch (error: any) {
-            alert("An unexpected error occurred.");
+            toast.error("An unexpected error occurred.");
         }
     };
 

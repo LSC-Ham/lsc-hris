@@ -82,7 +82,7 @@ export async function main() {
             government_ids: [
                 { id_label: "SSS Number", id_number: "04-1995682-6" },
                 { id_label: "Philhealth Number", id_number: "08-050785996-1" },
-                { id_label: "Pag-ibig Number", id_number:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     "102001641135" },
+                { id_label: "Pag-ibig Number", id_number: "102001641135" },
                 { id_label: "TIN Number", id_number: "261-861-691" },
             ],
         },
@@ -158,7 +158,6 @@ export async function main() {
             const divisionStr = data.division || "Unassigned";
             const positionStr = data.position || "Unassigned";
 
-            // Upsert the lookup tables
             const department = await prisma.departments.upsert({
                 where: { department: deptStr }, update: {}, create: { department: deptStr },
             });
@@ -172,7 +171,7 @@ export async function main() {
                 update: {},
                 create: {
                     position: positionStr,
-                    departments_id: department.id 
+                    departments_id: department.id
                 },
             });
 
@@ -186,7 +185,7 @@ export async function main() {
                         create: {
                             positions_id: position.id,
                             status: "Full-Time",
-                            is_active: true, 
+                            is_active: true,
                             start_at: new Date(),
                         }
                     },

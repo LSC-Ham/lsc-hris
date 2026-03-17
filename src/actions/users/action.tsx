@@ -116,7 +116,7 @@ export async function changePassword(userId: string, currentPassword: string, ne
             },
         });
 
-        revalidatePath("/hris");
+        revalidatePath("/hris/dashboard");
 
         return { success: true };
     } catch (error) {
@@ -144,7 +144,7 @@ export async function setupFirstPassword(newPassword: string) {
             where: { id: userId },
             data: {
                 password: hashedPassword,
-                password_changed: true, // This unlocks their account!
+                password_changed: true, 
             },
         });
 
