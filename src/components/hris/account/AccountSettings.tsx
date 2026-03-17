@@ -124,9 +124,10 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
 
     const [isDangerModalOpen, setIsDangerModalOpen] = useState(false);
 
-    const handleDangerAction = async (action: "deactivate" | "delete", password: string) => {
+    const handleDangerAction = async (action: "deactivate" | "delete", confirmText: string) => {
         try {
-            const res = await deactivateOrDeleteAccount(user.id, action, password);
+            // Pass the target ID, action, Admin ID, and the typed confirmation text
+            const res = await deactivateOrDeleteAccount(user.id, action, currentUserId, confirmText);
 
             if (res.error) {
                 alert(`Error: ${res.error}`);
@@ -135,8 +136,9 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
 
             alert(res.success);
             setIsDangerModalOpen(false);
+            // await signOut({ callbackUrl: '/hris/login' }); 
 
-            await signOut({ callbackUrl: '/login' });
+            window.location.href = '/admin/users';
 
         } catch (error: any) {
             alert("An unexpected error occurred.");
@@ -327,6 +329,7 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
                 isOpen={isDangerModalOpen}
                 onClose={() => setIsDangerModalOpen(false)}
                 onConfirm={handleDangerAction}
+                targetUsername={userData.username}
             />
         </div>
     );

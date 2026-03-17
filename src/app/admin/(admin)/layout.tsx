@@ -28,6 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         where: { id: userId },
         select: {
             profile_picture: true,
+            password_changed: true,
             biography: {
                 select: {
                     personal_information: {
@@ -37,8 +38,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                     }
                 }
             }
-        } // Only grab what we need for performance
+        }
     });
+
+
+    if (userData && userData.password_changed === false) {
+        redirect("/hris/change-password");
+    }
 
     return (
         <main className="flex min-h-screen bg-slate-50">
