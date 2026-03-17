@@ -1,9 +1,13 @@
 "use server";
 
-// Add bcrypt import if you don't have it
 import bcrypt from "bcrypt";
-import { prisma } from "@/lib/prisma"; // Adjust this import based on your setup
+import crypto from "crypto"; 
+import { prisma } from "@/lib/prisma"; 
 import { revalidatePath } from "next/cache";
+
+function generateTempPassword() {
+    return crypto.randomBytes(4).toString('hex');
+}
 
 export async function createEmployee(data: any) {
     try {
@@ -19,22 +23,19 @@ export async function createEmployee(data: any) {
             return { error: "Invalid Division or Department selected." };
         }
 
-        // Generate the temporary password
-        const rawPassword = "lakeshore123";
+        const rawPassword = generateTempPassword();
         const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
         const result = await prisma.$transaction(async (tx) => {
-            // 1. Create User with Username and Email
             const newUser = await tx.user.create({
                 data: {
                     username: data.id_number,
-                    email: data.email || null, // Ensure email is saved to the User model
+                    email: data.email || null,
                     password: hashedPassword,
                     password_changed: false,
                 }
             });
 
-            // 2. Create Biography and Employee (Your existing logic)
             const biographyRecord = await tx.biography.create({
                 data: {
                     users_id: newUser.id,
@@ -59,7 +60,7 @@ export async function createEmployee(data: any) {
                             civil_status: data.civil_status,
                             telephone_no: data.telephone_no,
                             mobile_no: data.mobile_no,
-                            email: data.email, // Kept here as well based on your previous schema
+                            email: data.email,
                             nationality: data.nationality,
                             height: data.height,
                             weight: data.weight,
@@ -73,7 +74,6 @@ export async function createEmployee(data: any) {
             const realEmployeeId = biographyRecord.employees?.id;
             if (!realEmployeeId) throw new Error("Failed to create the employee relation.");
 
-            // 3. Handle Positions (Your existing logic)
             const positionNames = data.positions?.map((p: any) => p.position) || [];
             const foundPositions = await tx.positions.findMany({
                 where: { position: { in: positionNames } },
@@ -100,7 +100,6 @@ export async function createEmployee(data: any) {
                 await tx.employees_positions.createMany({ data: positionInserts });
             }
 
-            // 4. Handle Gov IDs (Your existing logic)
             const govIdInserts: any[] = [];
             if (data.gsis_no) govIdInserts.push({ id_label: "GSIS No.", id_number: data.gsis_no, employees_id: realEmployeeId });
             if (data.pagibig_no) govIdInserts.push({ id_label: "Pag-IBIG No.", id_number: data.pagibig_no, employees_id: realEmployeeId });
@@ -120,18 +119,18 @@ export async function createEmployee(data: any) {
             };
         });
 
-        revalidatePath("/employees");
+        revalidatePath("/hris/employees");
 
         return {
             success: true,
             id: result.id,
             username: result.username,
             email: result.email,
-            tempPassword: rawPassword
+            tempPassword: rawPassword 
         };
 
     } catch (error) {
         console.error("Create Employee Error:", error);
-        return { error: "Failed to create employee account." };
+        return { error: "Failed to create employee account. Please check your inputs and try again." };
     }
 }

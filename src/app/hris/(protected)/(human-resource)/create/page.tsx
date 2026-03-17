@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { EmploymentDetails } from "@/components/profile/EmploymentDetails";
 import { PersonalInformation } from "@/components/profile/PersonalInformation";
+import { PrintableSlip } from "@/components/profile/PrintableSlip"; 
 
 import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";
@@ -12,47 +13,30 @@ import { generateEmployeeID } from "@/actions/employees/employment_details/actio
 import { createEmployee } from "@/actions/employees/users/action";
 
 import { toast } from "sonner";
-
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 export default function Page() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+    const [createdCredentials, setCreatedCredentials] = useState<{
+        name: string;
+        username: string;
+        email: string;
+        password?: string;
+    } | null>(null);
 
     const [departments, setDepartments] = useState<string[]>([]);
     const [divisions, setDivisions] = useState<string[]>([]);
     const [positions, setPositions] = useState<string[]>([]);
 
     const [formData, setFormData] = useState({
-        id_number: "",
-        hired_at: new Date(),
-        division: "",
-        department: "",
-        positions: [],
-        gsis_no: "",
-        pagibig_no: "",
-        philhealth_no: "",
-        sss_no: "",
-        tin_no: "",
-        agency_no: "",
-
-        firstname: "",
-        surname: "",
-        middlename: "",
-        extension: "",
-        birthdate: "",
-        birthplace: "",
-        sex: "",
-        civil_status: "",
-        telephone_no: "",
-        mobile_no: "",
-        email: "",
-        nationality: "",
-        height: "",
-        weight: "",
-        blood_type: "",
+        id_number: "", hired_at: new Date(), division: "", department: "", positions: [],
+        gsis_no: "", pagibig_no: "", philhealth_no: "", sss_no: "", tin_no: "", agency_no: "",
+        firstname: "", surname: "", middlename: "", extension: "", birthdate: "",
+        birthplace: "", sex: "", civil_status: "", telephone_no: "", mobile_no: "",
+        email: "", nationality: "", height: "", weight: "", blood_type: "",
     });
 
     useEffect(() => {
@@ -63,7 +47,6 @@ export default function Page() {
                     (await getDivisions()).map((div) => div.division),
                     (await getPositions()).map((pos) => pos.position),
                 ]);
-
                 setDepartments(fetchedDepts || []);
                 setDivisions(fetchedDivs || []);
                 setPositions(fetchedPos || []);
@@ -71,7 +54,6 @@ export default function Page() {
                 console.error("Failed to load dropdown options:", error);
             }
         };
-
         loadInitialData();
     }, []);
 
@@ -86,7 +68,6 @@ export default function Page() {
                 setFormData((prev) => ({ ...prev, id_number: "" }));
             }
         };
-
         fetchDynamicId();
     }, [formData.division]);
 
@@ -99,7 +80,6 @@ export default function Page() {
             toast.error("Please fill in the required fields (ID, Surname, First Name).");
             return;
         }
-
         setShowConfirmModal(true);
     };
 
@@ -116,14 +96,12 @@ export default function Page() {
                 toast.success("Employee Created Successfully!");
                 setShowConfirmModal(false);
 
-                const params = new URLSearchParams({
+                setCreatedCredentials({
                     name: `${formData.firstname} ${formData.surname}`.trim(),
                     username: result.username || formData.id_number,
                     email: result.email || formData.email || "N/A",
-                    password: result.tempPassword || "lakeshore123"
+                    password: result.tempPassword
                 });
-
-                router.push(`/hris/create/success?${params.toString()}`);
             }
         } catch (error) {
             console.error("Error creating employee:", error);
@@ -134,16 +112,24 @@ export default function Page() {
         }
     };
 
+    if (createdCredentials) {
+        return (
+            <PrintableSlip
+                name={createdCredentials.name}
+                username={createdCredentials.username}
+                email={createdCredentials.email}
+                password={createdCredentials.password}
+                onClose={() => router.push("/hris/employees")}
+            />
+        );
+    }
+
     return (
         <div className="space-y-6 pb-12 relative">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
-                        Create New Employee
-                    </h1>
-                    <p className="text-sm text-gray-500">
-                        Please provide the basic identity details to initialize the profile.
-                    </p>
+                    <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Create New Employee</h1>
+                    <p className="text-sm text-gray-500">Please provide the basic identity details to initialize the profile.</p>
                 </div>
             </div>
 
@@ -156,7 +142,6 @@ export default function Page() {
                         divisions={divisions}
                         departments={departments}
                         availablePositions={positions}
-
                     />
                 </div>
 

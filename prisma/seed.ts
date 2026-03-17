@@ -82,7 +82,7 @@ export async function main() {
             government_ids: [
                 { id_label: "SSS Number", id_number: "04-1995682-6" },
                 { id_label: "Philhealth Number", id_number: "08-050785996-1" },
-                { id_label: "Pag-ibig Number", id_number: "102001641135" },
+                { id_label: "Pag-ibig Number", id_number:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     "102001641135" },
                 { id_label: "TIN Number", id_number: "261-861-691" },
             ],
         },
@@ -147,16 +147,12 @@ export async function main() {
         },
     ];
 
-    // ==========================================
-    // EXECUTE USER SEEDING
-    // ==========================================
     console.log(`Start employing and seeding users...`);
 
     for (const data of seed) {
         const isEmployee = Boolean(data.id_number && data.id_number.trim() !== "");
         let employeePayload = undefined;
 
-        // --- HANDLE EMPLOYEE LOGIC ---
         if (isEmployee) {
             const deptStr = data.department || "Unassigned";
             const divisionStr = data.division || "Unassigned";
@@ -176,11 +172,10 @@ export async function main() {
                 update: {},
                 create: {
                     position: positionStr,
-                    departments_id: department.id // Automatically link position to department 
+                    departments_id: department.id 
                 },
             });
 
-            // Build the nested payload for the `employees` table
             employeePayload = {
                 create: {
                     id_number: data.id_number,
@@ -191,7 +186,7 @@ export async function main() {
                         create: {
                             positions_id: position.id,
                             status: "Full-Time",
-                            is_active: true, // Mark this position as active
+                            is_active: true, 
                             start_at: new Date(),
                         }
                     },
@@ -202,7 +197,6 @@ export async function main() {
             };
         }
 
-        // --- UPSERT THE MASTER USER ---
         const user = await prisma.user.upsert({
             where: { username: data.username },
             update: {},
