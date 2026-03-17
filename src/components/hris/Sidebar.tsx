@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import ProfilePictureUpload from "../profile/ProfilePictureUpload";
 import Image from "next/image";
 
-// 1. Add idNumber to your props interface
 interface SidebarProps {
     userRole: string;
     userId: string;
@@ -26,7 +25,6 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
 
     const isAdminActive = pathname.startsWith("/admin");
 
-    // 2. MOVE navItems INSIDE the component so it can use the idNumber prop
     const navItems = [
         {
             name: "Dashboard",
@@ -61,7 +59,6 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
         { type: "label", name: "ACCOUNTS" },
         {
             name: "Profile",
-            // 3. ✨ INJECT IT HERE ✨
             href: `/hris/${idNumber}`,
             icon: (isActive: boolean) => (
                 <svg className={`w-5 h-5 ${isActive ? "text-[#1a6b36]" : "text-gray-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -83,7 +80,6 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
 
     return (
         <>
-            {/* 1. MOBILE HEADER & HAMBURGER */}
             <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-40 flex items-center px-4 gap-2">
                 <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-md hover:bg-gray-100 focus:outline-none">
                     <svg className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -95,15 +91,12 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                 </h2>
             </div>
 
-            {/* 2. OVERLAY */}
             {isOpen && (
                 <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setIsOpen(false)} />
             )}
 
-            {/* 3. SIDEBAR CONTAINER */}
             <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:sticky md:top-0 md:h-screen md:min-w-64 flex flex-col`}>
 
-                {/* Logo */}
                 <div className="h-16 flex items-center px-6 border-b border-gray-100">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3">
                         <div className="relative w-8 h-8">
@@ -113,7 +106,6 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                     <span className="font-bold text-xl text-gray-800 tracking-tight">LSC HRIS</span>
                 </div>
 
-                {/* MAIN SCROLLING NAVIGATION */}
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {navItems.map((item, index) => {
                         if (item.type === "label") {
@@ -139,7 +131,6 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                     })}
                 </nav>
 
-                {/* ✨ ADMIN PANEL PINNED ABOVE FOOTER */}
                 {userRole === "admin" && (
                     <div className="px-4 py-2 border-t border-gray-50">
                         <Link
@@ -156,7 +147,6 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                     </div>
                 )}
 
-                {/* FOOTER */}
                 <div className="p-4 border-t border-gray-100">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold border border-gray-200">
