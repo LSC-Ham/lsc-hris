@@ -1,4 +1,4 @@
-// src/components/hris/auth/ChangePasswordForm.tsx
+// src\app\hris\change-password\ChangePasswordForm.tsx
 "use client";
 
 import { useState } from "react";

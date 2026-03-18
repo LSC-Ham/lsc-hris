@@ -1,9 +1,9 @@
-// src/app/hris/change-password/page.tsx
+// src\app\hris\change-password\page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import ChangePasswordForm from "@/components/hris/auth/ChangePasswordForm";
+import ChangePasswordForm from "@/app/hris/change-password/ChangePasswordForm";
 
 export default async function ChangePasswordPage() {
     const session = await getServerSession(authOptions);

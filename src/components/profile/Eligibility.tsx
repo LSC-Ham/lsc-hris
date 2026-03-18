@@ -50,7 +50,6 @@ export function Eligibility({ mode, formData = [], onSave }: EligibilityProps) {
     };
 
     const handleDeleteClick = async (index: number) => {
-        if (!window.confirm("Are you sure you want to remove this eligibility record?")) return;
         const updatedRecords = [...formData];
         updatedRecords.splice(index, 1);
         if (onSave) {

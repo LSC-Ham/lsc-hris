@@ -20,7 +20,7 @@ import { updateWorkExperience } from "@/actions/employees/work_experience/action
 import { deleteEmployee } from "@/actions/employees/action";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ConfirmModal } from "@/components/ui/ConfirmModal"; // Make sure this path is correct!
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface EmployeePageProps {
     role: null | "moderator";
@@ -76,7 +76,6 @@ const DEFAULT_EMPLOYMENT_DATA = {
     agency_no: ""
 };
 
-// Define a type for the pending action to keep TypeScript happy
 interface PendingAction {
     actionFn: Function;
     stateSetter: Function | null;
@@ -112,7 +111,6 @@ export default function EmployeePage({
     const [personalData, setPersonalData] = useState({ ...DEFAULT_PERSONAL_DATA, ...(personal_information || {}) });
     const [employmentData, setEmploymentData] = useState({ ...DEFAULT_EMPLOYMENT_DATA, ...(employment_details || {}) });
 
-    // --- MODAL STATE ---
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
@@ -177,20 +175,16 @@ export default function EmployeePage({
     const [addressData, setAddressData] = useState(buildAddressState());
     const [familyData, setFamilyData] = useState(buildFamilyState());
 
-    // --- REFACTORED handleAction ---
-    // Instead of executing the save immediately, we stage it and open the modal
     const handleAction = (actionFn: Function, stateSetter: Function, data: any, successMsg: string, actionName: string) => {
         setPendingAction({ actionFn, stateSetter, data, successMsg, actionName });
         setIsModalOpen(true);
     };
 
-    // --- EXECUTE SAVED ACTION ---
     const confirmExecuteAction = async () => {
         if (!pendingAction) return;
         setIsSaving(true);
 
         try {
-            // Handle Delete Logic
             if (pendingAction.isDelete) {
                 const result = await pendingAction.actionFn();
                 if (result.success) {
@@ -199,12 +193,11 @@ export default function EmployeePage({
                 } else {
                     toast.error("Error: " + result.error);
                 }
-                return; // Exit early since we route away
+                return;
             }
 
-            // Handle Standard Save Logic
             if (pendingAction.stateSetter) {
-                pendingAction.stateSetter(pendingAction.data); // Optimistic UI update
+                pendingAction.stateSetter(pendingAction.data);
             }
 
             const result = await pendingAction.actionFn(pendingAction.data);
@@ -318,7 +311,6 @@ export default function EmployeePage({
         );
     };
 
-    // --- STAGE DELETE ACTION ---
     const handleDeleteEmployeeClick = () => {
         setPendingAction({
             actionFn: () => deleteEmployee(employmentData.id_number),
@@ -396,9 +388,9 @@ export default function EmployeePage({
                 );
             default:
                 return (
-                    <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-100 rounded-xl">
-                        <h3 className="text-gray-900 font-medium">Coming Soon</h3>
-                        <p className="text-gray-500 text-sm mt-1">The {activeTab} form is under construction.</p>
+                    <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-xl transition-colors duration-300">
+                        <h3 className="text-gray-900 dark:text-zinc-100 font-medium">Coming Soon</h3>
+                        <p className="text-gray-500 dark:text-zinc-400 text-sm mt-1">The {activeTab} form is under construction.</p>
                     </div>
                 );
         }
@@ -420,20 +412,19 @@ export default function EmployeePage({
 
     return (
         <div className="space-y-6">
-            {/* PAGE HEADER */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight transition-colors">
                         {role === null ? "My Profile" : "Employee Profile"}
                     </h1>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-zinc-400 transition-colors">
                         {role === null ? "Manage your personal data and employment records." : "View and manage employee records."}
                     </p>
                 </div>
                 {role === "moderator" && (
                     <button
                         onClick={handleDeleteEmployeeClick}
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
                     >
                         Delete Employee
                     </button>
@@ -442,39 +433,36 @@ export default function EmployeePage({
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
                 <div className="md:col-span-4 lg:col-span-3 space-y-6">
-                    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
+                    <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm flex flex-col items-center text-center transition-colors duration-300">
                         <ProfilePictureUpload
                             userId={userData.id}
                             initialImage={userData.profile_picture}
                             size="lg"
                         />
-                        <h2 className="text-lg font-bold text-gray-800 capitalize">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 capitalize transition-colors">
                             {personalData.firstname} {personalData.surname}
                         </h2>
-                        <p className="text-xs text-gray-500 mb-1">
+                        <p className="text-xs text-gray-500 dark:text-zinc-400 mb-1 transition-colors">
                             {employmentData.department || "No Department Set"}
                         </p>
                     </div>
 
-                    {/* Navigation Menu */}
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden md:p-0">
+                    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden md:p-0 transition-colors duration-300">
 
-                        {/* 📱 MOBILE DROPDOWN */}
                         <div className="md:hidden">
                             <select
                                 value={activeTab}
                                 onChange={(e) => setActiveTab(e.target.value)}
-                                className="block w-full rounded-lg border-gray-200 bg-gray-50 py-3 pl-4 pr-10 text-sm font-medium text-gray-700 focus:border-[#1a6b36] focus:outline-none focus:ring-1 focus:ring-[#1a6b36]"
+                                className="block w-full rounded-lg border-gray-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 py-3 pl-4 pr-10 text-sm font-medium text-gray-700 dark:text-zinc-300 focus:border-[#1a6b36] focus:outline-none focus:ring-1 focus:ring-[#1a6b36] transition-colors"
                             >
                                 {menuItems.map((item) => (
-                                    <option key={item} value={item}>
+                                    <option key={item} value={item} className="bg-white dark:bg-zinc-900">
                                         {item}
                                     </option>
                                 ))}
                             </select>
                         </div>
 
-                        {/* 💻 DESKTOP SIDEBAR */}
                         <nav className="hidden md:flex flex-col p-2 space-y-1">
                             {menuItems.map((item) => (
                                 <button
@@ -482,7 +470,7 @@ export default function EmployeePage({
                                     onClick={() => setActiveTab(item)}
                                     className={`w-full text-left px-4 py-2.5 text-sm font-medium rounded-lg transition-colors duration-150 ${activeTab === item
                                         ? "bg-[#1a6b36] text-white shadow-sm"
-                                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                        : "text-gray-600 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-gray-900 dark:hover:text-zinc-100"
                                         }`}
                                 >
                                     {item}
@@ -493,7 +481,7 @@ export default function EmployeePage({
                 </div>
 
                 <div className="md:col-span-8 lg:col-span-9 space-y-6">
-                    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-6">
+                    <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden p-6 transition-colors duration-300">
                         {renderContent()}
                     </div>
                 </div>
@@ -527,7 +515,7 @@ export default function EmployeePage({
                     )
                 }
                 confirmText={pendingAction?.isDelete ? "Delete Profile" : "Save Changes"}
-                confirmColorClass={pendingAction?.isDelete ? "bg-red-600 hover:bg-red-700" : "bg-[#1a6b36] hover:bg-[#155a2b]"}
+                confirmColorClass={pendingAction?.isDelete ? "bg-red-600 hover:bg-red-700" : "bg-[#1a6b36] hover:bg-[#134d26] dark:hover:bg-[#208242]"}
             />
         </div>
     );

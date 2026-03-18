@@ -1,4 +1,3 @@
-// src/components/ui/Pagination.tsx
 "use client";
 
 import Link from "next/link";
@@ -20,7 +19,6 @@ export default function Pagination({
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    // Preserves any other URL parameters (like search filters) when changing pages
     const createPageURL = (pageNumber: number) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set("page", pageNumber.toString());
@@ -31,26 +29,35 @@ export default function Pagination({
 
     const skip = (currentPage - 1) * itemsPerPage;
 
+    // Shared style for buttons to keep code clean and prevent hydration issues
+    const btnBase = "px-4 py-2 border rounded-md text-sm font-medium transition-all duration-200";
+    
+    // Active button uses white/zinc-800 for depth against the container background
+    const btnActive = "border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 shadow-sm active:scale-95";
+    
+    // Disabled button uses slightly muted tones and removes the drop shadow
+    const btnDisabled = "border-gray-200 dark:border-zinc-800 text-gray-400 dark:text-zinc-600 bg-slate-50 dark:bg-zinc-900/50 cursor-not-allowed";
+
     return (
-        <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-gray-500">
-                Showing <span className="font-medium text-gray-900">{skip + 1}</span> to{" "}
-                <span className="font-medium text-gray-900">
+        <div className="bg-white dark:bg-zinc-900 px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 transition-colors duration-300">
+            <div className="text-sm text-gray-500 dark:text-zinc-400">
+                Showing <span className="font-medium text-gray-900 dark:text-zinc-100">{skip + 1}</span> to{" "}
+                <span className="font-medium text-gray-900 dark:text-zinc-100">
                     {Math.min(skip + itemsPerPage, totalItems)}
                 </span>{" "}
-                of <span className="font-medium text-gray-900">{totalItems}</span> {itemName}
+                of <span className="font-medium text-gray-900 dark:text-zinc-100">{totalItems}</span> {itemName}
             </div>
 
             <div className="flex items-center gap-2">
                 {currentPage > 1 ? (
                     <Link
                         href={createPageURL(currentPage - 1)}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                        className={`${btnBase} ${btnActive}`}
                     >
                         Previous
                     </Link>
                 ) : (
-                    <button disabled className="px-4 py-2 border border-gray-200 rounded-md text-sm font-medium text-gray-400 bg-gray-50 cursor-not-allowed">
+                    <button disabled className={`${btnBase} ${btnDisabled}`}>
                         Previous
                     </button>
                 )}
@@ -58,12 +65,12 @@ export default function Pagination({
                 {currentPage < totalPages ? (
                     <Link
                         href={createPageURL(currentPage + 1)}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                        className={`${btnBase} ${btnActive}`}
                     >
                         Next
                     </Link>
                 ) : (
-                    <button disabled className="px-4 py-2 border border-gray-200 rounded-md text-sm font-medium text-gray-400 bg-gray-50 cursor-not-allowed">
+                    <button disabled className={`${btnBase} ${btnDisabled}`}>
                         Next
                     </button>
                 )}

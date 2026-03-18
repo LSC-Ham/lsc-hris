@@ -33,7 +33,7 @@ export function EmploymentDetails({
         const year = d.getFullYear();
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`; 
+        return `${year}-${month}-${day}`;
     };
 
     const [assignedPosition, setAssignedPosition] = useState({
@@ -157,14 +157,14 @@ export function EmploymentDetails({
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                <h1 className="text-xl font-bold text-gray-800 tracking-tight">Employment Details</h1>
+            <div className="flex justify-between items-center border-b border-gray-100 dark:border-zinc-800 pb-4">
+                <h1 className="text-xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight">Employment Details</h1>
 
                 {mode === "update" && (
                     <button
                         type="button"
                         onClick={isEditing ? handleCancel : () => setIsEditing(true)}
-                        className="text-[#1a6b36] text-sm font-medium hover:underline"
+                        className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                     >
                         {isEditing ? "Cancel" : "Edit"}
                     </button>
@@ -215,8 +215,8 @@ export function EmploymentDetails({
                     />
                 </div>
 
-                <div className="border-t border-gray-100 pt-6 space-y-4 capitalize">
-                    <label className="block text-xs font-semibold text-gray-500 uppercase mb-4">
+                <div className="border-t border-gray-100 dark:border-zinc-800 pt-6 space-y-4 capitalize">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-zinc-500 uppercase mb-4">
                         Assigned Positions & History
                     </label>
 
@@ -226,42 +226,42 @@ export function EmploymentDetails({
                                 <div
                                     key={pos.id || index}
                                     className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-lg border transition-all ${pos.is_active
-                                        ? 'bg-white border-green-300 shadow-sm ring-1 ring-green-100'
-                                        : 'bg-gray-50 border-gray-200 opacity-75'
+                                        ? 'bg-white dark:bg-zinc-900 border-green-300 dark:border-green-900 shadow-sm ring-1 ring-green-100 dark:ring-green-900/30'
+                                        : 'bg-gray-50 dark:bg-zinc-800/50 border-gray-200 dark:border-zinc-800 opacity-75'
                                         }`}
                                 >
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
-                                            <h4 className={`font-bold text-sm ${pos.is_active ? 'text-gray-900' : 'text-gray-600'}`}>
+                                            <h4 className={`font-bold text-sm ${pos.is_active ? 'text-gray-900 dark:text-zinc-100' : 'text-gray-600 dark:text-zinc-400'}`}>
                                                 {pos.position}
                                             </h4>
 
                                             {pos.is_active && (
-                                                <span className="px-2 py-[2px] rounded text-[9px] uppercase font-bold tracking-wider border bg-green-50 text-green-700 border-green-200">
+                                                <span className="px-2 py-[2px] rounded text-[9px] uppercase font-bold tracking-wider border bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/50">
                                                     Active Role
                                                 </span>
                                             )}
 
                                             <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wide border ${pos.end_at < new Date()
-                                                ? 'bg-green-50 text-green-700 border-green-200'
-                                                : 'bg-gray-200 text-gray-600 border-gray-300'
+                                                ? 'bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-500 border-green-200 dark:border-green-900/30'
+                                                : 'bg-gray-200 dark:bg-zinc-700 text-gray-600 dark:text-zinc-300 border-gray-300 dark:border-zinc-600'
                                                 }`}>
                                                 {pos.status || 'N/A'}
                                             </span>
                                         </div>
 
                                         {pos.description && (
-                                            <p className="text-xs text-gray-500 line-clamp-1">
+                                            <p className="text-xs text-gray-500 dark:text-zinc-400 line-clamp-1">
                                                 {pos.description}
                                             </p>
                                         )}
 
-                                        <div className="flex items-center gap-1 text-xs text-gray-400 font-medium mt-1">
+                                        <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-zinc-500 font-medium mt-1">
                                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                             <span>
-                                                {formatDate(pos.start_at)} — {pos.end_at ? formatDate(pos.end_at) : <span className="text-green-600">Present</span>}
+                                                {formatDate(pos.start_at)} — {pos.end_at ? formatDate(pos.end_at) : <span className="text-green-600 dark:text-green-500">Present</span>}
                                             </span>
                                         </div>
                                     </div>
@@ -272,7 +272,7 @@ export function EmploymentDetails({
                                                 <button
                                                     type="button"
                                                     onClick={() => handleSetActivePosition(index)}
-                                                    className="text-[#1a6b36] hover:text-green-800 text-xs font-semibold transition-colors"
+                                                    className="text-[#1a6b36] dark:text-green-500 hover:text-green-800 dark:hover:text-green-400 text-xs font-semibold transition-colors"
                                                 >
                                                     Set Active
                                                 </button>
@@ -281,7 +281,7 @@ export function EmploymentDetails({
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemovePosition(index)}
-                                                className="group flex items-center gap-1 text-red-400 hover:text-red-600 text-xs font-medium transition-colors"
+                                                className="group flex items-center gap-1 text-red-400 dark:text-red-500 hover:text-red-600 dark:hover:text-red-400 text-xs font-medium transition-colors"
                                             >
                                                 <span>Remove</span>
                                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -293,15 +293,15 @@ export function EmploymentDetails({
                                 </div>
                             ))
                         ) : (
-                            <div className="grid col-span-full text-center py-6 border-2 border-dashed border-gray-100 rounded-lg">
-                                <p className="text-sm text-gray-400 italic">No position history found.</p>
+                            <div className="grid col-span-full text-center py-6 border-2 border-dashed border-gray-100 dark:border-zinc-800 rounded-lg">
+                                <p className="text-sm text-gray-400 dark:text-zinc-500 italic">No position history found.</p>
                             </div>
                         )}
                     </div>
 
                     {isEditing && (
-                        <div className="bg-green-50/50 border border-green-100 rounded-xl p-4 space-y-4">
-                            <h4 className="text-xs font-bold text-[#1a6b36] uppercase">Add New Position</h4>
+                        <div className="bg-green-50/50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30 rounded-xl p-4 space-y-4">
+                            <h4 className="text-xs font-bold text-[#1a6b36] dark:text-green-500 uppercase">Add New Position</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <ProfileSelect
                                     label="Position Title"
@@ -345,22 +345,22 @@ export function EmploymentDetails({
                                 />
                             </div>
 
-                            <div className="flex justify-between items-center border-t border-green-100 pt-4 mt-2">
+                            <div className="flex justify-between items-center border-t border-green-100 dark:border-green-900/30 pt-4 mt-2">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
                                         checked={assignedPosition.is_active}
                                         onChange={(e) => handleAssignedChange("is_active", e.target.checked)}
-                                        className="w-4 h-4 text-[#1a6b36] rounded border-gray-300 focus:ring-[#1a6b36]"
+                                        className="w-4 h-4 text-[#1a6b36] rounded border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:ring-[#1a6b36]"
                                     />
-                                    <span className="text-sm font-medium text-gray-700">Set as current Active Role</span>
+                                    <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Set as current Active Role</span>
                                 </label>
 
                                 <button
                                     type="button"
                                     onClick={handleAddPositionObj}
                                     disabled={!assignedPosition.position || !assignedPosition.status}
-                                    className="bg-[#1a6b36] text-white text-xs px-4 py-2 rounded-lg hover:bg-[#155a2b] disabled:opacity-50 transition-colors"
+                                    className="bg-[#1a6b36] text-white text-xs px-4 py-2 rounded-lg hover:bg-[#155a2b] disabled:opacity-50 transition-colors shadow-sm"
                                 >
                                     + Add Position
                                 </button>
@@ -370,7 +370,7 @@ export function EmploymentDetails({
                 </div>
 
                 <div>
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">
+                    <h3 className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-4 border-b border-gray-100 dark:border-zinc-800 pb-2">
                         Government Identifiers
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -385,11 +385,19 @@ export function EmploymentDetails({
             </div>
 
             {mode !== "create" && isEditing && (
-                <div className="flex justify-end pt-6 border-t border-gray-100 mt-6">
+                <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 dark:border-zinc-800 mt-6">
                     <button
                         type="button"
-                        className="bg-[#1a6b36] text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm hover:bg-[#155a2b] transition-all active:scale-95"
+                        onClick={handleCancel}
+                        className="cursor-pointer px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50 rounded-lg transition-all"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        type="button"
                         onClick={handleSaveClick}
+                        className="cursor-pointer bg-brand hover:bg-brand-dark text-white font-medium text-sm px-8 py-2.5 rounded-lg shadow-sm transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
                     >
                         Save Changes
                     </button>
@@ -404,7 +412,7 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
 
     return (
         <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-zinc-500 uppercase mb-2">
                 {label} {required && <span className="text-red-500 ml-1">*</span>}
             </label>
             {isEditing ? (
@@ -416,15 +424,17 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
                     required={required}
                     disabled={disabled}
                     className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm outline-none 
-                    ${type === 'text'} 
                     ${disabled
-                            ? "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
-                            : "bg-white focus:ring-1 " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
+                            ? "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-500 cursor-not-allowed border-gray-200 dark:border-zinc-700"
+                            : "bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 focus:ring-1 " +
+                            (required && !value
+                                ? "border-red-300 dark:border-red-900 focus:border-red-500"
+                                : "border-gray-200 dark:border-zinc-700 focus:border-green-500")
                         }`}
                 />
             ) : (
-                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center uppercase">
-                    {displayValue || <span className="text-gray-400 italic">Not set</span>}
+                <div className="w-full p-2.5 border border-transparent bg-gray-50 dark:bg-zinc-800/50 rounded-lg text-sm text-gray-800 dark:text-zinc-200 min-h-[42px] flex items-center uppercase">
+                    {displayValue || <span className="text-gray-400 dark:text-zinc-500 italic text-xs capitalize">Not set</span>}
                 </div>
             )}
         </div>
@@ -434,7 +444,7 @@ function ProfileField({ label, value, isEditing, type = "text", placeholder, onC
 function ProfileSelect({ label, value, options, isEditing, onChange, required, disabled }: any) {
     return (
         <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase mb-2">
+            <label className="block text-xs font-semibold text-gray-500 dark:text-zinc-500 uppercase mb-2">
                 {label} {required && <span className="text-red-500 ml-1">*</span>}
             </label>
             {isEditing ? (
@@ -446,22 +456,25 @@ function ProfileSelect({ label, value, options, isEditing, onChange, required, d
                         disabled={disabled}
                         className={`w-full p-2.5 border rounded-lg text-sm transition-all shadow-sm appearance-none
                         ${disabled
-                                ? "bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed"
-                                : "bg-white focus:ring-1 outline-none " + (required && !value ? "border-red-300 focus:border-red-500" : "border-gray-200 focus:border-green-500")
+                                ? "bg-gray-100 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-500 cursor-not-allowed"
+                                : "bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 focus:ring-1 outline-none " +
+                                (required && !value
+                                    ? "border-red-300 dark:border-red-900 focus:border-red-500"
+                                    : "border-gray-200 dark:border-zinc-700 focus:border-green-500")
                             }`}
                     >
-                        <option value="" disabled>Select {label}</option>
+                        <option value="" disabled className="dark:bg-zinc-900">Select {label}</option>
                         {options.map((opt: string) => (
-                            <option key={opt} value={opt}>{opt}</option>
+                            <option key={opt} value={opt} className="dark:bg-zinc-900">{opt}</option>
                         ))}
                     </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500 dark:text-zinc-400">
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                     </div>
                 </div>
             ) : (
-                <div className="w-full p-2.5 border border-transparent bg-gray-50 rounded-lg text-sm text-gray-800 min-h-[42px] flex items-center uppercase">
-                    {value || <span className="text-gray-400 italic">Not set</span>}
+                <div className="w-full p-2.5 border border-transparent bg-gray-50 dark:bg-zinc-800/50 rounded-lg text-sm text-gray-800 dark:text-zinc-200 min-h-[42px] flex items-center uppercase">
+                    {value || <span className="text-gray-400 dark:text-zinc-500 italic text-xs capitalize">Not set</span>}
                 </div>
             )}
         </div>

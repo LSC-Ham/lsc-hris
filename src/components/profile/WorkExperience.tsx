@@ -53,7 +53,6 @@ export function WorkExperience({ mode, formData = [], onSave }: WorkExperiencePr
     };
 
     const handleDeleteClick = async (index: number) => {
-        if (!window.confirm("Are you sure you want to remove this work experience record?")) return;
         const updatedRecords = [...formData];
         updatedRecords.splice(index, 1);
 

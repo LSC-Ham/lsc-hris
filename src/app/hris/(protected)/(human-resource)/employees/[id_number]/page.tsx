@@ -19,15 +19,9 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const { id_number: id_number } = await params;
 
     const employeeId = await prisma.employees.findUnique({
-        where: {
-            id_number: id_number,
-        }, select: {
+        where: { id_number: id_number }, select: {
             id: true,
-            biography: {
-                select: {
-                    users_id: true,
-                }
-            }
+            biography: { select: { users_id: true, } }
         }
     })
 

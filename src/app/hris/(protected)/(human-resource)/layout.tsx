@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; 
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
@@ -15,22 +15,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 
     const userData = await prisma.user.findUnique({
         where: { id: userId },
-        select: {
-            biography: {
-                select: {
-                    employees: {
-                        select: {
-                            departments: {
-                                select: {
-                                    department: true,
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-        } 
+        select: { biography: { select: { employees: { select: { departments: { select: { department: true } } } } } } }
     });
 
     const role = ALLOWED_DEPARTMENTS.includes(userData?.biography?.employees?.departments?.department.toLowerCase() || "")
