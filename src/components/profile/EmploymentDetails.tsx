@@ -164,9 +164,19 @@ export function EmploymentDetails({
                     <button
                         type="button"
                         onClick={isEditing ? handleCancel : () => setIsEditing(true)}
-                        className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
+                        className="cursor-pointer p-2 text-brand dark:text-green-500 hover:bg-brand/10 dark:hover:bg-zinc-800 rounded-lg transition-all active:scale-95"
+                        title={isEditing ? "Cancel" : "Edit"}
+                        aria-label={isEditing ? "Cancel Editing" : "Edit Details"}
                     >
-                        {isEditing ? "Cancel" : "Edit"}
+                        {isEditing ? (
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        ) : (
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        )}
                     </button>
                 )}
             </div>
@@ -385,11 +395,11 @@ export function EmploymentDetails({
             </div>
 
             {mode !== "create" && isEditing && (
-                <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 dark:border-zinc-800 mt-6">
+                <div className="flex items-center justify-end gap-3 pt-5 border-t border-gray-100 dark:border-zinc-800">
                     <button
                         type="button"
                         onClick={handleCancel}
-                        className="cursor-pointer px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-800/50 rounded-lg transition-all"
+                        className="cursor-pointer px-5 py-2 text-sm font-semibold text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-all"
                     >
                         Cancel
                     </button>
@@ -397,7 +407,7 @@ export function EmploymentDetails({
                     <button
                         type="button"
                         onClick={handleSaveClick}
-                        className="cursor-pointer bg-brand hover:bg-brand-dark text-white font-medium text-sm px-8 py-2.5 rounded-lg shadow-sm transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+                        className="cursor-pointer bg-brand hover:opacity-90 text-white font-semibold text-sm px-6 py-2 rounded-lg shadow-sm shadow-brand/20 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 dark:focus:ring-offset-zinc-900 flex items-center gap-2"
                     >
                         Save Changes
                     </button>

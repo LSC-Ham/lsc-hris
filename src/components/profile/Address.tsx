@@ -96,7 +96,15 @@ export function Address({ mode, formData, onSave }: AddressProps) {
                                 onClick={() => editMode.residential ? handleCancel("residential") : setEditMode(p => ({ ...p, residential: true }))}
                                 className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                             >
-                                {editMode.residential ? "Cancel" : "Edit"}
+                                {editMode.residential ? (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                )}
                             </button>
                         )}
                     </div>
@@ -154,7 +162,15 @@ export function Address({ mode, formData, onSave }: AddressProps) {
                                 onClick={() => editMode.permanent ? handleCancel("permanent") : setEditMode(p => ({ ...p, permanent: true }))}
                                 className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                             >
-                                {editMode.permanent ? "Cancel" : "Edit"}
+                                {editMode.permanent ? (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                )}
                             </button>
                         )}
                     </div>

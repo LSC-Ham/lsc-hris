@@ -72,9 +72,19 @@ export function PersonalInformation({ mode = "view", formData, onSave, onChange 
                     <button
                         type="button"
                         onClick={isEditing ? handleCancel : () => setIsEditing(true)}
-                        className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
+                        className="cursor-pointer p-2 text-brand dark:text-green-500 hover:bg-brand/10 dark:hover:bg-zinc-800 rounded-lg transition-all active:scale-95"
+                        title={isEditing ? "Cancel" : "Edit"}
+                        aria-label={isEditing ? "Cancel Editing" : "Edit Details"}
                     >
-                        {isEditing ? "Cancel" : "Edit"}
+                        {isEditing ? (
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        ) : (
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                        )}
                     </button>
                 )}
             </div>

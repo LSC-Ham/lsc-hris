@@ -77,8 +77,18 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
                                 onClick={() => editMode.guardian ? handleCancel("guardian") : setEditMode(p => ({ ...p, guardian: true }))}
                                 className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                             >
-                                {editMode.guardian ? "Cancel" : "Edit"}
+                                {editMode.guardian ? (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                )}
                             </button>
+
+
                         )}
                     </div>
 
@@ -121,7 +131,15 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
                                 onClick={() => editMode.father ? handleCancel("father") : setEditMode(p => ({ ...p, father: true }))}
                                 className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                             >
-                                {editMode.father ? "Cancel" : "Edit"}
+                                {editMode.father ? (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                )}
                             </button>
                         )}
                     </div>
@@ -165,7 +183,15 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
                                 onClick={() => editMode.mother ? handleCancel("mother") : setEditMode(p => ({ ...p, mother: true }))}
                                 className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                             >
-                                {editMode.mother ? "Cancel" : "Edit"}
+                                {editMode.mother ? (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                )}
                             </button>
                         )}
                     </div>
