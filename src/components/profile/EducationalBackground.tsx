@@ -45,7 +45,6 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
     const [draftData, setDraftData] = useState<EducationRecord>(emptyRecord);
     const today = new Date().toISOString().split('T')[0];
 
-    const [isSaving, setIsSaving] = useState(false);
 
     const handleLocalChange = (field: string, value: any) => {
         setDraftData((prev) => ({ ...prev, [field]: value }));
@@ -95,7 +94,6 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
             return;
         }
 
-        setIsSaving(true);
 
         const updatedRecords = [...formData];
 
@@ -110,7 +108,6 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
             await onSave(updatedRecords);
         }
 
-        setIsSaving(false);
         setIsFormOpen(false);
         setEditingIndex(null);
         setDraftData(emptyRecord);
@@ -184,9 +181,6 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
                                 onClick={handleSaveClick}
                                 className="cursor-pointer bg-brand hover:opacity-90 text-white font-semibold text-sm px-6 py-2 rounded-lg shadow-sm shadow-brand/20 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 dark:focus:ring-offset-zinc-900 flex items-center gap-2"
                             >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                                </svg>
                                 Save Changes
                             </button>
                         </div>
@@ -202,7 +196,7 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
                             >
                                 <div className="flex justify-between items-start mb-4">
                                     <span className="inline-block px-3 py-1 bg-brand/10 dark:bg-brand/20 text-brand dark:text-green-500 text-[10px] font-bold rounded-full uppercase tracking-widest">
-                                        {record.level || "Unknown Level"}
+                                        {record.level || ""}
                                     </span>
                                     {mode !== "view" && (
                                         <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
@@ -278,7 +272,7 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
                         ) : (
                             formData.length === 0 && (
                                 <div className="col-span-2 p-8 text-center border-2 border-dashed border-gray-300 dark:border-zinc-800 rounded-xl bg-gray-50 dark:bg-zinc-900/30 text-gray-500 dark:text-zinc-400 text-sm transition-colors">
-                                    No eligibility records added yet.
+                                    No educational background records added yet.
                                 </div>
                             )
                         )}
