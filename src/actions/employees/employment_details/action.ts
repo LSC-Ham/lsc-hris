@@ -12,7 +12,7 @@ export async function generateEmployeeID(division: string) {
 
         const nextId = count + 1;
 
-        return division.substring(0,2).toLowerCase() + nextId.toString().padStart(4, '0');
+        return division.substring(0, 2).toLowerCase() + nextId.toString().padStart(4, '0');
     } catch (error) {
         console.error("Error generating ID:", error);
         return "";
@@ -152,7 +152,8 @@ export async function updateEmploymentDetails(employeeId: string, formData: any)
             }
         });
 
-        revalidatePath(`/employees/${employeeId}`);
+        revalidatePath(`/hris/${formData.id_number}`);
+        revalidatePath(`/employees/${formData.id_number}`);
         return { success: true };
 
     } catch (error) {

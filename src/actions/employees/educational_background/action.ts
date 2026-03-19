@@ -1,7 +1,7 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; 
-import { authOptions } from "@/lib/auth"; 
+import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -20,7 +20,7 @@ export async function getEducationalBackground(employeeId: string) {
                 }
             },
             orderBy: {
-                date_from: 'desc' 
+                date_from: 'desc'
             }
         });
 
@@ -39,11 +39,11 @@ export async function getEducationalBackground(employeeId: string) {
 
     } catch (error) {
         console.error("Error fetching educational background:", error);
-        return []; 
+        return [];
     }
 }
 
-export async function updateEducationalBackground(data: any) { 
+export async function updateEducationalBackground(data: any) {
     try {
         const employee = await prisma.employees.findFirst({
             where: { id_number: data.id_number },
@@ -77,7 +77,8 @@ export async function updateEducationalBackground(data: any) {
             }
         });
 
-        revalidatePath("/profile");
+        revalidatePath(`/hris/${data.id_number}`);
+        revalidatePath(`/employees/${data.id_number}`);
         return { success: true };
 
     } catch (error) {

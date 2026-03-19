@@ -252,7 +252,7 @@ export function Eligibility({ mode, formData = [], onSave }: EligibilityProps) {
                                     </div>
                                     <div className="col-span-2">
                                         <span className="block text-gray-400 dark:text-zinc-500 font-bold uppercase mb-0.5 tracking-tighter">Validity</span>
-                                        <span className="text-gray-700 dark:text-zinc-300 font-semibold">{record.date_validity  || "N/A"}</span>
+                                        <span className="text-gray-700 dark:text-zinc-300 font-semibold">{record.date_validity || "N/A"}</span>
                                     </div>
                                 </div>
                             </div>

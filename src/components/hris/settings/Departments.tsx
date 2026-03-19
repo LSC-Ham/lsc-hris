@@ -3,8 +3,8 @@
 
 import { addDepartment, deleteDepartment, updateDepartment } from "@/actions/admin/settings/departments/action";
 import { useState, useRef } from "react";
-import { ConfirmModal } from "@/components/ui/ConfirmModal"; 
-import { toast } from "sonner"; 
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { toast } from "sonner";
 
 type Department = {
     id: string;
@@ -55,14 +55,14 @@ export default function Departments({ data }: DepartmentsTemplateProps) {
         try {
             if (pendingAction.type === "add" && pendingAction.formData) {
                 await addDepartment(pendingAction.formData);
-                addFormRef.current?.reset(); 
+                addFormRef.current?.reset();
                 toast.success("Department added successfully");
-            } 
+            }
             else if (pendingAction.type === "update" && pendingAction.id && pendingAction.formData) {
                 await updateDepartment(pendingAction.id, pendingAction.formData);
-                setEditingId(null); 
+                setEditingId(null);
                 toast.success("Department updated successfully");
-            } 
+            }
             else if (pendingAction.type === "delete" && pendingAction.id) {
                 await deleteDepartment(pendingAction.id);
                 toast.success("Department deleted successfully");
@@ -84,14 +84,14 @@ export default function Departments({ data }: DepartmentsTemplateProps) {
                     title: "Add Department",
                     message: "Are you sure you want to add this new department?",
                     confirmText: "Add Department",
-                    colorClass: "bg-[#1a6b36] hover:bg-[#155a2b]"
+                    colorClass: "bg-[#1a6b36] hover:bg-[#155a2b] dark:bg-green-700 dark:hover:bg-green-600"
                 };
             case "update":
                 return {
                     title: "Update Department",
                     message: "Are you sure you want to save these changes?",
                     confirmText: "Save Changes",
-                    colorClass: "bg-[#1a6b36] hover:bg-[#155a2b]"
+                    colorClass: "bg-[#1a6b36] hover:bg-[#155a2b] dark:bg-green-700 dark:hover:bg-green-600"
                 };
             case "delete":
                 return {
@@ -102,7 +102,7 @@ export default function Departments({ data }: DepartmentsTemplateProps) {
                         </>
                     ),
                     confirmText: "Delete",
-                    colorClass: "bg-red-600 hover:bg-red-700"
+                    colorClass: "bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600"
                 };
             default:
                 return { title: "", message: "", confirmText: "", colorClass: "" };
@@ -112,61 +112,87 @@ export default function Departments({ data }: DepartmentsTemplateProps) {
     const modalConfig = getModalConfig();
 
     return (
-        <div className="space-y-4">
-            <form ref={addFormRef} action={handleAddClick} className="flex flex-col sm:flex-row gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div className="space-y-6">
+            <form ref={addFormRef} action={handleAddClick} className="flex flex-col sm:flex-row gap-3 bg-gray-50 dark:bg-zinc-950/50 p-4 rounded-lg border border-gray-200 dark:border-zinc-800">
                 <input
                     type="text"
                     name="department"
                     placeholder="Department Name"
                     required
-                    className="flex-1 border border-gray-300 px-3 py-2 rounded-md text-sm"
+                    className="flex-1 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1a6b36]"
                 />
                 <input
                     type="text"
                     name="description"
                     placeholder="Description (Optional)"
-                    className="flex-1 border border-gray-300 px-3 py-2 rounded-md text-sm"
+                    className="flex-1 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1a6b36]"
                 />
-                <button type="submit" className="bg-[#1a6b36] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-800 transition">
+                <button type="submit" className="bg-[#1a6b36] dark:bg-green-700 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-[#155a2b] dark:hover:bg-green-600 transition shadow-sm whitespace-nowrap">
                     Add Department
                 </button>
             </form>
 
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 dark:border-zinc-800 rounded-lg overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-200">
+                    <thead className="bg-gray-50 dark:bg-zinc-950/50 border-b border-gray-200 dark:border-zinc-800">
                         <tr>
-                            <th className="px-4 py-3 font-medium text-gray-700">Name</th>
-                            <th className="px-4 py-3 font-medium text-gray-700">Description</th>
-                            <th className="px-4 py-3 font-medium text-gray-700 w-32 text-right">Actions</th>
+                            <th className="px-4 py-3 font-medium text-gray-700 dark:text-zinc-300 w-1/3">Name</th>
+                            <th className="px-4 py-3 font-medium text-gray-700 dark:text-zinc-300 w-1/2">Description</th>
+                            <th className="px-4 py-3 font-medium text-gray-700 dark:text-zinc-300 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 capitalize">
+                    <tbody className="divide-y divide-gray-200 dark:divide-zinc-800 capitalize">
                         {data.map((dept) => (
-                            <tr key={dept.id}>
+                            <tr key={dept.id} className="hover:bg-gray-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                                 {editingId === dept.id ? (
                                     <td colSpan={3} className="px-4 py-3">
                                         <form
                                             action={(formData) => handleUpdateClick(dept.id, formData)}
-                                            className="flex gap-2"
+                                            className="flex flex-col sm:flex-row gap-2"
                                         >
-                                            <input type="text" name="department" defaultValue={dept.department} required className="flex-1 border rounded px-2 py-1 text-sm" />
-                                            <input type="text" name="description" defaultValue={dept.description || ""} className="flex-1 border rounded px-2 py-1 text-sm" />
-                                            <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium">Save</button>
-                                            <button type="button" onClick={() => setEditingId(null)} className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs font-medium">Cancel</button>
+                                            <input
+                                                type="text"
+                                                name="department"
+                                                defaultValue={dept.department}
+                                                required
+                                                className="flex-1 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 px-2 py-1.5 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#1a6b36]"
+                                            />
+                                            <input
+                                                type="text"
+                                                name="description"
+                                                defaultValue={dept.description || ""}
+                                                className="flex-1 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 px-2 py-1.5 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#1a6b36]"
+                                            />
+                                            <div className="flex gap-2 justify-end sm:justify-start">
+                                                <button type="submit" className="bg-[#1a6b36] dark:bg-green-700 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-[#155a2b] dark:hover:bg-green-600 transition">Save</button>
+                                                <button type="button" onClick={() => setEditingId(null)} className="bg-gray-200 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-300 dark:hover:bg-zinc-700 transition px-3 py-1.5 rounded text-xs font-medium">Cancel</button>
+                                            </div>
                                         </form>
                                     </td>
                                 ) : (
                                     <>
-                                        <td className="px-4 py-3 font-medium text-gray-900">{dept.department}</td>
-                                        <td className="px-4 py-3 text-gray-500">{dept.description || "—"}</td>
-                                        <td className="px-4 py-3 text-right space-x-3">
-                                            <button onClick={() => setEditingId(dept.id)} className="text-blue-600 hover:underline text-xs font-medium">Edit</button>
-                                            <button 
-                                                onClick={() => handleDeleteClick(dept.id, dept.department)} 
-                                                className="text-red-600 hover:underline text-xs font-medium"
+                                        <td className="px-4 py-3 font-medium text-gray-900 dark:text-zinc-100">{dept.department}</td>
+                                        <td className="px-4 py-3 text-gray-500 dark:text-zinc-400">{dept.description || "—"}</td>
+                                        <td className="px-4 py-3 text-right space-x-3 whitespace-nowrap">
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditingId(dept.id)}
+                                                className="cursor-pointer p-2 inline-flex items-center justify-center text-gray-400 hover:text-[#1a6b36] dark:hover:text-green-500 hover:bg-[#1a6b36]/5 dark:hover:bg-[#1a6b36]/10 rounded-lg transition-colors"
+                                                title="Edit Record"
                                             >
-                                                Delete
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleDeleteClick(dept.id, dept.department)}
+                                                className="cursor-pointer p-2 inline-flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                title="Delete Record"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
                                             </button>
                                         </td>
                                     </>
@@ -175,7 +201,7 @@ export default function Departments({ data }: DepartmentsTemplateProps) {
                         ))}
                         {data.length === 0 && (
                             <tr>
-                                <td colSpan={3} className="px-4 py-6 text-center text-gray-500">
+                                <td colSpan={3} className="px-4 py-8 text-center text-gray-500 dark:text-zinc-500">
                                     No departments found.
                                 </td>
                             </tr>

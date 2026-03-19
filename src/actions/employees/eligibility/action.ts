@@ -1,7 +1,7 @@
 "use server";
 
-import { prisma } from "@/lib/prisma"; 
-import { authOptions } from "@/lib/auth"; 
+import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -31,11 +31,11 @@ export async function getEligibility(employeeId: string) {
             date_validity: eli.date_validity || "",
         }));
 
-        return formattedEligibility; 
+        return formattedEligibility;
 
     } catch (error) {
         console.error("Error fetching educational background:", error);
-        return []; 
+        return [];
     }
 }
 
@@ -76,7 +76,8 @@ export async function updateEligibility(data: any) {
             }
         });
 
-        revalidatePath("/profile");
+        revalidatePath(`/hris/${data.id_number}`);
+        revalidatePath(`/employees/${data.id_number}`);
         return { success: true };
 
     } catch (error) {

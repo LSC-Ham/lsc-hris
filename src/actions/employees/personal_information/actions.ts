@@ -57,7 +57,7 @@ export async function updatePersonalInformation(data: any) {
                             firstname: updateData.firstname,
                             middlename: updateData.middlename,
                             extension: updateData.extension,
-                            birthdate: validBirthdate, 
+                            birthdate: validBirthdate,
                             birthplace: updateData.birthplace,
                             sex: updateData.sex,
                             civil_status: updateData.civil_status,
@@ -74,7 +74,7 @@ export async function updatePersonalInformation(data: any) {
                             firstname: updateData.firstname,
                             middlename: updateData.middlename,
                             extension: updateData.extension,
-                            birthdate: validBirthdate, 
+                            birthdate: validBirthdate,
                             birthplace: updateData.birthplace,
                             sex: updateData.sex,
                             civil_status: updateData.civil_status,
@@ -91,7 +91,8 @@ export async function updatePersonalInformation(data: any) {
             }
         });
 
-        revalidatePath("/profile");
+        revalidatePath(`/hris/${data.id_number}`);
+        revalidatePath(`/employees/${data.id_number}`);
         return { success: true };
 
     } catch (error) {

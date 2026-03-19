@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/prisma"; 
+import { prisma } from "@/lib/prisma";
 
 export async function getWorkExperience(employeeId: string) {
     try {
@@ -15,7 +15,7 @@ export async function getWorkExperience(employeeId: string) {
                 }
             },
             orderBy: {
-                date_from: 'desc' 
+                date_from: 'desc'
             }
         });
 
@@ -34,7 +34,7 @@ export async function getWorkExperience(employeeId: string) {
 
     } catch (error) {
         console.error("Error fetching work experience:", error);
-        return []; 
+        return [];
     }
 }
 
@@ -78,7 +78,8 @@ export async function updateWorkExperience(data: any) {
             }
         });
 
-        revalidatePath("/profile");
+        revalidatePath(`/hris/${data.id_number}`);
+        revalidatePath(`/employees/${data.id_number}`);
         return { success: true };
 
     } catch (error) {

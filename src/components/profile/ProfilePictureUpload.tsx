@@ -10,14 +10,14 @@ interface ProfilePictureProps {
     userId: string;
     initialImage?: string | null;
     size?: 'sm' | 'lg';
-    isEditable?: boolean; 
+    isEditable?: boolean;
 }
 
 export default function ProfilePictureUpload({
     userId,
     initialImage,
     size = 'lg',
-    isEditable = true 
+    isEditable = true
 }: ProfilePictureProps) {
 
     const [imagePreview, setImagePreview] = useState<string | null>(() => {
@@ -41,9 +41,10 @@ export default function ProfilePictureUpload({
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
+    // Added dark mode borders to the containers
     const containerClasses = size === 'sm'
-        ? 'w-10 h-10 border border-gray-200'
-        : 'w-24 h-24 border-4 border-white mb-4';
+        ? 'w-10 h-10 border border-gray-200 dark:border-zinc-700'
+        : 'w-24 h-24 border-4 border-white dark:border-zinc-800 mb-4';
 
     const iconClasses = size === 'sm' ? 'w-5 h-5' : 'w-8 h-8';
     const overlayTextClasses = size === 'sm' ? 'text-[8px]' : 'text-xs';
@@ -53,7 +54,7 @@ export default function ProfilePictureUpload({
         if (file) {
             const previewUrl = URL.createObjectURL(file);
             setRawImage(previewUrl);
-            e.target.value = ''; 
+            e.target.value = '';
         }
     };
 
@@ -156,15 +157,15 @@ export default function ProfilePictureUpload({
                 <button
                     onClick={() => setShowOptions(true)}
                     disabled={isUploading || isDeleting}
-                    className={`relative rounded-full bg-green-50 shadow-sm flex items-center justify-center text-[#1a6b36] overflow-hidden group hover:bg-green-100 transition-colors disabled:opacity-50 ${containerClasses}`}
+                    className={`relative rounded-full bg-green-50 dark:bg-green-900/20 shadow-sm flex items-center justify-center text-[#1a6b36] dark:text-green-500 overflow-hidden group hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors disabled:opacity-50 ${containerClasses}`}
                 >
                     {AvatarImage}
-                    <div className={`absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white font-semibold ${overlayTextClasses}`}>
+                    <div className={`absolute inset-0 bg-black/40 dark:bg-black/60 hidden group-hover:flex items-center justify-center text-white font-semibold ${overlayTextClasses}`}>
                         {isDeleting ? "Removing..." : "Edit"}
                     </div>
                 </button>
             ) : (
-                <div className={`relative rounded-full bg-green-50 shadow-sm flex items-center justify-center text-[#1a6b36] overflow-hidden ${containerClasses}`}>
+                <div className={`relative rounded-full bg-green-50 dark:bg-green-900/20 shadow-sm flex items-center justify-center text-[#1a6b36] dark:text-green-500 overflow-hidden ${containerClasses}`}>
                     {AvatarImage}
                 </div>
             )}
@@ -179,12 +180,12 @@ export default function ProfilePictureUpload({
 
             {showOptions && isEditable && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 transition-opacity"
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 dark:bg-zinc-950/80 p-4 transition-opacity"
                     onClick={() => setShowOptions(false)}
                 >
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-xs overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
-                        <div className="p-6 bg-gray-50 flex flex-col items-center border-b border-gray-100">
-                            <div className="relative w-32 h-32 rounded-full border-4 border-white shadow-md bg-green-50 flex items-center justify-center text-[#1a6b36] overflow-hidden mb-4">
+                    <div className="bg-white dark:bg-zinc-900 border border-transparent dark:border-zinc-800 rounded-xl shadow-2xl w-full max-w-xs overflow-hidden flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+                        <div className="p-6 bg-gray-50 dark:bg-zinc-800/50 flex flex-col items-center border-b border-gray-100 dark:border-zinc-800">
+                            <div className="relative w-32 h-32 rounded-full border-4 border-white dark:border-zinc-800 shadow-md bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-[#1a6b36] dark:text-green-500 overflow-hidden mb-4">
                                 {imagePreview ? (
                                     <Image src={imagePreview} alt="Current Profile" fill className="object-cover" unoptimized />
                                 ) : (
@@ -193,46 +194,48 @@ export default function ProfilePictureUpload({
                                     </svg>
                                 )}
                             </div>
-                            <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wider">Profile Photo</h3>
+                            <h3 className="text-sm font-bold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Profile Photo</h3>
                         </div>
 
-                        <button onClick={() => { setShowOptions(false); fileInputRef.current?.click(); }} className="p-4 text-center font-semibold text-[#1a6b36] hover:bg-gray-50 border-b border-gray-100 transition-colors">
-                            Upload Photo
-                        </button>
-
-                        {imagePreview && (
-                            <button onClick={handleDownload} className="p-4 text-center font-semibold text-blue-600 hover:bg-blue-50 border-b border-gray-100 transition-colors">
-                                Download Photo
+                        <div className="flex flex-col">
+                            <button onClick={() => { setShowOptions(false); fileInputRef.current?.click(); }} className="p-4 text-center font-semibold text-[#1a6b36] dark:text-green-500 hover:bg-gray-50 dark:hover:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800 transition-colors">
+                                Upload Photo
                             </button>
-                        )}
 
-                        {imagePreview && (
-                            <button onClick={() => { setShowOptions(false); handleDeletePicture(); }} className="p-4 text-center font-semibold text-red-500 hover:bg-red-50 border-b border-gray-100 transition-colors">
-                                Remove Current Photo
+                            {imagePreview && (
+                                <button onClick={handleDownload} className="p-4 text-center font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 border-b border-gray-100 dark:border-zinc-800 transition-colors">
+                                    Download Photo
+                                </button>
+                            )}
+
+                            {imagePreview && (
+                                <button onClick={() => { setShowOptions(false); handleDeletePicture(); }} className="p-4 text-center font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 border-b border-gray-100 dark:border-zinc-800 transition-colors">
+                                    Remove Current Photo
+                                </button>
+                            )}
+
+                            <button onClick={() => setShowOptions(false)} className="p-4 text-center font-semibold text-gray-600 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                                Cancel
                             </button>
-                        )}
-
-                        <button onClick={() => setShowOptions(false)} className="p-4 text-center font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
-                            Cancel
-                        </button>
+                        </div>
                     </div>
                 </div>
             )}
 
             {rawImage && isEditable && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 p-4">
-                    <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md flex flex-col items-center">
-                        <h3 className="text-lg font-bold mb-4 text-gray-800">Adjust Profile Picture</h3>
-                        <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden mb-6">
+                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 dark:bg-zinc-950/90 p-4">
+                    <div className="bg-white dark:bg-zinc-900 border border-transparent dark:border-zinc-800 rounded-xl shadow-xl p-6 w-full max-w-md flex flex-col items-center animate-in zoom-in-95 duration-200">
+                        <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-zinc-100">Adjust Profile Picture</h3>
+                        <div className="relative w-full h-64 bg-gray-100 dark:bg-zinc-950 rounded-lg overflow-hidden mb-6 border border-gray-200 dark:border-zinc-800">
                             <Cropper image={rawImage} crop={crop} zoom={zoom} aspect={1} cropShape="round" onCropChange={setCrop} onCropComplete={onCropComplete} onZoomChange={setZoom} />
                         </div>
                         <div className="w-full mb-6">
-                            <label className="text-sm text-gray-600 mb-2 block">Zoom</label>
-                            <input type="range" value={zoom} min={1} max={3} step={0.1} aria-labelledby="Zoom" onChange={(e) => setZoom(Number(e.target.value))} className="w-full accent-[#1a6b36]" />
+                            <label className="text-sm text-gray-600 dark:text-zinc-400 mb-2 block font-medium">Zoom</label>
+                            <input type="range" value={zoom} min={1} max={3} step={0.1} aria-labelledby="Zoom" onChange={(e) => setZoom(Number(e.target.value))} className="w-full accent-[#1a6b36] dark:accent-green-500" />
                         </div>
                         <div className="flex gap-4 w-full justify-end">
-                            <button onClick={() => setRawImage(null)} disabled={isUploading} className="px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors font-medium disabled:opacity-50">Cancel</button>
-                            <button onClick={handleCropAndSave} disabled={isUploading} className="px-4 py-2 rounded-lg bg-[#1a6b36] text-white hover:bg-[#145229] transition-colors font-medium disabled:opacity-50">
+                            <button onClick={() => setRawImage(null)} disabled={isUploading} className="px-4 py-2 rounded-lg text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 border border-transparent dark:border-zinc-700 transition-colors font-medium disabled:opacity-50">Cancel</button>
+                            <button onClick={handleCropAndSave} disabled={isUploading} className="px-4 py-2 rounded-lg bg-[#1a6b36] dark:bg-green-700 text-white hover:bg-[#145229] dark:hover:bg-green-600 transition-colors font-medium disabled:opacity-50">
                                 {isUploading ? "Saving..." : "Save Picture"}
                             </button>
                         </div>

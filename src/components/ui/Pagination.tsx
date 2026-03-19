@@ -29,13 +29,10 @@ export default function Pagination({
 
     const skip = (currentPage - 1) * itemsPerPage;
 
-    // Shared style for buttons to keep code clean and prevent hydration issues
     const btnBase = "px-4 py-2 border rounded-md text-sm font-medium transition-all duration-200";
     
-    // Active button uses white/zinc-800 for depth against the container background
     const btnActive = "border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 shadow-sm active:scale-95";
     
-    // Disabled button uses slightly muted tones and removes the drop shadow
     const btnDisabled = "border-gray-200 dark:border-zinc-800 text-gray-400 dark:text-zinc-600 bg-slate-50 dark:bg-zinc-900/50 cursor-not-allowed";
 
     return (

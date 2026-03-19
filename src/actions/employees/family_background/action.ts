@@ -79,7 +79,8 @@ export async function updateFamilyBackground(data: any) {
             }
         });
 
-        revalidatePath("/profile");
+        revalidatePath(`/hris/${data.id_number}`);
+        revalidatePath(`/employees/${data.id_number}`);
         return { success: true };
 
     } catch (error) {

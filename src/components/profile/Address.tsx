@@ -94,7 +94,7 @@ export function Address({ mode, formData, onSave }: AddressProps) {
                             <button
                                 type="button"
                                 onClick={() => editMode.residential ? handleCancel("residential") : setEditMode(p => ({ ...p, residential: true }))}
-                                className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
+                                className="cursor-pointer text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                             >
                                 {editMode.residential ? (
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -160,7 +160,7 @@ export function Address({ mode, formData, onSave }: AddressProps) {
                             <button
                                 type="button"
                                 onClick={() => editMode.permanent ? handleCancel("permanent") : setEditMode(p => ({ ...p, permanent: true }))}
-                                className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
+                                className="cursor-pointer text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                             >
                                 {editMode.permanent ? (
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

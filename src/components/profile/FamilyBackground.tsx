@@ -75,7 +75,7 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
                             <button
                                 type="button"
                                 onClick={() => editMode.guardian ? handleCancel("guardian") : setEditMode(p => ({ ...p, guardian: true }))}
-                                className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
+                                className="cursor-pointer text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                             >
                                 {editMode.guardian ? (
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -129,7 +129,7 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
                             <button
                                 type="button"
                                 onClick={() => editMode.father ? handleCancel("father") : setEditMode(p => ({ ...p, father: true }))}
-                                className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
+                                className="cursor-pointer text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                             >
                                 {editMode.father ? (
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,7 +181,7 @@ export function FamilyBackground({ formData, onSave, mode }: FamilyBackgroundPro
                             <button
                                 type="button"
                                 onClick={() => editMode.mother ? handleCancel("mother") : setEditMode(p => ({ ...p, mother: true }))}
-                                className="text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
+                                className="cursor-pointer text-[#1a6b36] dark:text-green-500 text-sm font-medium hover:underline"
                             >
                                 {editMode.mother ? (
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
