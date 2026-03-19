@@ -35,6 +35,7 @@ interface EmployeePageProps {
     departments?: any[];
     divisions?: any[];
     positions?: any[];
+    ranks?: any[];
 }
 
 const DEFAULT_USER_DATA = {
@@ -64,6 +65,7 @@ const DEFAULT_EMPLOYMENT_DATA = {
     id_number: "",
     remarks: "",
     hired_at: "",
+    rank: "",
     division: "",
     department: "",
     positions: [],
@@ -97,7 +99,8 @@ export default function EmployeePage({
     work_experience,
     departments = [],
     divisions = [],
-    positions = []
+    positions = [],
+    ranks = [],
 }: EmployeePageProps) {
     const router = useRouter();
 
@@ -337,6 +340,7 @@ export default function EmployeePage({
                         departments={departments}
                         divisions={divisions}
                         availablePositions={positions}
+                        ranks={ranks}
                     />
                 );
             case "Personal Information":

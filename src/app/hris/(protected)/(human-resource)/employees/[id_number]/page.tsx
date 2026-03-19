@@ -2,6 +2,7 @@
 import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";
 import { getPositions } from "@/actions/admin/settings/positions/action";
+import { getRanks } from "@/actions/admin/settings/ranks/action";
 import { getAddress } from "@/actions/employees/address/action";
 import { getEducationalBackground } from "@/actions/employees/educational_background/action";
 import { getEligibility } from "@/actions/employees/eligibility/action";
@@ -38,6 +39,11 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const eligibility = await getEligibility(employeeId?.id || "");
     const work_experience = await getWorkExperience(employeeId?.id || "");
 
+
+    const ranks = await getRanks();
+    const rankNames = ranks.map((r) => r.rank);
+
+
     const departments = await getDepartments();
     const departmentNames = departments.map((dept) => dept.department);
 
@@ -54,5 +60,5 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
         family_background={family_background}
         educational_background={educational_background}
         eligibility={eligibility} work_experience={work_experience}
-        divisions={divisionNames} departments={departmentNames} positions={positionNames} />;
+        divisions={divisionNames} departments={departmentNames} positions={positionNames} ranks={rankNames} />;
 }

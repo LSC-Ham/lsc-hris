@@ -1,5 +1,3 @@
-// prisma/seed.ts
-
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 
@@ -15,6 +13,7 @@ export async function main() {
             sex: "male", civil_status: "single", nationality: "Philippines",
             government_ids: [],
             id_number: "ad03069", department: "Information Technology", position: "IT Personnel", division: "Administration", hired_at: new Date(),
+            rank: "Staff", rank_order: 1 
         },
         {
             username: "rasino", email: "rasino@lakeshore.edu.ph", password: hashedPassword, role: "user",
@@ -27,6 +26,7 @@ export async function main() {
                 { id_label: "Pag-ibig Number", id_number: "121146788115" },
                 { id_label: "TIN Number", id_number: "135-233-141-000" },
             ],
+            rank: "Professor", rank_order: 6 // NEW
         },
         {
             username: "jbinasoy", email: "jbinasoy@lakeshore.edu.ph", password: hashedPassword, role: "user",
@@ -39,6 +39,7 @@ export async function main() {
                 { id_label: "Pag-ibig Number", id_number: "1210-6149-5990" },
                 { id_label: "TIN Number", id_number: "434-121-008-000" },
             ],
+            rank: "Associate Professor", rank_order: 5 // NEW
         },
         {
             username: "emantala", email: "emantala@lakeshore.edu.ph", password: hashedPassword, role: "user",
@@ -51,6 +52,7 @@ export async function main() {
                 { id_label: "Pag-ibig Number", id_number: "081470010720" },
                 { id_label: "TIN Number", id_number: "39251305029" },
             ],
+            rank: "Assistant Professor", rank_order: 4 // NEW
         },
         {
             username: "ddadis", email: "ddadis@lakeshore.edu.ph", password: hashedPassword, role: "user",
@@ -61,6 +63,7 @@ export async function main() {
                 { id_label: "SSS Number", id_number: "08-2534194" },
                 { id_label: "Pag-ibig Number", id_number: "35-4" },
             ],
+            rank: "Instructor I", rank_order: 2 // NEW
         },
         {
             username: "jagayo", email: "jagayo@lakeshore.edu.ph", password: hashedPassword, role: "user",
@@ -73,6 +76,7 @@ export async function main() {
                 { id_label: "Pag-ibig Number", id_number: "1010-0184-7096" },
                 { id_label: "TIN Number", id_number: "246-747-567" },
             ],
+            rank: "Instructor I", rank_order: 2 // Re-using Instructor I order 2
         },
         {
             username: "falomia", email: "falomia@lakeshore.edu.ph", password: hashedPassword, role: "user",
@@ -85,6 +89,7 @@ export async function main() {
                 { id_label: "Pag-ibig Number", id_number: "102001641135" },
                 { id_label: "TIN Number", id_number: "261-861-691" },
             ],
+            rank: "Instructor II", rank_order: 3 // NEW
         },
         {
             username: "acantilleps", email: "acantilleps@lakeshore.edu.ph", password: hashedPassword, role: "user",
@@ -96,6 +101,7 @@ export async function main() {
                 { id_label: "Philhealth Number", id_number: "19-090309262-2" },
                 { id_label: "Pag-ibig Number", id_number: "208-056-377" },
             ],
+            rank: "Instructor I", rank_order: 2
         },
         {
             username: "acarpena", email: "acarpena@lakeshore.edu.ph", password: hashedPassword, role: "user",
@@ -108,6 +114,7 @@ export async function main() {
                 { id_label: "Pag-ibig Number", id_number: "102000841136" },
                 { id_label: "TIN Number", id_number: "171373875" },
             ],
+            rank: "Instructor I", rank_order: 2
         },
         {
             username: "acaya", email: "acaya@lakeshore.edu.ph", password: hashedPassword, role: "user",
@@ -120,6 +127,7 @@ export async function main() {
                 { id_label: "Pag-ibig Number", id_number: "121087006089" },
                 { id_label: "TIN Number", id_number: "434905951" },
             ],
+            rank: "Instructor I", rank_order: 2
         },
         {
             username: "cdetera", email: "cdetera@lakeshore.edu.ph", password: hashedPassword, role: "user",
@@ -132,6 +140,7 @@ export async function main() {
                 { id_label: "Pag-ibig Number", id_number: "1210-8915-7983" },
                 { id_label: "TIN Number", id_number: "265-537-311" },
             ],
+            rank: "Instructor I", rank_order: 2
         },
         {
             username: "mdumaguing", email: "mdumaguing@lakeshore.edu.ph", password: hashedPassword, role: "moderator",
@@ -144,6 +153,7 @@ export async function main() {
                 { id_label: "Pag-ibig Number", id_number: "109001457425" },
                 { id_label: "TIN Number", id_number: "217954031" },
             ],
+            rank: "Officer", rank_order: 7 // NEW
         },
     ];
 
@@ -154,9 +164,13 @@ export async function main() {
         let employeePayload = undefined;
 
         if (isEmployee) {
-            const deptStr = data.department || "Unassigned";
-            const divisionStr = data.division || "Unassigned";
-            const positionStr = data.position || "Unassigned";
+            const deptStr = data.department || "";
+            const divisionStr = data.division || "";
+            const positionStr = data.position || "";
+
+            // 2. Safely grab rank strings, providing fallbacks
+            const rankStr = data.rank || "Unranked";
+            const rankOrder = data.rank_order || 999;
 
             const department = await prisma.departments.upsert({
                 where: { department: deptStr }, update: {}, create: { department: deptStr },
@@ -175,12 +189,24 @@ export async function main() {
                 },
             });
 
+            // 3. Upsert the Ranks model
+            const rank = await prisma.ranks.upsert({
+                where: { rank: rankStr },
+                update: {},
+                create: {
+                    rank: rankStr,
+                    order: rankOrder,
+                    description: `${rankStr} Description` // Optional description filler
+                }
+            });
+
             employeePayload = {
                 create: {
                     id_number: data.id_number,
                     hired_at: data.hired_at || new Date(),
                     departments_id: department.id,
                     divisions_id: division.id,
+                    ranks_id: rank.id, // 4. Connect the new rank ID to the employee!
                     positions: {
                         create: {
                             positions_id: position.id,

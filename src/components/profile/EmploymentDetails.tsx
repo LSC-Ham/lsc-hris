@@ -11,6 +11,7 @@ interface EmploymentDetailsProps {
     formData: any;
     divisions?: string[];
     departments?: string[];
+    ranks?: string[];
     availablePositions?: string[];
     onSave?: (updatedData: any) => void;
     onChange?: (updatedFields: any) => void;
@@ -21,6 +22,7 @@ export function EmploymentDetails({
     formData,
     divisions = [],
     departments = [],
+    ranks = [],
     availablePositions = [],
     onSave,
     onChange
@@ -219,6 +221,14 @@ export function EmploymentDetails({
                         options={departments}
                         isEditing={isEditing}
                         onChange={(e: any) => handleLocalChange("department", e.target.value)}
+                        required
+                    />
+                    <ProfileSelect
+                        label="Rank"
+                        value={draftData.rank}
+                        options={ranks}
+                        isEditing={isEditing}
+                        onChange={(e: any) => handleLocalChange("rank", e.target.value)}
                         required
                     />
                 </div>

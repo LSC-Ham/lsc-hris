@@ -30,7 +30,8 @@ export async function getEmployeeDetails(employeeId: string) {
                 positions: { include: { positions: true }, orderBy: { start_at: 'desc' } },
                 government_ids: true,
                 divisions: true,
-                departments: true
+                departments: true,
+                ranks: true,
             }
         });
 
@@ -55,6 +56,7 @@ export async function getEmployeeDetails(employeeId: string) {
             hired_at: employee.hired_at,
             division: employee.divisions?.division || "",
             department: employee.departments?.department || "",
+            rank: employee.ranks?.rank || "",
             govt_ids: employee.government_ids,
             ...flatGovIds,
 
@@ -81,8 +83,20 @@ export async function updateEmploymentDetails(employeeId: string, formData: any)
             where: { department: formData.department },
         });
 
-        if (!division || !department) {
-            return { error: "Invalid Division or Department selected." };
+        const rank = await prisma.ranks.findFirst({
+            where: { rank: formData.rank },
+        });
+
+        if (!division) {
+            return { error: "Invalid Divisio selected." };
+        }
+
+        if (!department) {
+            return { error: "Invalid Department selected." };
+        }
+
+        if (!rank) {
+            return { error: "Invalid Rank selected." };
         }
 
         const positionNames = formData.positions?.map((p: any) => p.position) || [];
@@ -128,6 +142,7 @@ export async function updateEmploymentDetails(employeeId: string, formData: any)
                     remarks: formData.remarks ? formData.remarks : null,
                     divisions_id: division.id,
                     departments_id: department.id,
+                    ranks_id: rank.id,
                 },
             });
 
@@ -152,8 +167,7 @@ export async function updateEmploymentDetails(employeeId: string, formData: any)
             }
         });
 
-        revalidatePath(`/hris/${formData.id_number}`);
-        revalidatePath(`/employees/${formData.id_number}`);
+        revalidatePath(`/employees/${employeeId}`);
         return { success: true };
 
     } catch (error) {
