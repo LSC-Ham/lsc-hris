@@ -25,7 +25,6 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
 
     const isAdminActive = pathname.startsWith("/admin");
 
-    // Centralized styling for cleaner mapping
     const activeLinkStyles = "bg-green-50 text-[#1a6b36] border border-green-100 shadow-sm dark:bg-[#1a6b36]/20 dark:text-green-400 dark:border-green-400/20";
     const inactiveLinkStyles = "text-gray-600 hover:bg-slate-50 hover:text-gray-900 border border-transparent dark:text-zinc-400 dark:hover:bg-zinc-800/50 dark:hover:text-zinc-100";
 
@@ -39,6 +38,16 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
             icon: (isActive: boolean) => (
                 <svg className={`w-5 h-5 ${isActive ? activeIconStyles : inactiveIconStyles}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+            )
+        },
+        {
+            name: "Departments",
+            href: "/hris/departments",
+            hrOnly: true,
+            icon: (isActive: boolean) => (
+                <svg className={`w-5 h-5 ${isActive ? activeIconStyles : inactiveIconStyles}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z" />
                 </svg>
             )
         },
@@ -86,8 +95,7 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
     ];
 
     return (
-        <>
-            {/* Mobile Header */}
+        <div>
             <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800 z-40 flex items-center px-4 gap-2 transition-colors duration-200">
                 <button onClick={() => setIsOpen(!isOpen)} className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800 focus:outline-none transition-colors">
                     <svg className="w-6 h-6 text-gray-600 dark:text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,15 +107,12 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                 </h2>
             </div>
 
-            {/* Mobile Overlay */}
             {isOpen && (
                 <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-40 md:hidden transition-opacity" onClick={() => setIsOpen(false)} />
             )}
 
-            {/* Sidebar */}
             <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 transform transition-all duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:sticky md:top-0 md:h-screen md:min-w-64 flex flex-col`}>
 
-                {/* Logo Area */}
                 <div className="h-16 flex items-center px-6 border-b border-gray-100 dark:border-zinc-800/50">
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center mr-3">
                         <div className="relative w-8 h-8">
@@ -117,7 +122,6 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                     <span className="font-bold text-xl text-gray-800 dark:text-zinc-100 tracking-tight">LSC HRIS</span>
                 </div>
 
-                {/* Navigation Links */}
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {navItems.map((item, index) => {
                         if (item.type === "label") {
@@ -170,6 +174,6 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                     </div>
                 </div>
             </aside>
-        </>
+        </div>
     );
 }

@@ -1,9 +1,44 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 
-export default function EmployeesTable({ employeesList }: { employeesList: any[] }) {
+export default function EmployeesTable({
+    employeesList,
+    defaultQuery = ""
+}: {
+    employeesList: any[];
+    defaultQuery?: string;
+}) {
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
+    const [searchTerm, setSearchTerm] = useState(defaultQuery);
+
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            const currentQuery = searchParams.get("query") || "";
+
+            if (searchTerm === currentQuery) {
+                return;
+            }
+
+            const params = new URLSearchParams(searchParams);
+
+            if (searchTerm) {
+                params.set("query", searchTerm);
+            } else {
+                params.delete("query");
+            }
+
+            params.set("page", "1");
+
+            router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchTerm, pathname, router, searchParams]);
 
     const formatDateTime = (date: Date | null) => {
         if (!date) return "—";
@@ -25,7 +60,16 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
 
     return (
         <>
-            {/* Mobile View (Card Layout) */}
+            <div className="p-4 border-b border-gray-200 dark:border-zinc-800 transition-colors">
+                <input
+                    type="text"
+                    placeholder="Search by name or ID..."
+                    className="w-full md:max-w-sm rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-2 text-sm text-gray-900 dark:text-zinc-100 focus:border-[#1a6b36] focus:outline-none focus:ring-1 focus:ring-[#1a6b36] transition-colors shadow-sm"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
             <div className="block md:hidden divide-y divide-gray-200 dark:divide-zinc-800 transition-colors duration-300">
                 {employeesList.length > 0 ? (
                     employeesList.map((emp: any) => (
@@ -67,7 +111,7 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
                     ))
                 ) : (
                     <div className="p-8 text-center text-gray-500 dark:text-zinc-400 text-sm">
-                        No employees found.
+                        No employees found {searchTerm ? `matching "${searchTerm}"` : ""}.
                     </div>
                 )}
             </div>
@@ -92,7 +136,7 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
                                 <tr
                                     key={emp.id}
                                     onClick={() => handleRowClick(emp.id_number)}
-                                    className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
+                                    className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer h-18"
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-zinc-100 uppercase">{emp.id_number}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -115,7 +159,7 @@ export default function EmployeesTable({ employeesList }: { employeesList: any[]
                         ) : (
                             <tr>
                                 <td colSpan={8} className="px-6 py-12 text-center text-gray-500 dark:text-zinc-400 text-sm">
-                                    No employees found.
+                                    No employees found {searchTerm ? `matching "${searchTerm}"` : ""}.
                                 </td>
                             </tr>
                         )}
