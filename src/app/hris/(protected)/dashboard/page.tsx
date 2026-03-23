@@ -9,11 +9,7 @@ export default async function Dashboard() {
             select: {
                 id: true,
                 created_at: true,
-                departments: {
-                    select: {
-                        department: true,
-                    }
-                },
+                departments: { select: { department: true } },
                 biography: {
                     select: {
                         personal_information: {

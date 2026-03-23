@@ -49,7 +49,6 @@ export default async function Page({
 
     return (
         <div className="space-y-6">
-            {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight transition-colors">
@@ -60,7 +59,6 @@ export default async function Page({
                     </p>
                 </div>
 
-                {/* Brand Button */}
                 <Link
                     href="./create"
                     className="bg-[#1a6b36] hover:bg-[#134d26] dark:bg-[#1a6b36] dark:hover:bg-[#208242] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm text-center w-full md:w-auto"
@@ -69,7 +67,6 @@ export default async function Page({
                 </Link>
             </div>
 
-            {/* Table Container */}
             <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden transition-colors duration-300">
                 <EmployeesTable employeesList={employeesList} />
 
