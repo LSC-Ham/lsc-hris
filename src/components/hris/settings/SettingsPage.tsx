@@ -4,17 +4,15 @@
 import CollapsibleSection from "@/components/hris/settings/CollapsibleSection";
 import Departments from "./Departments";
 import Divisions from "./Divisions";
-import Positions from "./Positions";
 import Ranks from "./Ranks";
 
 interface SettingsPageProps {
     divisions: any[];
     departments: any[];
-    positions: any[];
     ranks: any[];
 }
 
-export default function SettingsPage({ divisions, departments, positions, ranks }: SettingsPageProps) {
+export default function SettingsPage({ divisions, departments, ranks }: SettingsPageProps) {
     return (
         <div className="space-y-6 pb-12">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -37,10 +35,6 @@ export default function SettingsPage({ divisions, departments, positions, ranks 
 
                     <CollapsibleSection title="Departments">
                         <Departments data={departments} />
-                    </CollapsibleSection>
-
-                    <CollapsibleSection title="Positions">
-                        <Positions data={positions} departments={departments} />
                     </CollapsibleSection>
 
                     <CollapsibleSection title="Ranks">

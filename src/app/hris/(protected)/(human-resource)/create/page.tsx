@@ -1,24 +1,24 @@
 import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";
-import { getPositions } from "@/actions/admin/settings/positions/action";
-import CreateEmployeePage from "./CreateEmployeePage"; 
+import CreateEmployeePage from "./CreateEmployeePage";
+import { getRanks } from "@/actions/admin/settings/ranks/action";
 
 export default async function Page() {
-    const [rawDepts, rawDivs, rawPos] = await Promise.all([
+    const [rawDepts, rawDivs, rawRanks] = await Promise.all([
         getDepartments(),
         getDivisions(),
-        getPositions(),
+        getRanks(),
     ]);
 
     const departments = rawDepts?.map((dept) => dept.department) || [];
     const divisions = rawDivs?.map((div) => div.division) || [];
-    const positions = rawPos?.map((pos) => pos.position) || [];
+    const ranks = rawRanks?.map((r) => r.rank) || [];
 
     return (
         <CreateEmployeePage
             initialDepartments={departments}
             initialDivisions={divisions}
-            initialPositions={positions}
+            initialRanks={ranks}
         />
     );
 }

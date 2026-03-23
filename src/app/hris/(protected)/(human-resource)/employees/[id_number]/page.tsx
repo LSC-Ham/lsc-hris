@@ -1,7 +1,6 @@
 //src\app\(protected)\(admin)\employees\[id]\page.tsx
 import { getDepartments } from "@/actions/admin/settings/departments/action";
 import { getDivisions } from "@/actions/admin/settings/divisions/action";
-import { getPositions } from "@/actions/admin/settings/positions/action";
 import { getRanks } from "@/actions/admin/settings/ranks/action";
 import { getAddress } from "@/actions/employees/address/action";
 import { getEducationalBackground } from "@/actions/employees/educational_background/action";
@@ -50,8 +49,6 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const divisions = await getDivisions();
     const divisionNames = divisions.map((div) => div.division);
 
-    const positions = await getPositions();
-    const positionNames = positions.map((pos) => pos.position);
 
 
     return <EmployeePage role="moderator"
@@ -60,5 +57,5 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
         family_background={family_background}
         educational_background={educational_background}
         eligibility={eligibility} work_experience={work_experience}
-        divisions={divisionNames} departments={departmentNames} positions={positionNames} ranks={rankNames} />;
+        divisions={divisionNames} departments={departmentNames} ranks={rankNames} />;
 }

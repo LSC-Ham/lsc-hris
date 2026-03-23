@@ -23,7 +23,6 @@ export function EmploymentDetails({
     divisions = [],
     departments = [],
     ranks = [],
-    availablePositions = [],
     onSave,
     onChange
 }: EmploymentDetailsProps) {
@@ -321,11 +320,11 @@ export function EmploymentDetails({
                         <div className="bg-green-50/50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30 rounded-xl p-4 space-y-4">
                             <h4 className="text-xs font-bold text-[#1a6b36] dark:text-green-500 uppercase">Add New Position</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <ProfileSelect
+                                <ProfileField
                                     label="Position Title"
                                     value={assignedPosition.position}
-                                    options={availablePositions}
                                     isEditing={true}
+                                    placeholder="Human Resource Office"
                                     onChange={(e: any) => handleAssignedChange("position", e.target.value)}
                                     required
                                 />

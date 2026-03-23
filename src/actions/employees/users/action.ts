@@ -1,8 +1,8 @@
 "use server";
 
 import bcrypt from "bcrypt";
-import crypto from "crypto"; 
-import { prisma } from "@/lib/prisma"; 
+import crypto from "crypto";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 function generateTempPassword() {
@@ -18,8 +18,11 @@ export async function createEmployee(data: any) {
         const department = await prisma.departments.findFirst({
             where: { department: data.department },
         });
+        const rank = await prisma.ranks.findFirst({
+            where: { rank: data.rank },
+        });
 
-        if (!division || !department) {
+        if (!division || !department || !rank) {
             return { error: "Invalid Division or Department selected." };
         }
 
@@ -46,6 +49,7 @@ export async function createEmployee(data: any) {
                             divisions_id: division.id,
                             departments_id: department.id,
                             remarks: data.remarks,
+                            ranks_id: rank.id,
                         }
                     },
                     personal_information: {
@@ -74,19 +78,14 @@ export async function createEmployee(data: any) {
             const realEmployeeId = biographyRecord.employees?.id;
             if (!realEmployeeId) throw new Error("Failed to create the employee relation.");
 
-            const positionNames = data.positions?.map((p: any) => p.position) || [];
-            const foundPositions = await tx.positions.findMany({
-                where: { position: { in: positionNames } },
-            });
-            const positionMap = new Map(foundPositions.map((p) => [p.position, p.id]));
+            // REMOVED: The tx.positions.findMany query and mapping
 
             const positionInserts = (data.positions || [])
                 .map((p: any) => {
-                    const posId = positionMap.get(p.position);
-                    if (!posId) return null;
+                    if (!p.position) return null; // Safety check
                     return {
                         employees_id: realEmployeeId,
-                        positions_id: posId,
+                        positions: p.position, // UPDATED: Insert the string directly!
                         status: p.status,
                         description: p.description,
                         is_active: Boolean(p.is_active),
@@ -126,7 +125,7 @@ export async function createEmployee(data: any) {
             id: result.id,
             username: result.username,
             email: result.email,
-            tempPassword: rawPassword 
+            tempPassword: rawPassword
         };
 
     } catch (error) {

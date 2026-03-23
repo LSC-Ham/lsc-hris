@@ -9,9 +9,7 @@ import { revalidatePath } from "next/cache";
 export async function generateEmployeeID(division: string) {
     try {
         const count = await prisma.employees.count();
-
         const nextId = count + 1;
-
         return division.substring(0, 2).toLowerCase() + nextId.toString().padStart(4, '0');
     } catch (error) {
         console.error("Error generating ID:", error);
@@ -27,7 +25,9 @@ export async function getEmployeeDetails(employeeId: string) {
         const employee = await prisma.employees.findUnique({
             where: { id: employeeId },
             include: {
-                positions: { include: { positions: true }, orderBy: { start_at: 'desc' } },
+                // REMOVED: include: { positions: true } 
+                // We just need to order the records now.
+                positions: { orderBy: { start_at: 'desc' } },
                 government_ids: true,
                 divisions: true,
                 departments: true,
@@ -60,10 +60,11 @@ export async function getEmployeeDetails(employeeId: string) {
             govt_ids: employee.government_ids,
             ...flatGovIds,
 
-            positions: employee.positions.map(({ positions, ...record }) => ({
+            // UPDATED: Simply map the 'positions' string field 
+            // We map it to 'position' to keep your frontend working without changes
+            positions: employee.positions.map((record) => ({
                 ...record,
-                position_id: positions.id,
-                position: positions.position,
+                position: record.positions,
             })),
         };
 
@@ -88,7 +89,7 @@ export async function updateEmploymentDetails(employeeId: string, formData: any)
         });
 
         if (!division) {
-            return { error: "Invalid Divisio selected." };
+            return { error: "Invalid Division selected." }; // Fixed small typo here!
         }
 
         if (!department) {
@@ -99,22 +100,16 @@ export async function updateEmploymentDetails(employeeId: string, formData: any)
             return { error: "Invalid Rank selected." };
         }
 
-        const positionNames = formData.positions?.map((p: any) => p.position) || [];
-
-        const foundPositions = await prisma.positions.findMany({
-            where: { position: { in: positionNames } },
-        });
-
-        const positionMap = new Map(foundPositions.map((p) => [p.position, p.id]));
+        // REMOVED: The block of code querying prisma.positions.findMany
+        // We no longer need to look up IDs. We just map the data directly!
 
         const positionInserts = (formData.positions || [])
             .map((p: any) => {
-                const posId = positionMap.get(p.position);
-                if (!posId) return null;
+                if (!p.position) return null; // Make sure the position string exists
 
                 return {
                     employees_id: employeeId,
-                    positions_id: posId,
+                    positions: p.position, // UPDATED: directly insert the string
                     status: p.status,
                     description: p.description,
                     is_active: Boolean(p.is_active),

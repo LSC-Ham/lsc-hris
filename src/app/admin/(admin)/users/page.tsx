@@ -1,4 +1,4 @@
-// src/app/(protected)/(admin)/users/page.tsx
+// src\app\admin\(admin)\users\page.tsx
 import UsersTable from "@/components/admin/users/UsersTable";
 import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
@@ -8,15 +8,12 @@ export default async function Page({
 }: {
     searchParams: Promise<{ page?: string }>;
 }) {
-    // 1. Await the searchParams Promise
     const resolvedSearchParams = await searchParams;
 
-    // 2. Pagination Setup
     const ITEMS_PER_PAGE = 10;
     const currentPage = Number(resolvedSearchParams?.page) || 1;
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
 
-    // 3. Fetch users with pagination and total count in parallel
     const [usersLists, totalUsers] = await Promise.all([
         prisma.user.findMany({
             skip,

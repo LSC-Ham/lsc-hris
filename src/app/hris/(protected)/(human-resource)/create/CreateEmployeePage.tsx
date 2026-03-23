@@ -15,13 +15,13 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 interface CreateEmployeePageProps {
     initialDepartments: string[];
     initialDivisions: string[];
-    initialPositions: string[];
+    initialRanks: string[]
 }
 
 export default function CreateEmployeePage({
     initialDepartments,
     initialDivisions,
-    initialPositions
+    initialRanks,
 }: CreateEmployeePageProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -127,7 +127,7 @@ export default function CreateEmployeePage({
                         onChange={handleFormUpdate}
                         divisions={initialDivisions}
                         departments={initialDepartments}
-                        availablePositions={initialPositions}
+                        ranks={initialRanks}
                     />
                 </div>
 

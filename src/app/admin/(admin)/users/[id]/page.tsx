@@ -1,11 +1,9 @@
-
+// src\app\admin\(admin)\users\[id]\page.tsx
 import { getUsers } from "@/actions/users/action";
 import AccountSettingsPage from "@/components/hris/account/AccountSettings";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 
-
-//src\app\hris\(protected)\account\page.tsx
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
     const { id: id } = await params;
     const session = await getServerSession(authOptions);

@@ -22,7 +22,7 @@ export default async function Page({
             take: ITEMS_PER_PAGE,
             include: {
                 departments: {
-                    select: { department: true, }
+                    select: { department: true }
                 },
                 divisions: {
                     select: { division: true }
@@ -31,7 +31,9 @@ export default async function Page({
                     select: {
                         personal_information: {
                             select: {
-                                firstname: true, middlename: true, surname: true,
+                                firstname: true,
+                                middlename: true,
+                                surname: true
                             }
                         },
                     }

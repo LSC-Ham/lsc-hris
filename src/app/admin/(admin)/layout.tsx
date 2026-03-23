@@ -1,11 +1,11 @@
+// src\app\admin\(admin)\layout.tsx
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // Make sure this path is correct
+import { authOptions } from "@/lib/auth"; 
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/admin/Sidebar";
 import { prisma } from "@/lib/prisma";
 import { LogoutButton } from "@/components/hris/auth/LogoutButton";
 
-// Define which roles are allowed to enter this zone
 const ALLOWED_ROLES = ["admin"];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

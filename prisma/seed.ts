@@ -179,15 +179,6 @@ export async function main() {
                 where: { division: divisionStr }, update: {}, create: { division: divisionStr },
             });
 
-            const position = await prisma.positions.upsert({
-                where: { position: positionStr },
-                update: {},
-                create: {
-                    position: positionStr,
-                    departments_id: department.id
-                },
-            });
-
             const rank = await prisma.ranks.upsert({
                 where: { rank: rankStr },
                 update: {},
@@ -207,7 +198,7 @@ export async function main() {
                     ranks_id: rank.id,
                     positions: {
                         create: {
-                            positions_id: position.id,
+                            positions: positionStr,
                             status: "Full-Time",
                             is_active: true,
                             start_at: new Date(),

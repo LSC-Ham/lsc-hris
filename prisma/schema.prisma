@@ -109,26 +109,12 @@ model departments {
   updated_at  DateTime? @updatedAt @db.Timestamp(6)
 
   employees employees[]
-  positions positions[]
-}
-
-model positions {
-  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  position       String    @unique
-  departments_id String?   @db.Uuid
-  description    String?
-  created_at     DateTime  @default(now()) @db.Timestamp(6)
-  updated_at     DateTime? @updatedAt @db.Timestamp(6)
-
-  departments departments? @relation(fields: [departments_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
-
-  employees employees_positions[]
 }
 
 model employees_positions {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   employees_id String    @db.Uuid
-  positions_id String    @db.Uuid
+  positions    String
   is_active    Boolean   @default(false)
   description  String?
   status       String?
@@ -136,7 +122,6 @@ model employees_positions {
   end_at       DateTime? @db.Timestamp(6)
 
   employees employees @relation(fields: [employees_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  positions positions @relation(fields: [positions_id], references: [id])
 }
 
 model ranks {

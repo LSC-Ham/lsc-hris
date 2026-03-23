@@ -34,7 +34,6 @@ interface EmployeePageProps {
     work_experience: any;
     departments?: any[];
     divisions?: any[];
-    positions?: any[];
     ranks?: any[];
 }
 
@@ -99,7 +98,6 @@ export default function EmployeePage({
     work_experience,
     departments = [],
     divisions = [],
-    positions = [],
     ranks = [],
 }: EmployeePageProps) {
     const router = useRouter();
@@ -339,7 +337,6 @@ export default function EmployeePage({
                         onSave={handleSaveEmploymentDetails}
                         departments={departments}
                         divisions={divisions}
-                        availablePositions={positions}
                         ranks={ranks}
                     />
                 );
