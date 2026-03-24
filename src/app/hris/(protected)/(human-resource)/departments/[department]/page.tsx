@@ -1,15 +1,14 @@
 // src\app\hris\(protected)\(human-resource)\departments\[department]\page.tsx
+import EmployeeDropdownCard from "@/components/hris/employees/EmployeeDropdownCard";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-// Next.js passes the URL parameters into this component
-export default async function DepartmentDetailsPage({
+export default async function Page({
     params,
 }: {
     params: Promise<{ department: string }>;
 }) {
-    // 1. Decode the URL (turns "Human%20Resources" back into "Human Resources")
     const { department: department } = await params;
     const departmentName = decodeURIComponent(department);
 
@@ -23,10 +22,20 @@ export default async function DepartmentDetailsPage({
                     id: true,
                     id_number: true,
                     created_at: true,
+                    department_role: true,
                     biography: {
                         select: {
+                            users: {
+                                select: {
+                                    id: true,
+                                    profile_picture: true,
+                                }
+                            },
                             personal_information: {
-                                select: { firstname: true, surname: true }
+                                select: {
+                                    firstname: true,
+                                    surname: true
+                                }
                             }
                         }
                     }
@@ -113,36 +122,19 @@ export default async function DepartmentDetailsPage({
                         {departmentData.employees.map((emp) => {
                             const firstName = emp.biography?.personal_information?.firstname || "Unknown";
                             const lastName = emp.biography?.personal_information?.surname || "Employee";
-                            const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 
                             return (
-                                <Link
-                                    href={`/hris/employees/${emp.id_number}`} // Links to the employee's specific profile
+                                <EmployeeDropdownCard
                                     key={emp.id}
-                                    className="flex items-center gap-4 bg-white dark:bg-zinc-900 p-4 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-md hover:border-[#1a6b36]/40 dark:hover:border-[#28a152]/40 transition-all group"
-                                >
-                                    {/* Avatar Placeholder */}
-                                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-zinc-700 group-hover:bg-[#1a6b36]/10 dark:group-hover:bg-[#1a6b36]/20 transition-colors">
-                                        <span className="text-sm font-bold text-gray-600 dark:text-zinc-300 group-hover:text-[#1a6b36] dark:group-hover:text-[#28a152]">
-                                            {initials}
-                                        </span>
-                                    </div>
-
-                                    {/* Employee Details */}
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 capitalize truncate group-hover:text-[#1a6b36] dark:group-hover:text-[#28a152] transition-colors">
-                                            {firstName} {lastName}
-                                        </p>
-                                        <p className="text-xs text-gray-500 dark:text-zinc-400 truncate mt-0.5">
-                                            Joined {new Date(emp.created_at).toLocaleDateString()}
-                                        </p>
-                                    </div>
-
-                                    {/* Small arrow to indicate it's clickable */}
-                                    <svg className="w-4 h-4 text-gray-300 dark:text-zinc-600 group-hover:text-[#1a6b36] dark:group-hover:text-[#28a152] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </Link>
+                                    id_number={emp.id_number}
+                                    firstName={firstName}
+                                    lastName={lastName}
+                                    userId={emp.biography.users?.id || ""}
+                                    profilePicture={emp.biography.users?.profile_picture || ""}
+                                    joinedDate={new Date(emp.created_at).toLocaleDateString()}
+                                    departmentName={departmentData.department}
+                                    currentRole={emp.department_role}
+                                />
                             );
                         })}
                     </div>

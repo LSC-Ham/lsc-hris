@@ -170,3 +170,43 @@ export async function updateEmploymentDetails(employeeId: string, formData: any)
         return { error: "Failed to update employment details." };
     }
 }
+
+export async function setDepartmentRole(id_number: string, newRole: string, departmentName: string) {
+    try {
+        // Optional but recommended: If you are setting a new "Head", 
+        // you might want to remove the "Head" role from anyone else in this department first!
+        if (newRole === 'Head') {
+            await prisma.employees.updateMany({
+                where: {
+                    departments: { department: departmentName },
+                    department_role: 'Head'
+                },
+                data: { department_role: null }
+            });
+        }
+
+        if (newRole === 'Assistant Head') {
+            await prisma.employees.updateMany({
+                where: {
+                    departments: { department: departmentName },
+                    department_role: 'Assistant Head'
+                },
+                data: { department_role: null }
+            });
+        }
+
+        // Now, update the actual employee that was clicked
+        await prisma.employees.update({
+            where: { id_number: id_number },
+            data: { department_role: newRole }
+        });
+
+        // This tells Next.js to instantly refresh the page data so the UI updates
+        revalidatePath(`/hris/departments/${departmentName}`);
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error setting role:", error);
+        return { success: false, error: "Failed to update role" };
+    }
+}

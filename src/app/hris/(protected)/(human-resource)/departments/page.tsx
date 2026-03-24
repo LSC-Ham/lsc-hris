@@ -2,7 +2,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
-export default async function DepartmentsPage() {
+export default async function Page() {
     // Highly optimized query: just gets the department and the COUNT of employees
     const departments = await prisma.departments.findMany({
         select: {

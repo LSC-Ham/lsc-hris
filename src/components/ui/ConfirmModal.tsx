@@ -1,3 +1,4 @@
+// src\components\ui\ConfirmModal.tsx
 "use client";
 
 import React from "react";
@@ -58,7 +59,7 @@ export function ConfirmModal({
                             type="button"
                             onClick={onClose}
                             disabled={isConfirming}
-                            className="flex-1 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 border border-gray-300 dark:border-zinc-700 text-sm font-medium px-4 py-2.5 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="cursor-pointer flex-1 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 border border-gray-300 dark:border-zinc-700 text-sm font-medium px-4 py-2.5 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {cancelText}
                         </button>
@@ -66,7 +67,7 @@ export function ConfirmModal({
                             type="button"
                             onClick={onConfirm}
                             disabled={isConfirming}
-                            className={`flex-1 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${confirmColorClass}`}
+                            className={`cursor-pointer flex-1 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${confirmColorClass}`}
                         >
                             {isConfirming ? (
                                 <>

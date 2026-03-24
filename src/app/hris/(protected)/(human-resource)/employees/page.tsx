@@ -15,10 +15,8 @@ export default async function Page({
     const currentPage = Number(resolvedSearchParams?.page) || 1;
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
 
-    // 1. Grab the search query from the URL
     const query = resolvedSearchParams?.query || "";
 
-    // 2. Create a reusable "where" filter for Prisma
     const whereFilter = query ? {
         OR: [
             { id_number: { contains: query, mode: "insensitive" as const } },
@@ -35,10 +33,9 @@ export default async function Page({
         ]
     } : {};
 
-    // 3. Apply the filter to BOTH the findMany and the count queries
     const [employeesList, totalEmployees] = await Promise.all([
         prisma.employees.findMany({
-            where: whereFilter, // <-- Added where clause
+            where: whereFilter,
             skip: skip,
             take: ITEMS_PER_PAGE,
             include: {
@@ -55,7 +52,7 @@ export default async function Page({
             orderBy: { created_at: "desc" },
         }),
         prisma.employees.count({
-            where: whereFilter // <-- Count only the matching rows!
+            where: whereFilter 
         })
     ]);
 
@@ -83,7 +80,6 @@ export default async function Page({
 
             <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden transition-colors duration-300">
 
-                {/* Pass the current query down so the input box remembers what was typed */}
                 <EmployeesTable employeesList={employeesList} defaultQuery={query} />
 
                 <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
