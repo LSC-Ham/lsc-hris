@@ -58,7 +58,9 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                         Welcome back, <span className="text-gray-900 dark:text-zinc-100 capitalize">{userData?.biography?.personal_information?.surname}</span>
                     </h2>
 
-                    <LogoutButton />
+                    <div className="hidden lg:block">
+                        <LogoutButton />
+                    </div>
                 </header>
 
                 <main className="p-4 pt-20 md:p-8 md:pt-8">

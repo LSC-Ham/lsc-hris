@@ -112,10 +112,13 @@ export default async function Page({
             </div>
 
             {/* Employee List Grid */}
-            <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-4">
+            <div className="flex flex-col gap-4">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-zinc-100">
                     Team Members
                 </h3>
+                <p className="text-xs text-gray-500 dark:text-zinc-400 italic">
+                    * Note: Heads and Assistant Heads are granted administrative control over departmental leave approvals.
+                </p>
 
                 {departmentData.employees.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

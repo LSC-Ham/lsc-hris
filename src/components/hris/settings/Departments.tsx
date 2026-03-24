@@ -113,19 +113,19 @@ export default function Departments({ data }: DepartmentsTemplateProps) {
 
     return (
         <div className="space-y-6">
-            <form ref={addFormRef} action={handleAddClick} className="flex flex-col sm:flex-row gap-3 bg-gray-50 dark:bg-zinc-950/50 p-4 rounded-lg border border-gray-200 dark:border-zinc-800">
+            <form ref={addFormRef} action={handleAddClick} className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 bg-gray-50 dark:bg-zinc-950/50 p-4 rounded-lg border border-gray-200 dark:border-zinc-800">
                 <input
                     type="text"
                     name="department"
                     placeholder="Department Name"
                     required
-                    className="flex-1 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1a6b36]"
+                    className="border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1a6b36]"
                 />
                 <input
                     type="text"
                     name="description"
                     placeholder="Description (Optional)"
-                    className="flex-1 border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1a6b36]"
+                    className="border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#1a6b36]"
                 />
                 <button type="submit" className="bg-[#1a6b36] dark:bg-green-700 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-[#155a2b] dark:hover:bg-green-600 transition shadow-sm whitespace-nowrap">
                     Add Department

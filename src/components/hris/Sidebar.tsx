@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import ProfilePictureUpload from "../profile/ProfilePictureUpload";
 import Image from "next/image";
+import { LogoutButton } from "./auth/LogoutButton";
 
 interface SidebarProps {
     userRole: string;
@@ -148,7 +149,7 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
 
                 {/* Admin Panel Link */}
                 {userRole === "admin" && (
-                    <div className="px-4 py-2 border-t border-gray-50 dark:border-zinc-800/50">
+                    <div className="px-4 py-2 border-t border-gray-50 dark:border-zinc-800/50 space-y-1">
                         <Link
                             href="/admin/dashboard"
                             className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${isAdminActive ? activeLinkStyles : inactiveLinkStyles}`}
@@ -158,10 +159,13 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                             </svg>
                             Admin Panel
                         </Link>
+
+                        <div className="block lg:hidden [&>button]:w-full [&>button]:border-0 [&>button]:px-4 [&>button]:py-3">
+                            <LogoutButton />
+                        </div>
                     </div>
                 )}
 
-                {/* Profile Footer */}
                 <div className="p-4 border-t border-gray-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/20">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center text-gray-500 dark:text-zinc-400 font-bold border border-gray-200 dark:border-zinc-700 overflow-hidden shadow-sm">
