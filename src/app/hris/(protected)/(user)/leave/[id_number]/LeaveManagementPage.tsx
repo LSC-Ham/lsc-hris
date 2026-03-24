@@ -114,12 +114,39 @@ export default function LeaveManagementPage({ leavesList, defaultQuery = "" }: P
         }
     };
 
-    const dummyBalance = { all: 18, vacation: 10, sick: 5, emergency: 3 };
+    const INITIAL_VL = 5;
+    const INITIAL_SL = 5;
+    const INITIAL_EL = 3;
+
+    let usedVL = 0;
+    let usedSL = 0;
+    let usedEL = 0;
+
+    leavesList.forEach((leave) => {
+        if (leave.status === 1 || leave.status === 2 || leave.status === 3) {
+            const days = Number(calculateDays(leave.date_from, leave.date_to)) || 0;
+            const type = (leave.leave_type || "").toLowerCase();
+
+            if (type.includes("vacation")) {
+                usedVL += days;
+            } else if (type.includes("sick")) {
+                usedSL += days;
+            } else if (type.includes("emergency")) {
+                usedEL += days;
+            }
+        }
+    });
+
+    const balanceVL = Math.max(0, INITIAL_VL - usedVL);
+    const balanceSL = Math.max(0, INITIAL_SL - usedSL);
+    const balanceEL = Math.max(0, INITIAL_EL - usedEL);
+    const balanceTotal = balanceVL + balanceSL + balanceEL;
+
     const stats = [
-        { label: "Total Balance", value: dummyBalance.all, icon: CalendarSVG, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-100 dark:border-blue-800/50" },
-        { label: "Vacation Leave", value: dummyBalance.vacation, icon: PlaneSVG, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", border: "border-emerald-100 dark:border-emerald-800/50" },
-        { label: "Sick Leave", value: dummyBalance.sick, icon: StethoscopeSVG, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-100 dark:border-amber-800/50" },
-        { label: "Emergency Leave", value: dummyBalance.emergency, icon: AlertTriangleSVG, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/20", border: "border-rose-100 dark:border-rose-800/50" }
+        { label: "Total Leave", value: balanceTotal, icon: CalendarSVG, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-100 dark:border-blue-800/50" },
+        { label: "Vacation Leave", value: balanceVL, icon: PlaneSVG, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", border: "border-emerald-100 dark:border-emerald-800/50" },
+        { label: "Sick Leave", value: balanceSL, icon: StethoscopeSVG, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-100 dark:border-amber-800/50" },
+        { label: "Emergency Leave", value: balanceEL, icon: AlertTriangleSVG, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/20", border: "border-rose-100 dark:border-rose-800/50" }
     ];
 
     return (

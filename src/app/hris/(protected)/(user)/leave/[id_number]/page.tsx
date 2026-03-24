@@ -8,11 +8,11 @@ export default async function Page({
     searchParams, params
 }: {
     searchParams: Promise<{ page?: string; query?: string }>;
-    params: Promise<{ id_number: string }>; 
+    params: Promise<{ id_number: string }>;
 }) {
     const resolvedSearchParams = await searchParams;
     const { id_number } = await params;
-    
+
     const ITEMS_PER_PAGE = 10;
     const currentPage = Number(resolvedSearchParams?.page) || 1;
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -23,7 +23,7 @@ export default async function Page({
             id_number: id_number
         }
     };
-    
+
     if (query) {
         whereFilter.leave_type = {
             contains: query,
@@ -58,7 +58,7 @@ export default async function Page({
                 </div>
 
                 <Link
-                    href={`/hris/leave/${id_number}/file`}
+                    href={`/hris/leave/file`}
                     className="bg-[#1a6b36] hover:bg-[#134d26] dark:bg-[#1a6b36] dark:hover:bg-[#208242] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm text-center w-full md:w-auto"
                 >
                     + File Leave

@@ -1,102 +1,39 @@
+// src\app\hris\(protected)\(user)\leave\file\actions.ts
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/lib/auth";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
-export async function getEmployeesLeave(employeeId: string) {
-    try {
-        const session = await getServerSession(authOptions);
-        if (!session?.user) {
-            redirect("/login");
-        }
+export async function submitLeaveApplication(formData: FormData) {
+    const employeeId = formData.get("employeeId") as string;
+    const leaveType = formData.get("leaveType") as string;
+    const dateFrom = formData.get("dateFrom") as string;
+    const dateTo = formData.get("dateTo") as string;
+    const reason = formData.get("reason") as string;
 
-        const employee = await prisma.employees.findUnique({
-            where: { id: employeeId },
-            include: {
-                biography: {
-                    select: {
-                        personal_information: true,
-                    }
-                }
-            },
-        });
-
-        if (!employee) return null;
-
-        return {
-            id: employee.id,
-            ...(employee.biography?.personal_information || {}),
-        };
-
-    } catch (error) {
-        console.error("Error fetching profile:", error);
-        return null;
+    if (!employeeId || !leaveType || !dateFrom || !dateTo) {
+        return { error: "Please fill out all required fields." };
     }
-}
 
-export async function updatePersonalInformation(data: any) {
     try {
-        const { id, ...updateData } = data;
-
-        const validBirthdate = updateData.birthdate
-            ? new Date(updateData.birthdate).toISOString()
-            : null;
-
-        await prisma.biography.update({
-            where: {
-                id: data.biography_id
-            },
+        await prisma.employees_leaves.create({
             data: {
-                personal_information: {
-                    upsert: {
-                        create: {
-                            surname: updateData.surname,
-                            firstname: updateData.firstname,
-                            middlename: updateData.middlename,
-                            extension: updateData.extension,
-                            birthdate: validBirthdate,
-                            birthplace: updateData.birthplace,
-                            sex: updateData.sex,
-                            civil_status: updateData.civil_status,
-                            telephone_no: updateData.telephone_no,
-                            mobile_no: updateData.mobile_no,
-                            email: updateData.email,
-                            nationality: updateData.nationality,
-                            height: updateData.height,
-                            weight: updateData.weight,
-                            blood_type: updateData.blood_type,
-                        },
-                        update: {
-                            surname: updateData.surname,
-                            firstname: updateData.firstname,
-                            middlename: updateData.middlename,
-                            extension: updateData.extension,
-                            birthdate: validBirthdate,
-                            birthplace: updateData.birthplace,
-                            sex: updateData.sex,
-                            civil_status: updateData.civil_status,
-                            telephone_no: updateData.telephone_no,
-                            mobile_no: updateData.mobile_no,
-                            email: updateData.email,
-                            nationality: updateData.nationality,
-                            height: updateData.height,
-                            weight: updateData.weight,
-                            blood_type: updateData.blood_type,
-                        }
-                    }
-                },
+                employees_id: employeeId,
+                leave_type: leaveType,
+                date_from: new Date(dateFrom),
+                date_to: new Date(dateTo),
+                reason: reason || null,
+                status: 1,
             }
         });
 
-        revalidatePath(`/hris/${data.id_number}`);
-        revalidatePath(`/employees/${data.id_number}`);
-        return { success: true };
-
     } catch (error) {
-        console.error("Error updating personal information:", error);
-        return { success: false, error: "Failed to save changes to the database." };
+        console.error("Database Error:", error);
+        return { error: "Failed to submit leave application. Please try again." };
     }
+
+    revalidatePath("/hris/leave");
+
+    redirect("/hris/leave");
 }
