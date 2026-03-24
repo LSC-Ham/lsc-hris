@@ -11,7 +11,7 @@ import { WorkExperience } from "@/components/profile/WorkExperience";
 
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
 import { updateEmploymentDetails } from "@/actions/employees/employment_details/action";
-import { updatePersonalInformation } from "@/actions/employees/personal_information/actions";
+import { updatePersonalInformation } from "@/actions/employees/personal_information/action";
 import { updateAddress } from "@/actions/employees/address/action";
 import { updateFamilyBackground } from "@/actions/employees/family_background/action";
 import { updateEducationalBackground } from "@/actions/employees/educational_background/action";

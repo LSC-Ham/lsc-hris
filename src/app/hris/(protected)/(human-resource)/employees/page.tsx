@@ -52,7 +52,7 @@ export default async function Page({
             orderBy: { created_at: "desc" },
         }),
         prisma.employees.count({
-            where: whereFilter 
+            where: whereFilter
         })
     ]);
 
@@ -81,15 +81,16 @@ export default async function Page({
             <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl shadow-sm overflow-hidden transition-colors duration-300">
 
                 <EmployeesTable employeesList={employeesList} defaultQuery={query} />
-
-                <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
-                    <Pagination
-                        totalPages={totalPages}
-                        currentPage={currentPage}
-                        totalItems={totalEmployees}
-                        itemName="employees"
-                    />
-                </div>
+                {totalPages > 0 && (
+                    <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
+                        <Pagination
+                            totalPages={totalPages}
+                            currentPage={currentPage}
+                            totalItems={totalEmployees}
+                            itemName="employees"
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

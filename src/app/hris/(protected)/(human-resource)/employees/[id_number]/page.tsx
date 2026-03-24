@@ -7,7 +7,7 @@ import { getEducationalBackground } from "@/actions/employees/educational_backgr
 import { getEligibility } from "@/actions/employees/eligibility/action";
 import { getEmployeeDetails } from "@/actions/employees/employment_details/action";
 import { getFamilyBackground } from "@/actions/employees/family_background/action";
-import { getPersonalInformation } from "@/actions/employees/personal_information/actions";
+import { getPersonalInformation } from "@/actions/employees/personal_information/action";
 import { getWorkExperience } from "@/actions/employees/work_experience/action";
 import { getUsers } from "@/actions/users/action";
 import EmployeePage from "@/app/hris/(protected)/(human-resource)/employees/[id_number]/EmployeePage";
