@@ -19,7 +19,7 @@ interface Props {
     leave: LeaveData;
     departmentRole?: string;
     headName?: string;
-    position?: string; // Added to check for VP Admin
+    position?: string; 
 }
 
 export default function ViewRequestorLeavePage({ leave, departmentRole, headName, position }: Props) {
@@ -145,6 +145,9 @@ export default function ViewRequestorLeavePage({ leave, departmentRole, headName
                     {/* 1. DEPARTMENT HEAD SECTION */}
                     <div className="w-full p-4 rounded-xl border border-divider bg-surface shadow-sm flex flex-col justify-between">
                         <div className="truncate">
+                            {
+                                // lets add Noted by:
+                            }
                             <p className="text-[10px] text-muted font-medium mb-1 uppercase">Department Head</p>
                             <p className="text-sm font-bold text-foreground truncate">{headName}</p>
                         </div>
@@ -177,6 +180,9 @@ export default function ViewRequestorLeavePage({ leave, departmentRole, headName
                     {/* 2. VP ADMIN SECTION */}
                     <div className="p-4 rounded-xl border border-divider bg-surface shadow-sm flex flex-col justify-between w-full">
                         <div>
+                            {
+                                //lets add approved by:
+                            }
                             <p className="text-[10px] text-muted font-medium mb-1 uppercase">Vice President for Administration</p>
                             <p className="text-sm font-bold text-foreground truncate">Maria Clara</p>
                         </div>
@@ -211,30 +217,6 @@ export default function ViewRequestorLeavePage({ leave, departmentRole, headName
                             )}
                         </div>
                     </div>
-
-                    {/* 3. HR MANAGER SECTION */}
-                    <div className="p-4 rounded-xl border border-divider bg-surface shadow-sm flex flex-col justify-between w-full">
-                        <div>
-                            <p className="text-[10px] text-muted font-medium mb-1 uppercase">HR Manager</p>
-                            <p className="text-sm font-bold text-foreground truncate">Jose Rizal</p>
-                        </div>
-                        <div className="mt-4">
-                            {leave.status === 2 ? (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-accent/10 text-[color:var(--color-accent)] border border-accent/20">
-                                    Pending
-                                </span>
-                            ) : leave.status && leave.status > 2 ? (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-brand/10 text-brand border border-brand/20">
-                                    Approved
-                                </span>
-                            ) : (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-muted/10 text-muted border border-divider">
-                                    Waiting
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>

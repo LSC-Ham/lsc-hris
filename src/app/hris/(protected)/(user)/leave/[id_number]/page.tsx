@@ -73,16 +73,16 @@ export default async function Page({
                         defaultQuery={query}
                     />
 
-                    <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
-                        {totalPages > 0 && (
+                    {totalPages > 0 && (
+                        <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
                             <Pagination
                                 totalPages={totalPages}
                                 currentPage={currentPage}
                                 totalItems={totalLeaves}
                                 itemName="leaves"
                             />
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                 </div>
             </div>

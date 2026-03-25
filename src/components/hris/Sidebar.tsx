@@ -15,9 +15,10 @@ interface SidebarProps {
     department?: string;
     idNumber: string;
     departmentRole: string;
+    rank: string
 }
 
-export function Sidebar({ userRole, userId, profilePicture, surname, department, idNumber, departmentRole }: SidebarProps) {
+export function Sidebar({ userRole, userId, profilePicture, surname, department, idNumber, departmentRole, rank }: SidebarProps) {
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
 
@@ -43,11 +44,11 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                 </svg>
             )
         },
-        { type: "label", name: "Human Resource", hrOnly: true },
+        { type: "label", name: "Human Resource", hrOnly: true, vpOnly: true },
         {
             name: "Employees",
             href: "/hris/employees",
-            hrOnly: true,
+            hrOnly: true, vpOnly: true,
             icon: (isActive: boolean) => (
                 <svg className={`w-5 h-5 ${isActive ? activeIconStyles : inactiveIconStyles}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -150,10 +151,11 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
 
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {navItems.map((item, index) => {
-                        if (item.hrOnly && !["human resource"].includes(department?.toLowerCase() || "")) return null;
+                        if (item.hrOnly && !["human resource"].includes(department?.toLowerCase() || "") &&
+                            item.vpOnly && !["vice president"].includes(rank?.toLowerCase() || "")) return null;
                         if (item.roles && !["admin", "moderator"].includes(userRole)) return null;
                         if (item.headOnly && !["head", "assistant head"].includes(departmentRole?.toLowerCase() || "")) return null;
-                        
+
                         if (item.type === "label") {
                             return (
                                 <div key={`label-${index}`} className="px-4 p-2">

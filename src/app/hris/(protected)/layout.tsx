@@ -29,6 +29,10 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                         select: {
                             id_number: true, department_role: true, departments: {
                                 select: { department: true }
+                            }, ranks: {
+                                select: {
+                                    rank: true,
+                                }
                             }
                         }
                     }
@@ -51,6 +55,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
                 department={userData?.biography?.employees?.departments?.department || ""}
                 idNumber={userData?.biography?.employees?.id_number || ""}
                 departmentRole={userData?.biography?.employees?.department_role || ""}
+                rank={userData?.biography?.employees?.ranks?.rank || ""}
             />
 
             <div className="flex-1 flex flex-col">

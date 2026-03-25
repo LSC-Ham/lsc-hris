@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 const ALLOWED_DEPARTMENTS = ["human resource"];
+const ALLOWED_RANKS = ["vice president"]
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
     const session = await getServerSession(authOptions);
@@ -15,12 +16,29 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 
     const userData = await prisma.user.findUnique({
         where: { id: userId },
-        select: { biography: { select: { employees: { select: { departments: { select: { department: true } } } } } } }
+        select: {
+            biography: {
+                select: {
+                    employees: {
+                        select: {
+                            departments: { select: { department: true } },
+                            ranks: {
+                                select: {
+                                    rank: true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     });
 
     const role = ALLOWED_DEPARTMENTS.includes(userData?.biography?.employees?.departments?.department.toLowerCase() || "")
+    const rank = ALLOWED_RANKS.includes(userData?.biography?.employees?.ranks?.rank.toLowerCase() || "")
 
-    if (!role) {
+
+    if (!role && !rank) {
         redirect("/hris/dashboard");
     }
 

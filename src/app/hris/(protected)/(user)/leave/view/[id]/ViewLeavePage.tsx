@@ -140,19 +140,6 @@ export default function ViewLeavePage({ leave, headName }: Props) {
                             </span>
                         </div>
                     </div>
-
-                    <div className="p-4 rounded-xl border border-divider bg-surface shadow-sm flex flex-col justify-between w-full">
-                        <div>
-                            <p className="text-[10px] text-muted font-medium mb-1 uppercase">HR Manager</p>
-                            <p className="text-sm font-bold text-foreground truncate">Jose Rizal</p>
-                        </div>
-                        <div className="mt-4">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-muted/10 text-muted border border-divider">
-                                Waiting
-                            </span>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
