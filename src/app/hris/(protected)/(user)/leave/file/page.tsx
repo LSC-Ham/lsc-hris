@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth"; // Adjust this import to your actual auth options path
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import FileEmployeePage from "./FileEmployeePage";
+import FormLeavePage from "./FormLeavePage";
 import Link from "next/link"; // Added for the Back button
 
 export default async function FileLeaveServerPage() {
@@ -46,7 +46,7 @@ export default async function FileLeaveServerPage() {
 
             <div className="rounded-xl shadow-sm transition-colors duration-300">
                 <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 transition-colors rounded-xl p-6 sm:p-8">
-                    <FileEmployeePage employeeId={employee.id} />
+                    <FormLeavePage employeeId={employee.id} />
                 </div>
             </div>
         </div>

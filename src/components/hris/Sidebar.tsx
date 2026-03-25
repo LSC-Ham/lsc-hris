@@ -14,9 +14,10 @@ interface SidebarProps {
     surname: string;
     department?: string;
     idNumber: string;
+    departmentRole: string;
 }
 
-export function Sidebar({ userRole, userId, profilePicture, surname, department, idNumber }: SidebarProps) {
+export function Sidebar({ userRole, userId, profilePicture, surname, department, idNumber, departmentRole }: SidebarProps) {
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
 
@@ -42,13 +43,14 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                 </svg>
             )
         },
+        { type: "label", name: "Human Resource", hrOnly: true },
         {
-            name: "Leave Management",
-            href: `/hris/leave/${idNumber}`,
+            name: "Employees",
+            href: "/hris/employees",
             hrOnly: true,
             icon: (isActive: boolean) => (
                 <svg className={`w-5 h-5 ${isActive ? activeIconStyles : inactiveIconStyles}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
             )
         },
@@ -62,16 +64,20 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                 </svg>
             )
         },
+
+        { type: "label", name: "Heads", headOnly: true },
         {
-            name: "Employees",
-            href: "/hris/employees",
-            hrOnly: true,
+            name: "Leave Requests",
+            href: `/hris/leave/request`,
+            headOnly: true,
             icon: (isActive: boolean) => (
                 <svg className={`w-5 h-5 ${isActive ? activeIconStyles : inactiveIconStyles}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z" />
                 </svg>
             )
         },
+
+        { type: "label", name: "Moderator", roles: true },
         {
             name: "System Settings",
             href: "/hris/settings",
@@ -90,6 +96,15 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
             icon: (isActive: boolean) => (
                 <svg className={`w-5 h-5 ${isActive ? activeIconStyles : inactiveIconStyles}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            )
+        },
+        {
+            name: "My Leave",
+            href: `/hris/leave/${idNumber}`,
+            icon: (isActive: boolean) => (
+                <svg className={`w-5 h-5 ${isActive ? activeIconStyles : inactiveIconStyles}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1v1H9V7zm5 0h1v1h-1V7zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1zm-5 4h1v1H9v-1zm5 0h1v1h-1v-1z" />
                 </svg>
             )
         },
@@ -135,16 +150,18 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
 
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {navItems.map((item, index) => {
+                        if (item.hrOnly && !["human resource"].includes(department?.toLowerCase() || "")) return null;
+                        if (item.roles && !["admin", "moderator"].includes(userRole)) return null;
+                        if (item.headOnly && !["head", "assistant head"].includes(departmentRole?.toLowerCase() || "")) return null;
+                        
                         if (item.type === "label") {
                             return (
-                                <div key={`label-${index}`} className="px-4 pt-6 pb-2">
+                                <div key={`label-${index}`} className="px-4 p-2">
                                     <span className="text-[10px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest">{item.name}</span>
                                 </div>
                             );
                         }
 
-                        if (item.hrOnly && !["human resource"].includes(department?.toLowerCase() || "")) return null;
-                        if (item.roles && !["admin", "moderator"].includes(userRole)) return null;
 
                         const isActive = pathname.startsWith(item.href || "#");
 
