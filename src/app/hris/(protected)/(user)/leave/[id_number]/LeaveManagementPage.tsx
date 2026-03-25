@@ -90,10 +90,14 @@ export default function LeaveManagementPage({ leavesList, defaultQuery = "" }: P
                     style: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
                 };
             case 1:
-            case 2:
                 return {
                     label: "Pending",
                     style: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
+                };
+            case 2:
+                return {
+                    label: "Rejected",
+                    style: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
                 };
             case 3:
                 return {
@@ -102,7 +106,7 @@ export default function LeaveManagementPage({ leavesList, defaultQuery = "" }: P
                 };
             default:
                 return {
-                    label: "Unknown",
+                    label: "",
                     style: "bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
                 };
         }
