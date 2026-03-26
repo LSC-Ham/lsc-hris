@@ -26,7 +26,6 @@ export default function LeaveManagementWrapper({ leavesList, defaultQuery = "" }
     const currentUrlQuery = searchParams.get("query") || "";
     const isSearching = isPending || searchTerm !== currentUrlQuery;
 
-    // Handle debounced URL updates for searching
     useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
             const currentQuery = searchParams.get("query") || "";
@@ -48,12 +47,10 @@ export default function LeaveManagementWrapper({ leavesList, defaultQuery = "" }
         return () => clearTimeout(delayDebounceFn);
     }, [searchTerm, pathname, router, searchParams]);
 
-    // Handle row clicks
     const handleRowClick = (id: string | number) => {
         router.push(`/hris/leave/view/${id}`);
     };
 
-    // Calculate stats based on the current list
     let countPending = 0;
     let countApproved = 0;
     let countRejected = 0;

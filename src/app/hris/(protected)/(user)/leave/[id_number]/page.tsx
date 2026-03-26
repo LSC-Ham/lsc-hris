@@ -13,15 +13,23 @@ export default async function Page({
     const resolvedSearchParams = await searchParams;
     const { id_number } = await params;
 
+    // 1. FETCH THE LATEST RESET DATE
+    const lastReset = await prisma.leave_reset_logs.findFirst({
+        orderBy: { date: 'desc' },
+        select: { date: true }
+    });
+
+    // If no reset has ever happened, we use a very old date (year 1970) 
+    // so that all historical leaves are counted.
+    const resetCutoff = lastReset?.date || new Date(0);
+
     const ITEMS_PER_PAGE = 10;
     const currentPage = Number(resolvedSearchParams?.page) || 1;
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
     const query = resolvedSearchParams?.query || "";
 
     const whereFilter: any = {
-        employees: {
-            id_number: id_number
-        }
+        employees: { id_number: id_number }
     };
 
     if (query) {
@@ -42,9 +50,7 @@ export default async function Page({
                                 personal_information: { select: { firstname: true, surname: true } }
                             }
                         },
-                        departments: {
-                            select: { department: true }
-                        }
+                        departments: { select: { department: true } }
                     }
                 }
             },
@@ -52,15 +58,14 @@ export default async function Page({
             take: ITEMS_PER_PAGE,
             orderBy: { created_at: "desc" },
         }),
-        prisma.employees_leaves.count({
-            where: whereFilter
-        })
+        prisma.employees_leaves.count({ where: whereFilter })
     ]);
 
-    const allApprovedLeaves = await prisma.employees_leaves.findMany({
+    const allApprovedLeavesSinceReset = await prisma.employees_leaves.findMany({
         where: {
             employees: { id_number: id_number },
-            status: { in: [3, 4] } 
+            status: { in: [3, 4] },
+            created_at: { gt: resetCutoff } 
         },
         select: { leave_type: true }
     });
@@ -71,7 +76,7 @@ export default async function Page({
 
     let usedVL = 0; let usedSL = 0; let usedEL = 0;
 
-    allApprovedLeaves.forEach((leave) => {
+    allApprovedLeavesSinceReset.forEach((leave) => {
         const type = (leave.leave_type || "").toLowerCase();
         if (type.includes("vacation")) usedVL += 1;
         else if (type.includes("sick")) usedSL += 1;

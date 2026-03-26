@@ -17,18 +17,18 @@ interface Props {
     departmentName?: string;
     headActions?: React.ReactNode;
     vpActions?: React.ReactNode;
+    requestorActions?: React.ReactNode;
     hasDepartmentHead?: boolean;
     isRequestorHead?: boolean;
 }
 
 export default function FiledLeavePage({
     leave, headName, vpName, employeeName, departmentName,
-    headActions, vpActions, hasDepartmentHead = true, isRequestorHead = false
+    headActions, vpActions, requestorActions, hasDepartmentHead = true, isRequestorHead = false
 }: Props) {
 
     const skipsHeadApproval = hasDepartmentHead === false || isRequestorHead;
 
-    // Standardized Badge Style Generator
     const badgeStyle = (color: string) => {
         const colors: Record<string, string> = {
             red: "bg-red-50 text-red-700 border-red-100 dark:bg-red-500/10 dark:text-red-400 dark:border-red-400/20",
@@ -120,7 +120,6 @@ export default function FiledLeavePage({
                         </div>
                     </div>
 
-                    {/* VP ADMIN / HR */}
                     <div className="flex-1 p-5 rounded-xl border border-divider bg-white dark:bg-zinc-900/50 shadow-sm flex flex-col justify-between transition-colors">
                         <div>
                             <p className="text-[10px] text-gray-400 dark:text-zinc-500 font-bold mb-1 uppercase tracking-tight">Approved by:</p>
@@ -146,6 +145,12 @@ export default function FiledLeavePage({
                     </div>
                 </div>
             </div>
+
+            {requestorActions && (
+                <div className="pt-6 mt-6 flex justify-end">
+                    {requestorActions}
+                </div>
+            )}
         </div>
     );
 }

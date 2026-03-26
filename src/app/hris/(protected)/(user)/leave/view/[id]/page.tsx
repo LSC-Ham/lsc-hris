@@ -167,6 +167,8 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
                     departmentName={requestorDepartment}
                     isRequestorHead={isRequestorHead}
                     hasDepartmentHead={hasDepartmentHead}
+                    isOwner={isOwner}
+                    
                 />
             </div>
         </div>

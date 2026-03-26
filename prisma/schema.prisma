@@ -134,6 +134,14 @@ model ranks {
   employees   employees[]
 }
 
+model leave_reset_logs {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  date       DateTime? @db.Timestamp(6)
+  reset_by   String
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
+}
+
 model employees_leaves {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   employees_id String    @db.Uuid

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import LeaveManagementWrapper from "@/components/hris/leave/table/LeaveManagementWrapper";
+import ResetLeavesButton from "./ResetLeavesButton";
 
 export default async function HRLeavesManagementPage({
     searchParams
@@ -94,6 +95,7 @@ export default async function HRLeavesManagementPage({
                         View and manage leave applications across all departments.
                     </p>
                 </div>
+                <ResetLeavesButton />
             </div>
 
             <div className="rounded-xl transition-colors duration-300">
@@ -103,7 +105,6 @@ export default async function HRLeavesManagementPage({
                         leavesList={JSON.parse(JSON.stringify(leavesList))}
                         defaultQuery={query}
                     />
-
                     <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
                         {totalPages > 0 && (
                             <Pagination
@@ -114,7 +115,6 @@ export default async function HRLeavesManagementPage({
                             />
                         )}
                     </div>
-
                 </div>
             </div>
         </div>

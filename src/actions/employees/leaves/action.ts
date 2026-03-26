@@ -1,6 +1,9 @@
 // src\app\hris\(protected)\(user)\leave\file\actions.ts
+
 "use server";
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -88,5 +91,63 @@ export async function updateDepartmentLeaveStatus(leaveId: string, newStatus: nu
     } catch (error) {
         console.error("Error updating leave status:", error);
         return { success: false, error: "Failed to update the leave status." };
+    }
+}
+
+export async function deleteLeaveRequest(leaveId: string) {
+    try {
+        const deletedLeave = await prisma.employees_leaves.delete({
+            where: {
+                id: leaveId
+            }
+        });
+
+        // Match your existing cache revalidation paths
+        revalidatePath(`/hris/leave/request/`);
+        revalidatePath("/hris/leave/request");
+
+        return { success: true, data: deletedLeave };
+    } catch (error) {
+        console.error("Error deleting leave request:", error);
+        return { success: false, error: "Failed to delete the leave request." };
+    }
+}
+
+export async function resetEmployeeLeaves() {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user) return { success: false, error: "Unauthorized" };
+
+        const userId = (session.user as any).id;
+
+        // 1. Get the Full Name of the person performing the reset
+        const currentUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                biography: {
+                    select: {
+                        personal_information: {
+                            select: { firstname: true, surname: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        const info = currentUser?.biography?.personal_information;
+        const fullName = info ? `${info.firstname} ${info.surname}` : "Unknown Admin";
+
+        await prisma.leave_reset_logs.create({
+            data: {
+                date: new Date(),
+                reset_by: fullName,
+            }
+        });
+
+        revalidatePath("/hris/leaves/management");
+        return { success: true };
+    } catch (error) {
+        console.error("Reset Error:", error);
+        return { success: false, error: "Failed to reset leaves." };
     }
 }

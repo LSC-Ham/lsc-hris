@@ -227,7 +227,7 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
 
                                 <div className="mb-5">
                                     <h3 className="text-base font-bold text-gray-900 dark:text-zinc-100 leading-snug mb-1 uppercase tracking-tight">
-                                        {record.school || "Unnamed School"}
+                                        {record.school || ""}
                                     </h3>
                                     <p className="text-sm text-gray-500 dark:text-zinc-400 font-medium uppercase italic">
                                         {record.degree || "No Degree/Certificate Provided"}
@@ -238,12 +238,12 @@ export function EducationalBackground({ mode, formData = [], onSave }: Education
                                     <div>
                                         <span className="block text-gray-400 dark:text-zinc-500 font-bold uppercase mb-0.5 tracking-tighter">Duration</span>
                                         <span className="text-gray-700 dark:text-zinc-300 font-semibold">
-                                            {record.date_from || "?"} — {record.date_to || "?"}
+                                            {record.date_from || ""} — {record.date_to || ""}
                                         </span>
                                     </div>
                                     <div>
                                         <span className="block text-gray-400 dark:text-zinc-500 font-bold uppercase mb-0.5 tracking-tighter">Year Graduated</span>
-                                        <span className="text-gray-700 dark:text-zinc-300 font-semibold">{record.year_graduated || "N/A"}</span>
+                                        <span className="text-gray-700 dark:text-zinc-300 font-semibold">{record.year_graduated || ""}</span>
                                     </div>
                                     {record.units_earned && (
                                         <div className="col-span-2">
