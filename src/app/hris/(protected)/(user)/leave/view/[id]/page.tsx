@@ -1,7 +1,7 @@
 // src\app\hris\(protected)\(user)\leave\view\[id]\page.tsx
+import RequestorFiledLeavePage from "@/components/hris/leave/RequestorFiledLeavePage";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import ViewLeavePage from "./ViewLeavePage";
 
 interface PageProps {
     params: Promise<{
@@ -19,6 +19,7 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
         include: {
             employees: {
                 select: {
+                    department_role: true, // <-- NEW: Fetching the requestor's role
                     departments: true,
                     biography: {
                         select: {
@@ -45,12 +46,18 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
         ? `${requestorInfo.firstname} ${requestorInfo.surname}`
         : "Unknown Employee";
 
-    // Note: Change '.name' to whatever your department string field is called (e.g., '.department_name')
-    const departmentName = leaveRecord.employees?.departments?.department || "";
+    const departmentName = (leaveRecord.employees?.departments as any)?.department
+        || (leaveRecord.employees?.departments as any)?.name
+        || "";
+
+    // --- Check if the Requestor is a Head ---
+    const requestorRole = leaveRecord.employees?.department_role?.toLowerCase() || "";
+    const isRequestorHead = ["head", "assistant head"].includes(requestorRole);
 
     const departmentId = leaveRecord.employees?.departments?.id;
     let headFullName = "Department Head";
     let vpFullName = "Vice President"; // Default fallback
+    let hasDepartmentHead = false; // <-- NEW: Flag for missing heads
 
     // 1. Fetch Department Head
     if (departmentId) {
@@ -58,8 +65,7 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
             where: {
                 departments_id: departmentId,
                 department_role: {
-                    equals: "head",
-                    mode: "insensitive"
+                    in: ["Head", "head", "Assistant Head", "assistant head"]
                 }
             },
             select: {
@@ -75,18 +81,22 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
                 }
             }
         });
+
+        hasDepartmentHead = !!departmentHead; // <-- Set to true if a head was found
         const personalInfo = departmentHead?.biography?.personal_information;
         if (personalInfo) {
             headFullName = `${personalInfo.firstname} ${personalInfo.surname}`;
         }
     }
 
-    // 2. Fetch Vice President
+    // 2. Fetch Vice President (Aligned with previous files)
     const vicePresident = await prisma.employees.findFirst({
         where: {
-            department_role: {
-                equals: "vice president",
-                mode: "insensitive"
+            ranks: {
+                rank: {
+                    contains: "vice president",
+                    mode: "insensitive"
+                }
             }
         },
         select: {
@@ -125,12 +135,14 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
 
             <div className="rounded-xl shadow-sm transition-colors duration-300">
                 <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 transition-colors rounded-xl p-6 sm:p-8">
-                    <ViewLeavePage
+                    <RequestorFiledLeavePage
                         leave={serializedLeave}
                         headName={headFullName}
                         vpName={vpFullName}
-                        employeeName={requestorName} // Pass down the requestor name
-                        departmentName={departmentName} // Pass down the department
+                        employeeName={requestorName}
+                        departmentName={departmentName}
+                        isRequestorHead={isRequestorHead}     // <-- NEW: Pass down the prop
+                        hasDepartmentHead={hasDepartmentHead} // <-- NEW: Pass down the prop
                     />
                 </div>
             </div>
