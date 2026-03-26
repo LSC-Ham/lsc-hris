@@ -57,7 +57,7 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
         },
         {
             name: "Leave Management",
-            href: "/hris/leaves",
+            href: "/hris/leave",
             hrOnly: true, vpOnly: true,
             icon: (isActive: boolean) => (
                 <svg className={`w-5 h-5 ${isActive ? activeIconStyles : inactiveIconStyles}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -78,8 +78,8 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
 
         { type: "label", name: "Heads", headOnly: true },
         {
-            name: "Leave Requests",
-            href: `/hris/leave/request`,
+            name: "Leave Management",
+            href: `/hris/head/leave`,
             headOnly: true,
             icon: (isActive: boolean) => (
                 <svg className={`w-5 h-5 ${isActive ? activeIconStyles : inactiveIconStyles}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -175,7 +175,9 @@ export function Sidebar({ userRole, userId, profilePicture, surname, department,
                         }
 
 
-                        const isActive = pathname.startsWith(item.href || "#");
+                        const isActive = item.href === "/hris/leave"
+                            ? pathname === "/hris/leave" // Exact match for the base management page
+                            : pathname.startsWith(item.href || "#"); // Starts with for everything else
 
                         return (
                             <Link key={item.name} href={item.href || "#"} className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${isActive ? activeLinkStyles : inactiveLinkStyles}`}>

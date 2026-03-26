@@ -86,7 +86,7 @@ export default function LeaveRequestsTable({ requests }: Props) {
                         requests.map((leave) => (
                             <tr
                                 key={leave.id}
-                                onClick={() => router.push(`/hris/leave/request/${leave.id}`)}
+                                onClick={() => router.push(`/hris/leave/view/${leave.id}`)}
                                 className="hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer"
                             >
                                 <td className="px-6 py-4">

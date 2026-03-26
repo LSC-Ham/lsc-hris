@@ -72,59 +72,43 @@ export default function RequestorFiledLeavePage({
         }
     };
 
-    const headActions = (isHead && leave.status === null && hasDepartmentHead !== false && !isRequestorHead) ? (
-        <div className="flex gap-2">
+    // Shared Button Classes for consistency
+    const btnBase = "cursor-pointer flex-1 inline-flex justify-center items-center px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none";
+
+    const btnApprove = `${btnBase} bg-brand text-white shadow-sm hover:bg-brand-dark hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 dark:focus:ring-offset-zinc-900`;
+
+    const btnDecline = `${btnBase} bg-surface border border-divider text-foreground hover:bg-gray-100 dark:hover:bg-zinc-800 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-divider focus:ring-offset-2 dark:focus:ring-offset-zinc-900`;
+
+    const ActionButtons = ({ approveStatus, declineStatus }: { approveStatus: number, declineStatus: number }) => (
+        <div className="flex gap-3 w-full animate-in fade-in slide-in-from-bottom-2 duration-500">
             <button
                 disabled={isUpdating}
-                onClick={() => handleStatusUpdate(1)}
-                className="cursor-pointer flex-1 inline-flex justify-center items-center px-3 py-2 rounded-lg text-xs font-semibold text-white bg-brand border border-transparent shadow-sm transition-all duration-200 hover:bg-brand-dark hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand disabled:hover:-translate-y-0 disabled:hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1 dark:focus:ring-offset-zinc-900"
+                onClick={() => handleStatusUpdate(approveStatus)}
+                className={btnApprove}
             >
-                Approve
+                {isUpdating ? "Processing..." : "Approve"}
             </button>
 
             <button
                 disabled={isUpdating}
-                onClick={() => handleStatusUpdate(0)}
-                className="cursor-pointer flex-1 inline-flex justify-center items-center px-3 py-2 rounded-lg text-xs font-semibold text-foreground bg-surface border border-divider shadow-sm transition-all duration-200 hover:bg-background hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-surface disabled:hover:-translate-y-0 disabled:hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-divider focus:ring-offset-1 dark:focus:ring-offset-zinc-900"
+                onClick={() => handleStatusUpdate(declineStatus)}
+                className={btnDecline}
             >
                 Decline
             </button>
         </div>
-    ) : undefined;
+    );
+
+    const headActions = (isHead && leave.status === null && hasDepartmentHead !== false && !isRequestorHead)
+        ? <ActionButtons approveStatus={1} declineStatus={0} />
+        : undefined;
 
     const skipsHeadApproval = hasDepartmentHead === false || isRequestorHead;
     const canVpActNow = leave.status === 1 || (leave.status === null && skipsHeadApproval);
 
-    const vpActions = (canApproveFinal && canVpActNow) ? (
-        <div className="flex gap-2">
-            <button
-                disabled={isUpdating}
-                onClick={() => handleStatusUpdate(3)}
-                className="cursor-pointer flex-1 inline-flex justify-center items-center px-3 py-2 rounded-lg text-xs font-semibold text-white bg-brand border border-transparent shadow-sm transition-all duration-200 hover:bg-brand-dark hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand disabled:hover:-translate-y-0 disabled:hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-1 dark:focus:ring-offset-zinc-900"
-            >
-                Approve
-            </button>
-
-            <button
-                disabled={isUpdating}
-                onClick={() => handleStatusUpdate(2)}
-                className="cursor-pointer
-                        flex-1 inline-flex justify-center items-center px-3 py-2 rounded-lg 
-                        text-xs font-semibold text-foreground 
-                        bg-surface border border-divider shadow-sm 
-                        transition-all duration-200 
-                        /* The Fix: Use a more distinct hover background */
-                        hover:bg-gray-100 dark:hover:bg-zinc-800 
-                        hover:-translate-y-0.5 hover:shadow-md 
-                        active:translate-y-0 active:shadow-sm 
-                        disabled:opacity-50 disabled:cursor-not-allowed 
-                        disabled:hover:translate-y-0 
-                        focus:outline-none focus:ring-2 focus:ring-divider focus:ring-offset-1 dark:focus:ring-offset-zinc-900
-                        ">
-                Decline
-            </button>
-        </div>
-    ) : undefined;
+    const vpActions = (canApproveFinal && canVpActNow)
+        ? <ActionButtons approveStatus={3} declineStatus={2} />
+        : undefined;
 
     return (
         <FiledLeavePage
@@ -136,7 +120,7 @@ export default function RequestorFiledLeavePage({
             headActions={headActions}
             vpActions={vpActions}
             hasDepartmentHead={hasDepartmentHead}
-            isRequestorHead={isRequestorHead} // Pass it down to update the UI badges!
+            isRequestorHead={isRequestorHead}
         />
     );
 }

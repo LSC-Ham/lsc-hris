@@ -183,7 +183,7 @@ export default function LeaveManagementPage({ leavesList, defaultQuery = "" }: P
                                 const fullName = `${empInfo?.firstname || ''} ${empInfo?.surname || ''}`.trim() || "Unknown Employee";
 
                                 return (
-                                    <div key={leave.id} onClick={() => router.push(`/hris/leaves/requests/${leave.id}`)} className="p-4 hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors space-y-3 cursor-pointer">
+                                    <div key={leave.id} onClick={() => router.push(`/hris/leave/view/${leave.id}`)} className="p-4 hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors space-y-3 cursor-pointer">
                                         <div className="flex justify-between items-start gap-4">
                                             <div className="flex flex-col gap-1">
                                                 <h3 className="font-bold text-gray-900 dark:text-zinc-100 text-base leading-tight">
@@ -226,7 +226,7 @@ export default function LeaveManagementPage({ leavesList, defaultQuery = "" }: P
 
                                         return (
                                             <tr key={leave.id}
-                                                onClick={() => router.push(`/hris/leaves/requests/${leave.id}`)}
+                                                onClick={() => router.push(`/hris/leave/view/${leave.id}`)}
                                                 className="hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer">
 
                                                 {/* Employee Column */}
