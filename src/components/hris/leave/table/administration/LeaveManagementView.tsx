@@ -137,8 +137,6 @@ export default function LeaveManagementView({
                 </div>
 
                 <div className={`transition-opacity duration-200 ${isSearching ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
-
-                    {/* MOBILE VIEW */}
                     <div className="block md:hidden divide-y divide-gray-100 dark:divide-zinc-800/80 transition-colors duration-300">
                         {leavesList.length > 0 ? (
                             leavesList.map((leave) => {
@@ -196,7 +194,6 @@ export default function LeaveManagementView({
                                     <th scope="col" className="px-6 py-3 text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Employee</th>
                                     <th scope="col" className="px-6 py-3 text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Leave Type</th>
                                     <th scope="col" className="px-6 py-3 text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Date & Time</th>
-                                    <th scope="col" className="px-6 py-3 text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Days</th>
                                     <th scope="col" className="px-6 py-3 text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Status</th>
                                     <th scope="col" className="px-6 py-3 text-xs font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-wider">Date Filed</th>
                                 </tr>
@@ -213,7 +210,6 @@ export default function LeaveManagementView({
                                             >
                                                 <td className="px-6 py-4">
                                                     <div className="text-sm font-bold text-gray-900 dark:text-zinc-100 capitalize">{getEmployeeName(leave)}</div>
-                                                    {/* Department added here for desktop */}
                                                     <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">{getDepartmentName(leave)}</div>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -225,9 +221,6 @@ export default function LeaveManagementView({
                                                     <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
                                                         {formatTime(leave.time_from)} <span className="mx-1">→</span> {formatTime(leave.time_to)}
                                                     </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm font-bold text-gray-900 dark:text-zinc-100">1</div>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border ${status.style}`}>

@@ -140,7 +140,7 @@ export default async function Page({
                 </div>
             </div>
 
-            <div className="rounded-xl shadow-sm transition-colors duration-300">
+            <div className="rounded-xl transition-colors duration-300">
                 <div className="border-gray-200 dark:border-zinc-800 transition-colors">
 
                     <LeaveManagementWrapper

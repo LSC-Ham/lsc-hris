@@ -31,8 +31,6 @@ export default async function Page({
         };
     }
 
-    // 1. Fetch Paginated Leaves & Total Count (Added 'include' for employee name)
-    // 1. Fetch Paginated Leaves & Total Count
     const [leavesList, totalLeaves] = await Promise.all([
         prisma.employees_leaves.findMany({
             where: whereFilter,
@@ -59,11 +57,10 @@ export default async function Page({
         })
     ]);
 
-    // 2. Fetch ALL approved leaves to calculate accurate balances
     const allApprovedLeaves = await prisma.employees_leaves.findMany({
         where: {
             employees: { id_number: id_number },
-            status: { in: [3, 4] } // Adjust these integers based on your DB schema for "approved"
+            status: { in: [3, 4] } 
         },
         select: { leave_type: true }
     });
@@ -110,7 +107,7 @@ export default async function Page({
                 </Link>
             </div>
 
-            <div className="rounded-xl shadow-sm transition-colors duration-300">
+            <div className="rounded-xl transition-colors duration-300">
                 <div className="border-gray-200 dark:border-zinc-800 transition-colors">
 
                     <LeaveManagementWrapper
