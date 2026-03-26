@@ -84,30 +84,35 @@ export default function LeaveManagementPage({ leavesList, defaultQuery = "" }: P
 
     const getStatusDetails = (status: number | null) => {
         switch (status) {
+            case null:
+                return {
+                    label: "Pending Head",
+                    style: "bg-gray-100 text-gray-600 border-gray-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
+                };
             case 0:
                 return {
-                    label: "Rejected",
+                    label: "Declined by Head",
                     style: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
                 };
             case 1:
                 return {
-                    label: "Pending",
-                    style: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
+                    label: "Pending VP",
+                    style: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20"
                 };
             case 2:
                 return {
-                    label: "Rejected",
+                    label: "Declined by VP",
                     style: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
                 };
             case 3:
                 return {
-                    label: "Approved",
+                    label: "Fully Approved",
                     style: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
                 };
             default:
                 return {
-                    label: "",
-                    style: "bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
+                    label: "Unknown Status",
+                    style: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
                 };
         }
     };
@@ -121,7 +126,8 @@ export default function LeaveManagementPage({ leavesList, defaultQuery = "" }: P
     let usedEL = 0;
 
     leavesList.forEach((leave) => {
-        if (leave.status === 1 || leave.status === 2 || leave.status === 3) {
+        // ONLY count leaves that are fully approved (3 or 4)
+        if (leave.status === 3 || leave.status === 4) {
             const type = (leave.leave_type || "").toLowerCase();
 
             if (type.includes("vacation")) {

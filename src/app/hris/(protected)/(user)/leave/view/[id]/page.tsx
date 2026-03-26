@@ -12,7 +12,6 @@ interface PageProps {
 export default async function ViewSpecificLeaveServerPage({ params }: PageProps) {
     const { id } = await params;
 
-    // 1. Fetch the leave record AND the department ID of the employee who filed it
     const leaveRecord = await prisma.employees_leaves.findUnique({
         where: {
             id: id,
@@ -20,7 +19,7 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
         include: {
             employees: {
                 select: {
-                    departments_id: true, // We need this to find their specific Dept Head
+                    departments_id: true, 
                 }
             }
         }
@@ -32,7 +31,9 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
 
     const departmentId = leaveRecord.employees?.departments_id;
     let headFullName = "Department Head"; 
+    let vpFullName = "Vice President"; // Default fallback
     
+    // 1. Fetch Department Head
     if (departmentId) {
         const departmentHead = await prisma.employees.findFirst({
             where: {
@@ -61,6 +62,35 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
         }
     }
 
+    // 2. Fetch Vice President
+    // NOTE: Update the 'where' clause below if your schema identifies the VP differently 
+    // (e.g., role: "VP", position: "Vice President", etc.)
+    const vicePresident = await prisma.employees.findFirst({
+        where: {
+            department_role: {
+                equals: "vice president", 
+                mode: "insensitive"
+            }
+        },
+        select: {
+            biography: {
+                select: {
+                    personal_information: {
+                        select: {
+                            firstname: true,
+                            surname: true,
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const vpPersonalInfo = vicePresident?.biography?.personal_information;
+    if (vpPersonalInfo) {
+        vpFullName = `${vpPersonalInfo.firstname} ${vpPersonalInfo.surname}`;
+    }
+
     const serializedLeave = JSON.parse(JSON.stringify(leaveRecord));
 
     return (
@@ -81,6 +111,7 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
                     <ViewLeavePage
                         leave={serializedLeave}
                         headName={headFullName}
+                        vpName={vpFullName} // Pass the fetched VP name
                     />
                 </div>
             </div>

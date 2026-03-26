@@ -1,4 +1,4 @@
-// src\app\hris\(protected)\(user)\leave\view\[id]\page.tsx
+// src/app/hris/(protected)/(human-resource)/leaves/requests/[id]/page.tsx
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -21,26 +21,18 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
 
     const userId = (session.user as any).id || "";
 
+    // 1. Fetch current logged-in user data for gatekeeping
     const currentUserData = await prisma.user.findUnique({
-        where: {
-            id: userId
-        },
+        where: { id: userId },
         select: {
             biography: {
                 select: {
                     employees: {
                         select: {
+                            id: true,
                             department_role: true,
-                            biography: {
-                                select: {
-                                    personal_information: {
-                                        select: {
-                                            firstname: true,
-                                            surname: true,
-                                        }
-                                    }
-                                }
-                            }
+                            ranks: { select: { rank: true } },
+                            departments: { select: { department: true } },
                         }
                     }
                 }
@@ -48,10 +40,16 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
         }
     });
 
+    // 2. Fetch the leave record AND include the applicant's department ID
     const leaveRecord = await prisma.employees_leaves.findUnique({
-        where: {
-            id: id,
-        },
+        where: { id: id },
+        include: {
+            employees: {
+                select: {
+                    departments_id: true
+                }
+            }
+        }
     });
 
     if (!leaveRecord) {
@@ -59,25 +57,79 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
     }
 
     const employeeData = currentUserData?.biography?.employees;
-    const personalInfo = employeeData?.biography?.personal_information;
+    const isVP = employeeData?.ranks?.rank?.toLowerCase() === "vice president";
+    const isHR = employeeData?.departments?.department?.toLowerCase() === "human resource";
+    const isOwner = leaveRecord.employees_id === employeeData?.id;
 
-    const departmentRole = employeeData?.department_role || "";
-    const headFullName = personalInfo
-        ? `${personalInfo.firstname} ${personalInfo.surname}`
+    // GATEKEEPER
+    if (!employeeData || (!isVP && !isHR && !isOwner)) {
+        redirect("/hris/dashboard");
+    }
+
+    // 3. Fetch the Department Head for the specific applicant's department
+    const applicantDepartmentId = leaveRecord.employees?.departments_id;
+    const departmentHead = await prisma.employees.findFirst({
+        where: {
+            departments_id: applicantDepartmentId,
+            department_role: {
+                in: ["Head", "head", "Assistant Head", "assistant head"]
+            }
+        },
+        select: {
+            biography: {
+                select: {
+                    personal_information: {
+                        select: { firstname: true, surname: true }
+                    }
+                }
+            }
+        }
+    });
+
+    // 4. Fetch the Vice President from the database
+    const vicePresident = await prisma.employees.findFirst({
+        where: {
+            ranks: {
+                rank: {
+                    equals: "Vice President",
+                    mode: "insensitive"
+                }
+            }
+        },
+        select: {
+            biography: {
+                select: {
+                    personal_information: {
+                        select: { firstname: true, surname: true }
+                    }
+                }
+            }
+        }
+    });
+
+    // Format the fetched names
+    const headInfo = departmentHead?.biography?.personal_information;
+    const actualHeadName = headInfo
+        ? `${headInfo.firstname} ${headInfo.surname}`
         : "Department Head";
 
+    const vpInfo = vicePresident?.biography?.personal_information;
+    const actualVPName = vpInfo
+        ? `${vpInfo.firstname} ${vpInfo.surname}`
+        : "Vice President";
+
+    const departmentRole = employeeData?.department_role || "";
     const serializedLeave = JSON.parse(JSON.stringify(leaveRecord));
 
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-
-                    <h1 className="text-2xl font-bold text-foreground tracking-tight transition-colors">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight transition-colors">
                         View Leave Application
                     </h1>
-                    <p className="text-sm text-muted transition-colors">
-                        Read-only details of the filed leave request.
+                    <p className="text-sm text-gray-500 dark:text-zinc-400 transition-colors">
+                        Read-only details of the filed leave request and approval management.
                     </p>
                 </div>
             </div>
@@ -87,7 +139,10 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
                     <ViewRequestorLeavePage
                         leave={serializedLeave}
                         departmentRole={departmentRole}
-                        headName={headFullName}
+                        headName={actualHeadName}
+                        vpName={actualVPName}
+                        rank={employeeData.ranks?.rank}
+                        department={employeeData.departments?.department}
                     />
                 </div>
             </div>

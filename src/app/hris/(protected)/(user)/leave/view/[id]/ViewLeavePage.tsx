@@ -16,9 +16,10 @@ interface LeaveData {
 interface Props {
     leave: LeaveData;
     headName?: string;
+    vpName?: string; // Added VP prop
 }
 
-export default function ViewLeavePage({ leave, headName }: Props) {
+export default function ViewLeavePage({ leave, headName, vpName }: Props) {
     //const router = useRouter();
 
     const formatDateForInput = (dateString: string) => {
@@ -121,10 +122,12 @@ export default function ViewLeavePage({ leave, headName }: Props) {
                             <p className="text-sm font-bold text-foreground truncate">{headName}</p>
                         </div>
                         <div className="mt-4">
-                            {leave.status === 1 && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-brand/10 text-brand border border-brand/20">
-                                    Approved
-                                </span>
+                            {leave.status === 0 ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">Declined</span>
+                            ) : (leave.status !== null && leave.status >= 1) ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20">Approved</span>
+                            ) : (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20">Pending</span>
                             )}
                         </div>
                     </div>
@@ -132,12 +135,20 @@ export default function ViewLeavePage({ leave, headName }: Props) {
                     <div className="p-4 rounded-xl border border-divider bg-surface shadow-sm flex flex-col justify-between w-full">
                         <div>
                             <p className="text-[10px] text-muted font-medium mb-1 uppercase">VP Admin</p>
-                            <p className="text-sm font-bold text-foreground truncate">Maria Clara</p>
+                            <p className="text-sm font-bold text-foreground truncate">{vpName}</p>
                         </div>
                         <div className="mt-4">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-accent/10 text-[color:var(--color-accent)] border border-accent/20">
-                                Pending
-                            </span>
+                            {leave.status === 2 ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20">Declined</span>
+                            ) : leave.status === 3 ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">Fully Approved</span>
+                            ) : leave.status === 1 ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20">Pending Final Approval</span>
+                            ) : leave.status === 0 ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-200 text-gray-600 border border-gray-300 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700">Stopped at Head Level</span>
+                            ) : (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-gray-200 text-gray-600 border border-gray-300 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700">Waiting for Head</span>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -6,9 +6,7 @@ import { authOptions } from "@/lib/auth";
 import ViewRequestorLeavePage from "./ViewRequestorLeavePage";
 
 interface PageProps {
-    params: Promise<{
-        id: string;
-    }>;
+    params: Promise<{ id: string }>;
 }
 
 export default async function ViewSpecificLeaveServerPage({ params }: PageProps) {
@@ -16,15 +14,13 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
-        redirect("/hris/leave/request");
+        redirect("/hris/login");
     }
 
     const userId = (session.user as any).id || "";
 
     const currentUserData = await prisma.user.findUnique({
-        where: {
-            id: userId
-        },
+        where: { id: userId },
         select: {
             biography: {
                 select: {
@@ -34,10 +30,7 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
                             biography: {
                                 select: {
                                     personal_information: {
-                                        select: {
-                                            firstname: true,
-                                            surname: true,
-                                        }
+                                        select: { firstname: true, surname: true }
                                     }
                                 }
                             }
@@ -49,19 +42,43 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
     });
 
     const leaveRecord = await prisma.employees_leaves.findUnique({
-        where: {
-            id: id,
-        },
+        where: { id: id },
     });
 
     if (!leaveRecord) {
         notFound();
     }
 
+    // Fetch the VP for Administration to display their name
+    const vpAdmin = await prisma.employees.findFirst({
+        where: {
+            ranks: {
+                rank: {
+                    contains: "vice president",
+                    mode: "insensitive"
+                }
+            }
+        },
+        select: {
+            biography: {
+                select: {
+                    personal_information: {
+                        select: { firstname: true, surname: true }
+                    }
+                }
+            }
+        }
+    });
+
+    const vpPersonalInfo = vpAdmin?.biography?.personal_information;
+    const vpFullName = vpPersonalInfo
+        ? `${vpPersonalInfo.firstname} ${vpPersonalInfo.surname}`
+        : "Vice President for Administration";
+
     const employeeData = currentUserData?.biography?.employees;
     const personalInfo = employeeData?.biography?.personal_information;
-
     const departmentRole = employeeData?.department_role || "";
+
     const headFullName = personalInfo
         ? `${personalInfo.firstname} ${personalInfo.surname}`
         : "Department Head";
@@ -70,26 +87,22 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
+            <header>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight">
+                    View Leave Application
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-zinc-400">
+                    Review details and manage your department's approval status.
+                </p>
+            </header>
 
-                    <h1 className="text-2xl font-bold text-foreground tracking-tight transition-colors">
-                        View Leave Application
-                    </h1>
-                    <p className="text-sm text-muted transition-colors">
-                        Read-only details of the filed leave request.
-                    </p>
-                </div>
-            </div>
-
-            <div className="rounded-xl shadow-sm transition-colors duration-300">
-                <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 transition-colors rounded-xl p-6 sm:p-8">
-                    <ViewRequestorLeavePage
-                        leave={serializedLeave}
-                        departmentRole={departmentRole}
-                        headName={headFullName}
-                    />
-                </div>
+            <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl p-6 sm:p-8 shadow-sm">
+                <ViewRequestorLeavePage
+                    leave={serializedLeave}
+                    departmentRole={departmentRole}
+                    headName={headFullName}
+                    vpName={vpFullName}
+                />
             </div>
         </div>
     );

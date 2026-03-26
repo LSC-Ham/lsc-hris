@@ -81,15 +81,36 @@ export default function LeaveManagementPage({ leavesList, defaultQuery = "" }: P
 
     const getStatusDetails = (status: number | null) => {
         switch (status) {
+            case null:
+                return {
+                    label: "Pending Head",
+                    style: "bg-gray-100 text-gray-600 border-gray-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
+                };
             case 0:
-                return { label: "Rejected", style: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20" };
+                return {
+                    label: "Declined by Head",
+                    style: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
+                };
             case 1:
+                return {
+                    label: "Pending VP",
+                    style: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20"
+                };
             case 2:
-                return { label: "Pending", style: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" };
+                return {
+                    label: "Declined by VP",
+                    style: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
+                };
             case 3:
-                return { label: "Approved", style: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" };
+                return {
+                    label: "Fully Approved",
+                    style: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+                };
             default:
-                return { label: "Unknown", style: "bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700" };
+                return {
+                    label: "Unknown Status",
+                    style: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
+                };
         }
     };
 
@@ -162,7 +183,7 @@ export default function LeaveManagementPage({ leavesList, defaultQuery = "" }: P
                                 const fullName = `${empInfo?.firstname || ''} ${empInfo?.surname || ''}`.trim() || "Unknown Employee";
 
                                 return (
-                                    <div key={leave.id} onClick={() => router.push(`/hris/leave/request/${leave.id}`)} className="p-4 hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors space-y-3 cursor-pointer">
+                                    <div key={leave.id} onClick={() => router.push(`/hris/leaves/requests/${leave.id}`)} className="p-4 hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors space-y-3 cursor-pointer">
                                         <div className="flex justify-between items-start gap-4">
                                             <div className="flex flex-col gap-1">
                                                 <h3 className="font-bold text-gray-900 dark:text-zinc-100 text-base leading-tight">
@@ -205,7 +226,7 @@ export default function LeaveManagementPage({ leavesList, defaultQuery = "" }: P
 
                                         return (
                                             <tr key={leave.id}
-                                                onClick={() => router.push(`/hris/leave/request/${leave.id}`)}
+                                                onClick={() => router.push(`/hris/leaves/requests/${leave.id}`)}
                                                 className="hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors cursor-pointer">
 
                                                 {/* Employee Column */}

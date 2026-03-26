@@ -52,7 +52,6 @@ export async function submitLeaveApplication(formData: FormData) {
                 time_from: timeFromDate,
                 time_to: timeToDate,
                 reason: leave.reason || null,
-                status: 1,
             };
         });
 

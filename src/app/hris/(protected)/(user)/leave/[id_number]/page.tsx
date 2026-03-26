@@ -1,6 +1,6 @@
 // src\app\hris\(protected)\(user)\leave\[id_number]\page.tsx
 import Link from "next/link";
-import LeaveManagementPage from "./LeaveManagementPage";
+import LeaveManagementPage from "./EmployeesLeavePage";
 import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
 

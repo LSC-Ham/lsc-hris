@@ -8,7 +8,7 @@ interface LeaveRequest {
     date: string;
     time_from: string;
     time_to: string;
-    status: number;
+    status: number | null; // Allow null for pending state
     created_at: string;
     employees: {
         biography: {
@@ -40,14 +40,33 @@ export default function LeaveRequestsTable({ requests }: Props) {
         return new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true }).format(new Date(time));
     };
 
-    const getStatusBadge = (status: number) => {
+    const getStatusDetails = (status: number | null) => {
         switch (status) {
+            case 0:
+                return {
+                    label: "Declined (Head)",
+                    style: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
+                };
             case 1:
-                return <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200 dark:border-green-800">Approved</span>;
+                return {
+                    label: "Approved (Head)",
+                    style: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20"
+                };
             case 2:
-                return <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800">Rejected</span>;
-            default:
-                return <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800">Pending</span>;
+                return {
+                    label: "Declined (VP)",
+                    style: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
+                };
+            case 3:
+                return {
+                    label: "Fully Approved",
+                    style: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+                };
+            default: // null or undefined
+                return {
+                    label: "Pending",
+                    style: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
+                };
         }
     };
 
@@ -90,7 +109,9 @@ export default function LeaveRequestsTable({ requests }: Props) {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">
-                                    {getStatusBadge(leave.status)}
+                                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase tracking-wider whitespace-nowrap ${getStatusDetails(leave.status).style}`}>
+                                        {getStatusDetails(leave.status).label}
+                                    </span>
                                 </td>
                             </tr>
                         ))

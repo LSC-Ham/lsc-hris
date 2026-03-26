@@ -2,6 +2,7 @@
 import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
 import LeaveManagementPage from "./LeaveManagementPage";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export default async function HRLeavesManagementPage({
@@ -9,6 +10,25 @@ export default async function HRLeavesManagementPage({
 }: {
     searchParams: Promise<{ page?: string; query?: string }>;
 }) {
+    // ============================================================================
+    // 1. AUTHORIZATION GUARD
+    // ============================================================================
+    // TODO: Replace this with your actual authentication fetcher (NextAuth, Clerk, etc.)
+    // Example: 
+    // const session = await getServerSession(authOptions);
+    // const currentUserRole = session?.user?.role; 
+
+    const currentUserRole = "HR"; // <-- MOCK ROLE: Replace with actual session role
+
+    const allowedRoles = ["HR", "Human Resource", "Vice President", "VP"];
+    const isAuthorized = allowedRoles.includes(currentUserRole);
+
+    if (!isAuthorized) {
+        // Redirect unauthorized users back to a safe page (e.g., their own dashboard)
+        redirect("/hris/dashboard");
+    }
+    // ============================================================================
+
     const resolvedSearchParams = await searchParams;
 
     const ITEMS_PER_PAGE = 10;
@@ -16,7 +36,7 @@ export default async function HRLeavesManagementPage({
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
     const query = resolvedSearchParams?.query || "";
 
-    // 1. Build a robust search filter for HR
+    // 2. Build a robust search filter for HR
     const whereFilter: any = {};
 
     if (query) {
@@ -42,7 +62,7 @@ export default async function HRLeavesManagementPage({
         ];
     }
 
-    // 2. Fetch all leaves and include the employee details
+    // 3. Fetch all leaves and include the employee details
     const [leavesList, totalLeaves] = await Promise.all([
         prisma.employees_leaves.findMany({
             where: whereFilter,
@@ -96,16 +116,16 @@ export default async function HRLeavesManagementPage({
                         defaultQuery={query}
                     />
 
-                    {totalPages > 0 && (
-                       <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
+                    <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
+                        {totalPages > 0 && (
                             <Pagination
                                 totalPages={totalPages}
                                 currentPage={currentPage}
                                 totalItems={totalLeaves}
                                 itemName="leaves"
                             />
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                 </div>
             </div>
