@@ -1,7 +1,5 @@
 "use client";
 
-//import { useRouter } from "next/navigation";
-
 interface LeaveData {
     id: string;
     leave_type: string;
@@ -16,11 +14,12 @@ interface LeaveData {
 interface Props {
     leave: LeaveData;
     headName?: string;
-    vpName?: string; // Added VP prop
+    vpName?: string;
+    employeeName?: string; // New prop for requestor name
+    departmentName?: string; // New prop for department name
 }
 
-export default function ViewLeavePage({ leave, headName, vpName }: Props) {
-    //const router = useRouter();
+export default function ViewLeavePage({ leave, headName, vpName, employeeName, departmentName }: Props) {
 
     const formatDateForInput = (dateString: string) => {
         if (!dateString) return "";
@@ -35,6 +34,32 @@ export default function ViewLeavePage({ leave, headName, vpName }: Props) {
 
     return (
         <div className="space-y-6">
+            {/* Added Employee and Department Fields */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-900 dark:text-zinc-100">
+                        Full name
+                    </label>
+                    <input
+                        type="text" // Changed from date to text
+                        value={employeeName || "N/A"} // Hooked up correctly
+                        disabled
+                        className="w-full p-2.5 rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 text-gray-700 dark:text-zinc-400 cursor-not-allowed outline-none transition-colors"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-900 dark:text-zinc-100">
+                        Department
+                    </label>
+                    <input
+                        type="text"
+                        value={departmentName || "N/A"} // Hooked up correctly
+                        disabled
+                        className="w-full p-2.5 rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 text-gray-700 dark:text-zinc-400 cursor-not-allowed outline-none transition-colors"
+                    />
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-900 dark:text-zinc-100">

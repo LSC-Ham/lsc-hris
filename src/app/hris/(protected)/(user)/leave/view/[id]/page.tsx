@@ -19,7 +19,17 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
         include: {
             employees: {
                 select: {
-                    departments_id: true, 
+                    departments: true,
+                    biography: {
+                        select: {
+                            personal_information: {
+                                select: {
+                                    firstname: true,
+                                    surname: true,
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -29,10 +39,19 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
         notFound();
     }
 
-    const departmentId = leaveRecord.employees?.departments_id;
-    let headFullName = "Department Head"; 
+    // --- Extract Requestor Information ---
+    const requestorInfo = leaveRecord.employees?.biography?.personal_information;
+    const requestorName = requestorInfo
+        ? `${requestorInfo.firstname} ${requestorInfo.surname}`
+        : "Unknown Employee";
+
+    // Note: Change '.name' to whatever your department string field is called (e.g., '.department_name')
+    const departmentName = leaveRecord.employees?.departments?.department || "";
+
+    const departmentId = leaveRecord.employees?.departments?.id;
+    let headFullName = "Department Head";
     let vpFullName = "Vice President"; // Default fallback
-    
+
     // 1. Fetch Department Head
     if (departmentId) {
         const departmentHead = await prisma.employees.findFirst({
@@ -63,12 +82,10 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
     }
 
     // 2. Fetch Vice President
-    // NOTE: Update the 'where' clause below if your schema identifies the VP differently 
-    // (e.g., role: "VP", position: "Vice President", etc.)
     const vicePresident = await prisma.employees.findFirst({
         where: {
             department_role: {
-                equals: "vice president", 
+                equals: "vice president",
                 mode: "insensitive"
             }
         },
@@ -111,7 +128,9 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
                     <ViewLeavePage
                         leave={serializedLeave}
                         headName={headFullName}
-                        vpName={vpFullName} // Pass the fetched VP name
+                        vpName={vpFullName}
+                        employeeName={requestorName} // Pass down the requestor name
+                        departmentName={departmentName} // Pass down the department
                     />
                 </div>
             </div>

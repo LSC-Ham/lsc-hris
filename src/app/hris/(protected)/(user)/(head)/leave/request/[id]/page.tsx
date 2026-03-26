@@ -1,4 +1,4 @@
-// src\app\hris\(protected)\(user)\leave\view\[id]\page.tsx
+// src/app/hris/(protected)/(user)/leave/view/[id]/page.tsx
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -41,13 +41,38 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
         }
     });
 
+    // Fetch the leave record AND include the applicant's department info and biography
     const leaveRecord = await prisma.employees_leaves.findUnique({
         where: { id: id },
+        include: {
+            employees: {
+                select: {
+                    departments: true,
+                    biography: {
+                        select: {
+                            personal_information: {
+                                select: { firstname: true, surname: true }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     });
 
     if (!leaveRecord) {
         notFound();
     }
+
+    // --- Extract Requestor Information ---
+    const requestorInfo = leaveRecord.employees?.biography?.personal_information;
+    const requestorName = requestorInfo
+        ? `${requestorInfo.firstname} ${requestorInfo.surname}`
+        : "Unknown Employee";
+
+    const requestorDepartment = (leaveRecord.employees?.departments as any)?.department
+        || (leaveRecord.employees?.departments as any)?.name
+        || "Unknown Department";
 
     // Fetch the VP for Administration to display their name
     const vpAdmin = await prisma.employees.findFirst({
@@ -102,6 +127,8 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
                     departmentRole={departmentRole}
                     headName={headFullName}
                     vpName={vpFullName}
+                    employeeName={requestorName} // Passed down
+                    departmentName={requestorDepartment} // Passed down
                 />
             </div>
         </div>

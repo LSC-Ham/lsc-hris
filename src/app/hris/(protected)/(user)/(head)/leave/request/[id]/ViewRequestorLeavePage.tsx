@@ -20,9 +20,11 @@ interface Props {
     departmentRole?: string;
     headName?: string;
     vpName?: string;
+    employeeName?: string;   // Added
+    departmentName?: string; // Added
 }
 
-export default function ViewRequestorLeavePage({ leave, departmentRole, headName, vpName }: Props) {
+export default function ViewRequestorLeavePage({ leave, departmentRole, headName, vpName, employeeName, departmentName }: Props) {
     const router = useRouter();
     const [isUpdating, setIsUpdating] = useState(false);
 
@@ -55,6 +57,18 @@ export default function ViewRequestorLeavePage({ leave, departmentRole, headName
 
     return (
         <div className="space-y-6">
+            {/* Added Employee and Department Fields */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-900 dark:text-zinc-100">Full name</label>
+                    <input type="text" value={employeeName || "N/A"} disabled className="w-full p-2.5 rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 text-gray-700 dark:text-zinc-400 cursor-not-allowed outline-none" />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-900 dark:text-zinc-100">Department</label>
+                    <input type="text" value={departmentName || "N/A"} disabled className="w-full p-2.5 rounded-lg border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 text-gray-700 dark:text-zinc-400 cursor-not-allowed outline-none" />
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-900 dark:text-zinc-100">Date of File</label>

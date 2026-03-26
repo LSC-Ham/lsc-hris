@@ -40,13 +40,24 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
         }
     });
 
-    // 2. Fetch the leave record AND include the applicant's department ID
+    // 2. Fetch the leave record AND include the applicant's department ID, department info, and biography
     const leaveRecord = await prisma.employees_leaves.findUnique({
         where: { id: id },
         include: {
             employees: {
                 select: {
-                    departments_id: true
+                    departments_id: true,
+                    departments: true,
+                    biography: {
+                        select: {
+                            personal_information: {
+                                select: {
+                                    firstname: true,
+                                    surname: true,
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -65,6 +76,18 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
     if (!employeeData || (!isVP && !isHR && !isOwner)) {
         redirect("/hris/dashboard");
     }
+
+    // --- Extract Requestor Information ---
+    const requestorInfo = leaveRecord.employees?.biography?.personal_information;
+    const requestorName = requestorInfo 
+        ? `${requestorInfo.firstname} ${requestorInfo.surname}` 
+        : "Unknown Employee";
+
+    // Note: Based on your `currentUserData` query above, the field seems to be called `department`
+    // If it's `name` in the schema instead, change this to `.name`
+    const requestorDepartment = (leaveRecord.employees?.departments as any)?.department 
+        || (leaveRecord.employees?.departments as any)?.name 
+        || "Unknown Department";
 
     // 3. Fetch the Department Head for the specific applicant's department
     const applicantDepartmentId = leaveRecord.employees?.departments_id;
@@ -143,6 +166,8 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
                         vpName={actualVPName}
                         rank={employeeData.ranks?.rank}
                         department={employeeData.departments?.department}
+                        employeeName={requestorName} // Pass down requestor name
+                        departmentName={requestorDepartment} // Pass down department
                     />
                 </div>
             </div>
