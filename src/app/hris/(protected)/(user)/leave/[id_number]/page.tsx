@@ -1,8 +1,8 @@
 // src\app\hris\(protected)\(user)\leave\[id_number]\page.tsx
 import Link from "next/link";
-import LeaveManagementPage from "./EmployeesLeavePage";
 import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
+import LeaveManagementWrapper from "@/components/hris/leave/table/administration/LeaveManagementWrapper";
 
 export default async function Page({
     searchParams, params
@@ -31,9 +31,25 @@ export default async function Page({
         };
     }
 
+    // 1. Fetch Paginated Leaves & Total Count (Added 'include' for employee name)
+    // 1. Fetch Paginated Leaves & Total Count
     const [leavesList, totalLeaves] = await Promise.all([
         prisma.employees_leaves.findMany({
             where: whereFilter,
+            include: {
+                employees: {
+                    select: {
+                        biography: {
+                            select: {
+                                personal_information: { select: { firstname: true, surname: true } }
+                            }
+                        },
+                        departments: {
+                            select: { department: true }
+                        }
+                    }
+                }
+            },
             skip: skip,
             take: ITEMS_PER_PAGE,
             orderBy: { created_at: "desc" },
@@ -42,6 +58,35 @@ export default async function Page({
             where: whereFilter
         })
     ]);
+
+    // 2. Fetch ALL approved leaves to calculate accurate balances
+    const allApprovedLeaves = await prisma.employees_leaves.findMany({
+        where: {
+            employees: { id_number: id_number },
+            status: { in: [3, 4] } // Adjust these integers based on your DB schema for "approved"
+        },
+        select: { leave_type: true }
+    });
+
+    const INITIAL_VL = 5;
+    const INITIAL_SL = 5;
+    const INITIAL_EL = 3;
+
+    let usedVL = 0; let usedSL = 0; let usedEL = 0;
+
+    allApprovedLeaves.forEach((leave) => {
+        const type = (leave.leave_type || "").toLowerCase();
+        if (type.includes("vacation")) usedVL += 1;
+        else if (type.includes("sick")) usedSL += 1;
+        else if (type.includes("emergency")) usedEL += 1;
+    });
+
+    const balances = {
+        vl: Math.max(0, INITIAL_VL - usedVL),
+        sl: Math.max(0, INITIAL_SL - usedSL),
+        el: Math.max(0, INITIAL_EL - usedEL),
+        get total() { return this.vl + this.sl + this.el; }
+    };
 
     const totalPages = Math.ceil(totalLeaves / ITEMS_PER_PAGE);
 
@@ -68,8 +113,9 @@ export default async function Page({
             <div className="rounded-xl shadow-sm transition-colors duration-300">
                 <div className="border-gray-200 dark:border-zinc-800 transition-colors">
 
-                    <LeaveManagementPage
-                        leavesList={JSON.parse(JSON.stringify(leavesList))} // Serialized to prevent date errors
+                    <LeaveManagementWrapper
+                        leavesList={JSON.parse(JSON.stringify(leavesList))}
+                        balances={balances}
                         defaultQuery={query}
                     />
 

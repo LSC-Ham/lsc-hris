@@ -100,7 +100,7 @@ export default function FiledLeavePage({
                     {/* DEPARTMENT HEAD */}
                     <div className="flex-1 p-5 rounded-xl border border-divider bg-white dark:bg-zinc-900/50 shadow-sm flex flex-col justify-between transition-colors">
                         <div>
-                            <p className="text-[10px] text-gray-400 dark:text-zinc-500 font-bold mb-1 uppercase tracking-tight">Noted by: Dept. Head</p>
+                            <p className="text-[10px] text-gray-400 dark:text-zinc-500 font-bold mb-1 uppercase tracking-tight">Noted by:</p>
                             <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 truncate uppercase">
                                 {headName || "---"}
                             </p>
@@ -123,7 +123,7 @@ export default function FiledLeavePage({
                     {/* VP ADMIN / HR */}
                     <div className="flex-1 p-5 rounded-xl border border-divider bg-white dark:bg-zinc-900/50 shadow-sm flex flex-col justify-between transition-colors">
                         <div>
-                            <p className="text-[10px] text-gray-400 dark:text-zinc-500 font-bold mb-1 uppercase tracking-tight">Approved by: VP / HR</p>
+                            <p className="text-[10px] text-gray-400 dark:text-zinc-500 font-bold mb-1 uppercase tracking-tight">Approved by:</p>
                             <p className="text-sm font-bold text-gray-900 dark:text-zinc-100 truncate uppercase">
                                 {vpName || "---"}
                             </p>

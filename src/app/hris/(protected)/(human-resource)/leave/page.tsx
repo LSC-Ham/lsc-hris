@@ -1,33 +1,23 @@
-// src\app\hris\(protected)\(human-resource)\leaves\page.tsx
 import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
-import LeaveManagementPage from "./LeaveManagementPage";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import LeaveManagementWrapper from "@/components/hris/leave/table/LeaveManagementWrapper";
 
 export default async function HRLeavesManagementPage({
     searchParams
 }: {
     searchParams: Promise<{ page?: string; query?: string }>;
 }) {
-    // ============================================================================
-    // 1. AUTHORIZATION GUARD
-    // ============================================================================
-    // TODO: Replace this with your actual authentication fetcher (NextAuth, Clerk, etc.)
-    // Example: 
-    // const session = await getServerSession(authOptions);
-    // const currentUserRole = session?.user?.role; 
 
-    const currentUserRole = "HR"; // <-- MOCK ROLE: Replace with actual session role
+    const currentUserRole = "HR";
 
     const allowedRoles = ["HR", "Human Resource", "Vice President", "VP"];
     const isAuthorized = allowedRoles.includes(currentUserRole);
 
     if (!isAuthorized) {
-        // Redirect unauthorized users back to a safe page (e.g., their own dashboard)
         redirect("/hris/dashboard");
     }
-    // ============================================================================
 
     const resolvedSearchParams = await searchParams;
 
@@ -36,7 +26,6 @@ export default async function HRLeavesManagementPage({
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
     const query = resolvedSearchParams?.query || "";
 
-    // 2. Build a robust search filter for HR
     const whereFilter: any = {};
 
     if (query) {
@@ -62,7 +51,6 @@ export default async function HRLeavesManagementPage({
         ];
     }
 
-    // 3. Fetch all leaves and include the employee details
     const [leavesList, totalLeaves] = await Promise.all([
         prisma.employees_leaves.findMany({
             where: whereFilter,
@@ -111,8 +99,8 @@ export default async function HRLeavesManagementPage({
             <div className="rounded-xl shadow-sm transition-colors duration-300">
                 <div className="border-gray-200 dark:border-zinc-800 transition-colors">
 
-                    <LeaveManagementPage
-                        leavesList={JSON.parse(JSON.stringify(leavesList))} // Serialized to prevent date errors
+                    <LeaveManagementWrapper
+                        leavesList={JSON.parse(JSON.stringify(leavesList))}
                         defaultQuery={query}
                     />
 

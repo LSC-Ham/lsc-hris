@@ -4,9 +4,8 @@ import { authOptions } from "@/lib/auth"; // Adjust this import to your actual a
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import FormLeavePage from "./FormLeavePage";
-import Link from "next/link"; // Added for the Back button
 
-export default async function FileLeaveServerPage() {
+export default async function Page() {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
