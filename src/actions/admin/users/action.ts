@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { revalidatePath } from "next/cache";
 
 export async function deactivateOrDeleteAccount(
     targetUserId: string,
@@ -59,5 +60,29 @@ export async function deactivateOrDeleteAccount(
     } catch (error: any) {
         console.error("Error in deactivateOrDeleteAccount:", error);
         return { error: error.message || "Something went wrong on the server." };
+    }
+}
+
+export async function adminResetPassword(userId: string, newPassword: string) {
+    try {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) return { error: "User not found." };
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                password: hashedNewPassword,
+                password_changed: false
+            },
+        });
+
+        revalidatePath("/admin/users");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Admin Reset Password Error:", error);
+        return { error: "Something went wrong. Please try again." };
     }
 }

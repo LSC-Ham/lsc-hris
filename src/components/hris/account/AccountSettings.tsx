@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AccountDangerModal from "./AccountDangerModal";
-import { deactivateOrDeleteAccount } from "@/actions/admin/users/action";
+import { adminResetPassword, deactivateOrDeleteAccount } from "@/actions/admin/users/action";
 import { changePassword, updateEmail, updateRole, updateUsername } from "@/actions/users/action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -113,8 +113,16 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
         }
 
         try {
-            const res = await changePassword(user.id, passwords.currentPassword, passwords.newPassword);
+            let res;
+
+            if (canEditRole) {
+                res = await adminResetPassword(user.id, passwords.newPassword);
+            } else {
+                res = await changePassword(user.id, passwords.currentPassword, passwords.newPassword);
+            }
+
             if (res?.error) throw new Error(res.error);
+
             setPassMessage({ type: "success", text: "Password changed successfully!" });
             setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
         } catch (error: any) {
@@ -137,7 +145,6 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
 
             toast.success(res.success);
             setIsDangerModalOpen(false);
-            // await signOut({ callbackUrl: '/hris/login' }); 
 
             router.push("/admin/users")
 
@@ -354,11 +361,12 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
                     </div>
                 </div>
 
-                {/* Password Card */}
                 <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
                     <div className="p-6 border-b border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/50">
                         <h2 className="text-lg font-semibold text-gray-800 dark:text-zinc-100">Password</h2>
-                        <p className="text-xs text-gray-500 dark:text-zinc-400">Update your password to ensure account security.</p>
+                        <p className="text-xs text-gray-500 dark:text-zinc-400">
+                            {canEditRole ? "Force reset this user's password." : "Update your password to ensure account security."}
+                        </p>
                     </div>
                     <form onSubmit={handlePasswordUpdate} className="p-6 space-y-4">
                         {passMessage.text && (
@@ -367,10 +375,13 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
                             </div>
                         )}
                         <div className="space-y-4 md:w-1/2">
-                            <div>
-                                <label className="block text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase mb-2">Current Password</label>
-                                <input type="password" value={passwords.currentPassword} onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })} required className="w-full p-2.5 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm outline-none transition-all shadow-sm bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 focus:ring-1 focus:ring-[#1a6b36] dark:focus:ring-green-600 focus:border-[#1a6b36] dark:focus:border-green-600" />
-                            </div>
+                            {/* ONLY SHOW CURRENT PASSWORD IF NOT AN ADMIN EDITING ANOTHER USER */}
+                            {!canEditRole && (
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase mb-2">Current Password</label>
+                                    <input type="password" value={passwords.currentPassword} onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })} required={!canEditRole} className="w-full p-2.5 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm outline-none transition-all shadow-sm bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 focus:ring-1 focus:ring-[#1a6b36] dark:focus:ring-green-600 focus:border-[#1a6b36] dark:focus:border-green-600" />
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase mb-2">New Password</label>
                                 <input type="password" value={passwords.newPassword} onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })} required minLength={8} className="w-full p-2.5 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm outline-none transition-all shadow-sm bg-white dark:bg-zinc-900 text-gray-900 dark:text-zinc-100 focus:ring-1 focus:ring-[#1a6b36] dark:focus:ring-green-600 focus:border-[#1a6b36] dark:focus:border-green-600" />
@@ -381,8 +392,9 @@ export default function AccountSettingsPage({ user, currentUserId, currentUserRo
                             </div>
                         </div>
                         <div className="pt-2">
-                            <button type="submit" disabled={isPassLoading || !passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword} className="bg-[#1a6b36] dark:bg-green-700 text-white text-sm font-medium px-6 py-2 rounded-lg shadow-sm hover:bg-[#155a2b] dark:hover:bg-green-600 transition-all disabled:opacity-50">
-                                {isPassLoading ? "Updating..." : "Update Password"}
+                            {/* UPDATED DISABLED STATE */}
+                            <button type="submit" disabled={isPassLoading || (!canEditRole && !passwords.currentPassword) || !passwords.newPassword || !passwords.confirmPassword} className="bg-[#1a6b36] dark:bg-green-700 text-white text-sm font-medium px-6 py-2 rounded-lg shadow-sm hover:bg-[#155a2b] dark:hover:bg-green-600 transition-all disabled:opacity-50">
+                                {isPassLoading ? "Updating..." : (canEditRole ? "Force Reset Password" : "Update Password")}
                             </button>
                         </div>
                     </form>
