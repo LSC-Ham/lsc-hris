@@ -72,7 +72,7 @@ export async function submitLeaveApplication(formData: FormData) {
 }
 
 
-export async function updateDepartmentLeaveStatus(leaveId: string, newStatus: number) {
+export async function updateLeaveStatus(leaveId: string, newStatus: number) {
     try {
 
         const updatedLeave = await prisma.employees_leaves.update({
@@ -84,8 +84,8 @@ export async function updateDepartmentLeaveStatus(leaveId: string, newStatus: nu
             }
         });
 
-        revalidatePath(`/hris/leave/request/`);
-        revalidatePath("/hris/leave/request");
+        revalidatePath(`/hris/dashboard/`);
+        revalidatePath(`/hris/dashboard/`);
 
         return { success: true, data: updatedLeave };
     } catch (error) {
@@ -99,12 +99,18 @@ export async function deleteLeaveRequest(leaveId: string) {
         const deletedLeave = await prisma.employees_leaves.delete({
             where: {
                 id: leaveId
+            },
+            include: {
+                employees: {
+                    select: {
+                        id_number: true
+                    }
+                }
             }
         });
 
-        // Match your existing cache revalidation paths
-        revalidatePath(`/hris/leave/request/`);
-        revalidatePath("/hris/leave/request");
+        revalidatePath(`/hris/dashboard/`);
+        revalidatePath(`/hris/dashboard/`);
 
         return { success: true, data: deletedLeave };
     } catch (error) {
@@ -120,7 +126,6 @@ export async function resetEmployeeLeaves() {
 
         const userId = (session.user as any).id;
 
-        // 1. Get the Full Name of the person performing the reset
         const currentUser = await prisma.user.findUnique({
             where: { id: userId },
             select: {
@@ -135,7 +140,7 @@ export async function resetEmployeeLeaves() {
         });
 
         const info = currentUser?.biography?.personal_information;
-        const fullName = info ? `${info.firstname} ${info.surname}` : "Unknown Admin";
+        const fullName = info ? `${info.firstname} ${info.surname}` : "";
 
         await prisma.leave_reset_logs.create({
             data: {
@@ -144,7 +149,7 @@ export async function resetEmployeeLeaves() {
             }
         });
 
-        revalidatePath("/hris/leaves/management");
+        revalidatePath("/hris/leaves/");
         return { success: true };
     } catch (error) {
         console.error("Reset Error:", error);

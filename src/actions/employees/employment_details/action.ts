@@ -25,8 +25,6 @@ export async function getEmployeeDetails(employeeId: string) {
         const employee = await prisma.employees.findUnique({
             where: { id: employeeId },
             include: {
-                // REMOVED: include: { positions: true } 
-                // We just need to order the records now.
                 positions: { orderBy: { start_at: 'desc' } },
                 government_ids: true,
                 divisions: true,

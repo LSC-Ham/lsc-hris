@@ -44,7 +44,6 @@ export default function FiledLeavePage({
 
     return (
         <div className="space-y-6">
-            {/* 1. Header Information */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <label className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase">Full name</label>
@@ -56,7 +55,6 @@ export default function FiledLeavePage({
                 </div>
             </div>
 
-            {/* 2. Leave Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <label className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase">Date of File</label>
@@ -90,14 +88,12 @@ export default function FiledLeavePage({
                 </div>
             </div>
 
-            {/* 3. Approvals Section */}
             <div className="pt-8 mt-8 border-t border-divider">
                 <h3 className="text-xs font-bold text-gray-400 dark:text-zinc-500 mb-6 uppercase tracking-[0.2em]">
                     Signatories & Approvals
                 </h3>
 
                 <div className="flex flex-col md:flex-row gap-6">
-                    {/* DEPARTMENT HEAD */}
                     <div className="flex-1 p-5 rounded-xl border border-divider bg-white dark:bg-zinc-900/50 shadow-sm flex flex-col justify-between transition-colors">
                         <div>
                             <p className="text-[10px] text-gray-400 dark:text-zinc-500 font-bold mb-1 uppercase tracking-tight">Noted by:</p>

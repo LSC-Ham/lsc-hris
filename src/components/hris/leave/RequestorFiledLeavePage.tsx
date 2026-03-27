@@ -1,7 +1,7 @@
 "use client";
 
 // Make sure to create and import your delete action here
-import { deleteLeaveRequest, updateDepartmentLeaveStatus } from "@/actions/employees/leaves/action";
+import { deleteLeaveRequest, updateLeaveStatus } from "@/actions/employees/leaves/action";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import FiledLeavePage from "./FiledLeavePage";
@@ -30,17 +30,16 @@ interface Props {
     departmentName?: string;
     hasDepartmentHead?: boolean;
     isRequestorHead?: boolean;
-    isOwner?: boolean; // <-- ADDED THIS
+    isOwner?: boolean; limitWarning?: string | null; // Add this new prop
 }
 
 export default function RequestorFiledLeavePage({
     leave, departmentRole, headName, vpName, rank, department,
-    employeeName, departmentName, hasDepartmentHead = true, isRequestorHead = false, isOwner = false
+    employeeName, departmentName, hasDepartmentHead = true, isRequestorHead = false, isOwner = false, limitWarning = null
 }: Props) {
     const router = useRouter();
     const [isUpdating, setIsUpdating] = useState(false);
 
-    // MODAL STATE
     const [modalConfig, setModalConfig] = useState<{
         isOpen: boolean;
         title: string;
@@ -56,7 +55,6 @@ export default function RequestorFiledLeavePage({
 
     const closeModal = () => setModalConfig(prev => ({ ...prev, isOpen: false }));
 
-    // --- EXISTING FORMATTERS ---
     const formatDateForInput = (dateString: string) => {
         if (!dateString) return "";
         return new Date(dateString).toISOString().split('T')[0];
@@ -76,12 +74,10 @@ export default function RequestorFiledLeavePage({
         time_to: formatTimeForInput(leave.time_to),
     };
 
-    // --- ACTION LOGIC ---
-
     const handleStatusUpdate = async (newStatus: number) => {
         setIsUpdating(true);
         try {
-            const response = await updateDepartmentLeaveStatus(leave.id, newStatus);
+            const response = await updateLeaveStatus(leave.id, newStatus);
             if (!response.success) throw new Error(response.error);
             toast.success("Leave status updated successfully");
             router.refresh();
@@ -109,13 +105,27 @@ export default function RequestorFiledLeavePage({
         }
     };
 
-    // --- MODAL TRIGGERS ---
-
     const triggerConfirmStatus = (status: number, actionType: 'approve' | 'decline') => {
+        // If VP is approving (status 3) AND there is a limit warning, show it
+        const isVPApproving = actionType === 'approve' && status === 3;
+        const showWarning = isVPApproving && limitWarning;
+
+        const baseMessage = `Are you sure you want to ${actionType} this leave request for ${employeeName}?`;
+
+        // Construct a stylized warning message for the modal
+        const finalMessage = showWarning
+            ? <div className="space-y-3">
+                <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400">
+                    <strong>⚠️ Balance Warning:</strong> {limitWarning}
+                </div>
+                <p>{baseMessage}</p>
+            </div>
+            : baseMessage;
+
         setModalConfig({
             isOpen: true,
-            title: actionType === 'approve' ? "Confirm Approval" : "Confirm Decline",
-            message: `Are you sure you want to ${actionType} this leave request for ${employeeName}?`,
+            title: actionType === 'approve' ? "Confirm Final Approval" : "Confirm Decline",
+            message: finalMessage,
             confirmColor: actionType === 'approve' ? "bg-[#1a6b36] hover:bg-[#155a2b]" : "bg-red-600 hover:bg-red-700",
             onConfirm: () => handleStatusUpdate(status)
         });
@@ -131,7 +141,6 @@ export default function RequestorFiledLeavePage({
         });
     };
 
-    // --- BUTTON STYLES ---
     const btnBase = "cursor-pointer flex-1 inline-flex justify-center items-center px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed";
     const btnApprove = `${btnBase} bg-brand text-white shadow-sm hover:bg-brand-dark hover:-translate-y-0.5`;
     const btnDecline = `${btnBase} bg-surface border border-divider text-foreground hover:bg-gray-100 hover:-translate-y-0.5`;

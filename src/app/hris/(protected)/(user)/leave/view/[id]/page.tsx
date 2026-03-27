@@ -11,6 +11,39 @@ interface PageProps {
     }>;
 }
 
+async function getLeaveWarning(employeeId: string, leaveType: string) {
+    const limits: Record<string, number> = {
+        "Vacation Leave": 5,
+        "Sick Leave": 5,
+        "Emergency Leave": 3,
+    };
+
+    const limit = limits[leaveType];
+
+    if (!limit) return null;
+
+    const latestReset = await prisma.leave_reset_logs.findFirst({
+        orderBy: { created_at: 'desc' },
+        select: { created_at: true }
+    });
+    const resetDate = latestReset?.created_at || new Date(0);
+
+    const usedLeaves = await prisma.employees_leaves.count({
+        where: {
+            employees_id: employeeId,
+            leave_type: leaveType,
+            created_at: { gte: resetDate },
+            status: { notIn: [0, 2] }
+        }
+    });
+
+    if (usedLeaves >= limit) {
+        return `This employee has exhausted their ${leaveType} limit (Used/Pending: ${usedLeaves} / Limit: ${limit}).`;
+    }
+
+    return null;
+}
+
 export default async function ViewSpecificLeaveServerPage({ params }: PageProps) {
     const { id } = await params;
     const session = await getServerSession(authOptions);
@@ -63,6 +96,9 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
     if (!leaveRecord) {
         notFound();
     }
+
+    // 3. Call the helper function to get the warning message
+    const warningMessage = await getLeaveWarning(leaveRecord.employees_id, leaveRecord.leave_type);
 
     const employeeData = currentUserData?.biography?.employees;
 
@@ -168,7 +204,7 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
                     isRequestorHead={isRequestorHead}
                     hasDepartmentHead={hasDepartmentHead}
                     isOwner={isOwner}
-                    
+                    limitWarning={warningMessage} // 4. Pass it down to the client component
                 />
             </div>
         </div>
