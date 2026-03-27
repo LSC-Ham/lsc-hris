@@ -38,10 +38,8 @@ export default async function Page({ params }: { params: Promise<{ id_number: st
     const eligibility = await getEligibility(employeeId?.id || "");
     const work_experience = await getWorkExperience(employeeId?.id || "");
 
-
     const ranks = await getRanks();
     const rankNames = ranks.map((r) => r.rank);
-
 
     const departments = await getDepartments();
     const departmentNames = departments.map((dept) => dept.department);

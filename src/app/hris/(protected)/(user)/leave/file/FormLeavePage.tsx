@@ -4,7 +4,7 @@ import { useState } from "react";
 import { LoadingSpinner } from "@/components/ui/Loading";
 import Link from "next/link";
 import { submitLeaveApplication } from "@/actions/employees/leaves/action";
-import { ConfirmModal } from "@/components/ui/ConfirmModal"; 
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 interface Props {
     employeeId: string;
@@ -194,7 +194,7 @@ export default function FormLeavePage({ employeeId }: Props) {
                             type="button"
                             onClick={handleAddLeave}
                             disabled={!isBuilderValid}
-                            className="bg-[#1a6b36] text-white text-xs px-4 py-2 rounded-lg hover:bg-[#155a2b] disabled:opacity-50 transition-colors shadow-sm"
+                            className="cursor-pointer bg-[#1a6b36] text-white text-xs px-4 py-2 rounded-lg hover:bg-[#155a2b] disabled:opacity-50 transition-colors shadow-sm disabled:cursor-not-allowed"
                         >
                             + Add to Application
                         </button>
@@ -227,7 +227,7 @@ export default function FormLeavePage({ employeeId }: Props) {
                                     <button
                                         type="button"
                                         onClick={() => handleRemoveLeave(index)}
-                                        className="text-[10px] text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold uppercase tracking-wider px-3 py-1.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 hover:border-red-200 dark:hover:border-red-900/50 rounded-md transition-colors sm:w-auto text-center self-start sm:self-center shrink-0"
+                                        className="cursor-pointer text-[10px] text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-bold uppercase tracking-wider px-3 py-1.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 hover:border-red-200 dark:hover:border-red-900/50 rounded-md transition-colors sm:w-auto text-center self-start sm:self-center shrink-0"
                                     >
                                         Remove
                                     </button>
@@ -247,7 +247,7 @@ export default function FormLeavePage({ employeeId }: Props) {
                     <button
                         type="submit"
                         disabled={isSubmitting || leavesList.length === 0}
-                        className="w-full sm:w-auto px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-[#1a6b36] hover:bg-[#134d26] dark:hover:bg-[#208242] rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[160px]"
+                        className="cursor-pointer w-full sm:w-auto px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white bg-[#1a6b36] hover:bg-[#134d26] dark:hover:bg-[#208242] rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center min-w-[160px]"
                     >
                         {isSubmitting ? <LoadingSpinner size="sm" color="white" /> : `Submit Application`}
                     </button>

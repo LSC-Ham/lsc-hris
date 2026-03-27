@@ -27,7 +27,7 @@ export default function ResetLeavesButton() {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="bg-[#1a6b36] hover:bg-[#134d26] dark:bg-[#1a6b36] dark:hover:bg-[#208242] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm text-center w-full md:w-auto"
+                className="cursor-pointer bg-[#1a6b36] hover:bg-[#134d26] dark:bg-[#1a6b36] dark:hover:bg-[#208242] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm text-center w-full md:w-auto"
             >
                 Reset Leaves
             </button>

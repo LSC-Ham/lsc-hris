@@ -13,14 +13,11 @@ export default async function Page({
     const resolvedSearchParams = await searchParams;
     const { id_number } = await params;
 
-    // 1. FETCH THE LATEST RESET DATE
     const lastReset = await prisma.leave_reset_logs.findFirst({
         orderBy: { date: 'desc' },
         select: { date: true }
     });
 
-    // If no reset has ever happened, we use a very old date (year 1970) 
-    // so that all historical leaves are counted.
     const resetCutoff = lastReset?.date || new Date(0);
 
     const ITEMS_PER_PAGE = 10;

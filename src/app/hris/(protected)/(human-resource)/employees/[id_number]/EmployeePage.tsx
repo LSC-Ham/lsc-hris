@@ -482,6 +482,25 @@ export default function EmployeePage({
                 </div>
 
                 <div className="md:col-span-8 lg:col-span-9 space-y-6">
+                    <div className="flex items-center gap-3 p-4 rounded-xl border border-blue-100 bg-blue-50 dark:border-blue-800/50 dark:bg-blue-900/20 transition-colors duration-300">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 16v-4" />
+                            <path d="M12 8h.01" />
+                        </svg>
+                        <p className="text-sm font-medium text-blue-800 dark:text-white">
+                            Note: Please ensure that all the personal information provided is correct.
+                        </p>
+                    </div>
                     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden p-6 transition-colors duration-300">
                         {renderContent()}
                     </div>

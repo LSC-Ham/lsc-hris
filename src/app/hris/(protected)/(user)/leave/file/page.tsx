@@ -1,6 +1,6 @@
 // src\app\hris\(protected)\(user)\leave\file\page.tsx
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; // Adjust this import to your actual auth options path
+import { authOptions } from "@/lib/auth"; 
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import FormLeavePage from "./FormLeavePage";
@@ -42,7 +42,25 @@ export default async function Page() {
                     </p>
                 </div>
             </div>
-
+            <div className="flex items-start gap-3 p-4 rounded-xl border border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-900/20 transition-colors duration-300">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-5 h-5 text-red-600 dark:text-red-500 shrink-0 mt-0.5"
+                >
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                    <line x1="12" x2="12" y1="9" y2="13" />
+                    <line x1="12" x2="12.01" y1="17" y2="17" />
+                </svg>
+                <p className="text-sm font-medium text-red-800 dark:text-white">
+                    Falsification of this form or failing to adhere to Timekeeping Policy is grounds for disciplinary action, up to including dismissal.
+                </p>
+            </div>
             <div className="rounded-xl shadow-sm transition-colors duration-300">
                 <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 transition-colors rounded-xl p-6 sm:p-8">
                     <FormLeavePage employeeId={employee.id} />
