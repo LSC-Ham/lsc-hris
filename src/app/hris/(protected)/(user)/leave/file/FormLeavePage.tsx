@@ -125,6 +125,7 @@ export default function FormLeavePage({ employeeId }: Props) {
                         >
                             <option value="" disabled>Select a leave type...</option>
                             <option value="Vacation Leave">Vacation Leave</option>
+                            <option value="Service Incentive Leave">Service Incentive Leave</option>
                             <option value="Sick Leave">Sick Leave</option>
                             <option value="Emergency Leave">Emergency Leave</option>
                             <option value="Leave Without Pay">Leave Without Pay</option>

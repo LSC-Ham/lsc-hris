@@ -12,20 +12,46 @@ interface PageProps {
 }
 
 async function getLeaveWarning(employeeId: string, leaveType: string) {
-    const limits: Record<string, number> = {
+    const employee = await prisma.employees.findUnique({
+        where: { id: employeeId },
+        select: { divisions: { select: { division: true } } } // Change this to wherever you store their role
+    });
+
+    if (!employee) return "Employee not found.";
+
+    // ⚠️ Adjust this condition based on what your database actually returns for academics
+    const isAcademic = employee.divisions?.division === "Academic";
+
+    const academicLimits: Record<string, number> = {
+        "Service Incentive Leave": 5,
+    };
+
+    const adminLimits: Record<string, number> = {
         "Vacation Leave": 5,
         "Sick Leave": 5,
         "Emergency Leave": 3,
     };
 
-    const limit = limits[leaveType];
+    let limit: number | undefined;
 
-    if (!limit) return null;
+    if (isAcademic) {
+        limit = academicLimits[leaveType];
+        if (!limit) {
+            return `Academics are not eligible for ${leaveType}. They may only use Service Incentive Leave.`;
+        }
+    } else {
+        limit = adminLimits[leaveType];
+        if (!limit) {
+            return `Administration staff are not eligible for ${leaveType}.`;
+        }
+    }
 
+    // 4. Proceed with the normal limit check
     const latestReset = await prisma.leave_reset_logs.findFirst({
         orderBy: { created_at: 'desc' },
         select: { created_at: true }
     });
+
     const resetDate = latestReset?.created_at || new Date(0);
 
     const usedLeaves = await prisma.employees_leaves.count({
@@ -33,7 +59,7 @@ async function getLeaveWarning(employeeId: string, leaveType: string) {
             employees_id: employeeId,
             leave_type: leaveType,
             created_at: { gte: resetDate },
-            status: { notIn: [0, 2] }
+            status: { notIn: [0, 2] } // Assuming 0=Rejected, 2=Cancelled
         }
     });
 
@@ -204,7 +230,7 @@ export default async function Page({ params }: PageProps) {
                     isRequestorHead={isRequestorHead}
                     hasDepartmentHead={hasDepartmentHead}
                     isOwner={isOwner}
-                    limitWarning={warningMessage} // 4. Pass it down to the client component
+                    limitWarning={warningMessage}
                 />
             </div>
         </div>

@@ -84,7 +84,6 @@ export default function LeaveManagementWrapper({
         router.push(`${viewRoutePrefix}/${id}`);
     };
 
-    // Map the string iconName to the actual SVG component
     const mappedStats = statsConfig.map(stat => ({
         ...stat,
         icon: IconMap[stat.iconName]

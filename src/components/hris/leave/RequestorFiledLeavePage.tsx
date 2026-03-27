@@ -1,6 +1,5 @@
 "use client";
 
-// Make sure to create and import your delete action here
 import { deleteLeaveRequest, updateLeaveStatus } from "@/actions/employees/leaves/action";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -30,7 +29,8 @@ interface Props {
     departmentName?: string;
     hasDepartmentHead?: boolean;
     isRequestorHead?: boolean;
-    isOwner?: boolean; limitWarning?: string | null; // Add this new prop
+    isOwner?: boolean;
+    limitWarning?: string | null;
 }
 
 export default function RequestorFiledLeavePage({
@@ -106,17 +106,15 @@ export default function RequestorFiledLeavePage({
     };
 
     const triggerConfirmStatus = (status: number, actionType: 'approve' | 'decline') => {
-        // If VP is approving (status 3) AND there is a limit warning, show it
         const isVPApproving = actionType === 'approve' && status === 3;
         const showWarning = isVPApproving && limitWarning;
 
         const baseMessage = `Are you sure you want to ${actionType} this leave request for ${employeeName}?`;
 
-        // Construct a stylized warning message for the modal
         const finalMessage = showWarning
             ? <div className="space-y-3">
                 <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400">
-                    <strong>⚠️ Balance Warning:</strong> {limitWarning}
+                    <strong>Warning:</strong> {limitWarning}
                 </div>
                 <p>{baseMessage}</p>
             </div>
