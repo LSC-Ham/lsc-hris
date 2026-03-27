@@ -65,32 +65,52 @@ export default async function Page({
     };
 
     if (query) {
-        whereFilter.leave_type = {
-            contains: query,
-            mode: "insensitive" as const,
-        };
+        whereFilter.OR = [
+            { leave_type: { contains: query, mode: "insensitive" } },
+            {
+                employees: {
+                    OR: [
+                        { id_number: { contains: query, mode: "insensitive" } },
+                        {
+                            biography: {
+                                personal_information: {
+                                    OR: [
+                                        { firstname: { contains: query, mode: "insensitive" } },
+                                        { surname: { contains: query, mode: "insensitive" } },
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ];
     }
 
     const [leavesList, totalLeaves] = await Promise.all([
         prisma.employees_leaves.findMany({
             where: whereFilter,
+            skip: skip,
+            take: ITEMS_PER_PAGE,
+            orderBy: { updated_at: "desc" },
             include: {
                 employees: {
                     select: {
+                        id_number: true,
+                        departments: { select: { department: true } },
                         biography: {
                             select: {
-                                personal_information: { select: { firstname: true, surname: true } }
+                                personal_information: {
+                                    select: {
+                                        firstname: true,
+                                        surname: true
+                                    }
+                                }
                             }
-                        },
-                        departments: {
-                            select: { department: true }
                         }
                     }
                 }
-            },
-            skip: skip,
-            take: ITEMS_PER_PAGE,
-            orderBy: { created_at: "desc" },
+            }
         }),
         prisma.employees_leaves.count({
             where: whereFilter
@@ -110,7 +130,6 @@ export default async function Page({
         prisma.employees_leaves.count({ where: { ...whereFilter, status: { in: [0, 2] } } }),
     ]);
 
-    // 3. Set the stats config to exactly what you requested
     const statsConfig: StatConfig[] = [
         { label: "Total Leave", value: totalLeaves, iconName: "calendar", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-100 dark:border-blue-800/50" },
         { label: "Pending", value: countPending, iconName: "alert", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-100 dark:border-amber-800/50" },
@@ -136,7 +155,6 @@ export default async function Page({
             <div className="rounded-xl transition-colors duration-300">
                 <div className="border-gray-200 dark:border-zinc-800 transition-colors">
 
-                    {/* 4. Pass it cleanly to the wrapper */}
                     <LeaveManagementWrapper
                         leavesList={JSON.parse(JSON.stringify(leavesList))}
                         defaultQuery={query}
@@ -144,16 +162,16 @@ export default async function Page({
                         viewRoutePrefix="/hris/leave/view"
                     />
 
-                    {totalPages > 0 && (
-                        <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
+                    <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
+                        {totalPages > 0 && (
                             <Pagination
                                 totalPages={totalPages}
                                 currentPage={currentPage}
                                 totalItems={totalLeaves}
-                                itemName="requests"
+                                itemName="leaves"
                             />
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

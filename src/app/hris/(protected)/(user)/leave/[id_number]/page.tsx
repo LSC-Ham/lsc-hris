@@ -30,32 +30,56 @@ export default async function Page({
     };
 
     if (query) {
-        whereFilter.leave_type = {
-            contains: query,
-            mode: "insensitive" as const,
-        };
+        whereFilter.OR = [
+            { leave_type: { contains: query, mode: "insensitive" } },
+            {
+                employees: {
+                    OR: [
+                        { id_number: { contains: query, mode: "insensitive" } },
+                        {
+                            biography: {
+                                personal_information: {
+                                    OR: [
+                                        { firstname: { contains: query, mode: "insensitive" } },
+                                        { surname: { contains: query, mode: "insensitive" } },
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ];
     }
 
     const [leavesList, totalLeaves] = await Promise.all([
         prisma.employees_leaves.findMany({
             where: whereFilter,
+            skip: skip,
+            take: ITEMS_PER_PAGE,
+            orderBy: { updated_at: "desc" },
             include: {
                 employees: {
                     select: {
+                        id_number: true,
+                        departments: { select: { department: true } },
                         biography: {
                             select: {
-                                personal_information: { select: { firstname: true, surname: true } }
+                                personal_information: {
+                                    select: {
+                                        firstname: true,
+                                        surname: true
+                                    }
+                                }
                             }
-                        },
-                        departments: { select: { department: true } }
+                        }
                     }
                 }
-            },
-            skip: skip,
-            take: ITEMS_PER_PAGE,
-            orderBy: { created_at: "desc" },
+            }
         }),
-        prisma.employees_leaves.count({ where: whereFilter })
+        prisma.employees_leaves.count({
+            where: whereFilter
+        })
     ]);
 
     const allApprovedLeavesSinceReset = await prisma.employees_leaves.findMany({
@@ -89,12 +113,11 @@ export default async function Page({
 
     const totalPages = Math.ceil(totalLeaves / ITEMS_PER_PAGE);
 
-    // Replaced the actual SVG components with the string keys your wrapper expects
     const stats = [
         { label: "Total Leave", value: balances.total, iconName: "calendar" as const, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-100 dark:border-blue-800/50" },
-        { label: "Vacation Leave", value: balances.vl, iconName: "plane" as const, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", border: "border-emerald-100 dark:border-emerald-800/50" },
-        { label: "Sick Leave", value: balances.sl, iconName: "stethoscope" as const, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-100 dark:border-amber-800/50" },
-        { label: "Emergency Leave", value: balances.el, iconName: "alert" as const, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/20", border: "border-rose-100 dark:border-rose-800/50" }
+        { label: "Vacation Leave Remaining", value: balances.vl, iconName: "plane" as const, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", border: "border-emerald-100 dark:border-emerald-800/50" },
+        { label: "Sick Leave Remaining", value: balances.sl, iconName: "stethoscope" as const, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-100 dark:border-amber-800/50" },
+        { label: "Emergency Leave Remaining", value: balances.el, iconName: "alert" as const, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/20", border: "border-rose-100 dark:border-rose-800/50" }
     ];
 
     return (
@@ -126,16 +149,16 @@ export default async function Page({
                         defaultQuery={query}
                     />
 
-                    {totalPages > 0 && (
-                        <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors pt-4">
+                    <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
+                        {totalPages > 0 && (
                             <Pagination
                                 totalPages={totalPages}
                                 currentPage={currentPage}
                                 totalItems={totalLeaves}
                                 itemName="leaves"
                             />
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                 </div>
             </div>

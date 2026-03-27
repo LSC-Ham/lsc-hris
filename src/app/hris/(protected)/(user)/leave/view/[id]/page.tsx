@@ -44,7 +44,7 @@ async function getLeaveWarning(employeeId: string, leaveType: string) {
     return null;
 }
 
-export default async function ViewSpecificLeaveServerPage({ params }: PageProps) {
+export default async function Page({ params }: PageProps) {
     const { id } = await params;
     const session = await getServerSession(authOptions);
 

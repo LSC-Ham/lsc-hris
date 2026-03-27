@@ -130,14 +130,13 @@ export default function LeaveManagementView({
             </div>
 
             <div className="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 rounded-t-xl overflow-hidden flex flex-col w-full">
-                
                 <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-zinc-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50 dark:bg-zinc-900/50">
                     <h3 className="font-bold text-gray-900 dark:text-zinc-100">{title}</h3>
                     <div className="relative w-full md:max-w-sm">
                         <SearchSVG className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search by leave type..."
+                            placeholder="Search by id number, full name, leave type..."
                             value={searchTerm}
                             onChange={(e) => onSearchChange?.(e.target.value)}
                             className="w-full pl-9 pr-10 py-2 rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a6b36]/20 focus:border-[#1a6b36] transition-colors shadow-sm text-gray-900 dark:text-zinc-100"
@@ -151,14 +150,14 @@ export default function LeaveManagementView({
                 </div>
 
                 <div className={`transition-opacity duration-200 ${isSearching ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
-                    
+
                     {/* MOBILE VIEW */}
                     <div className="block md:hidden divide-y divide-gray-100 dark:divide-zinc-800/80 transition-colors duration-300">
                         {leavesList.length > 0 ? (
                             leavesList.map((leave) => {
                                 const status = getStatusDetails(leave.status);
                                 const empInfo = leave.employees?.biography?.personal_information;
-                                const fullName = `${empInfo?.firstname || ''} ${empInfo?.surname || ''}`.trim() || "Unknown Employee";
+                                const fullName = `${empInfo?.firstname || ''} ${empInfo?.surname || ''}`.trim() || "";
 
                                 return (
                                     <div key={leave.id} onClick={() => onRowClick?.(leave.id)} className="p-4 hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors space-y-3 cursor-pointer">

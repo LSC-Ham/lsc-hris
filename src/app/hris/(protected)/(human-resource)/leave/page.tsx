@@ -2,11 +2,10 @@
 import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import LeaveManagementWrapper, { StatConfig } from "@/components/hris/leave/table/LeaveManagementWrapper";
 import ResetLeavesButton from "./ResetLeavesButton";
 
-export default async function HRLeavesManagementPage({
+export default async function Page({
     searchParams
 }: {
     searchParams: Promise<{ page?: string; query?: string }>;
@@ -58,7 +57,7 @@ export default async function HRLeavesManagementPage({
             where: whereFilter,
             skip: skip,
             take: ITEMS_PER_PAGE,
-            orderBy: { created_at: "desc" },
+            orderBy: { updated_at: "desc" },
             include: {
                 employees: {
                     select: {
@@ -95,7 +94,7 @@ export default async function HRLeavesManagementPage({
         prisma.employees_leaves.count({ where: { ...whereFilter, status: 3 } }),
         prisma.employees_leaves.count({ where: { ...whereFilter, status: { in: [0, 2] } } }),
     ]);
-    // 3. Define the config array for the dumb wrapper
+
     const statsConfig: StatConfig[] = [
         { label: "Total Leave", value: totalLeaves, iconName: "calendar", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-100 dark:border-blue-800/50" },
         { label: "Pending", value: countPending, iconName: "alert", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-100 dark:border-amber-800/50" },
@@ -122,7 +121,6 @@ export default async function HRLeavesManagementPage({
             <div className="rounded-xl transition-colors duration-300">
                 <div className="border-gray-200 dark:border-zinc-800 transition-colors">
 
-                    {/* 4. Pass the config to the dumb wrapper */}
                     <LeaveManagementWrapper
                         leavesList={JSON.parse(JSON.stringify(leavesList))}
                         defaultQuery={query}
