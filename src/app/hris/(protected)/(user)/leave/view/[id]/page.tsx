@@ -14,12 +14,11 @@ interface PageProps {
 async function getLeaveWarning(employeeId: string, leaveType: string) {
     const employee = await prisma.employees.findUnique({
         where: { id: employeeId },
-        select: { divisions: { select: { division: true } } } // Change this to wherever you store their role
+        select: { divisions: { select: { division: true } } } 
     });
 
     if (!employee) return "Employee not found.";
 
-    // ⚠️ Adjust this condition based on what your database actually returns for academics
     const isAcademic = employee.divisions?.division === "Academic";
 
     const academicLimits: Record<string, number> = {
@@ -46,7 +45,6 @@ async function getLeaveWarning(employeeId: string, leaveType: string) {
         }
     }
 
-    // 4. Proceed with the normal limit check
     const latestReset = await prisma.leave_reset_logs.findFirst({
         orderBy: { created_at: 'desc' },
         select: { created_at: true }
@@ -59,7 +57,7 @@ async function getLeaveWarning(employeeId: string, leaveType: string) {
             employees_id: employeeId,
             leave_type: leaveType,
             created_at: { gte: resetDate },
-            status: { notIn: [0, 2] } // Assuming 0=Rejected, 2=Cancelled
+            status: { notIn: [0, 2] } 
         }
     });
 
