@@ -1,8 +1,8 @@
-// src\app\hris\(protected)\(user)\leave\[id_number]\page.tsx
+// src/app/hris/(protected)/(user)/leave/[id_number]/page.tsx
 import Link from "next/link";
 import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
-import LeaveManagementWrapper from "@/components/hris/leave/table/administration/LeaveManagementWrapper";
+import LeaveManagementWrapper from "@/components/hris/leave/table/LeaveManagementWrapper";
 
 export default async function Page({
     searchParams, params
@@ -62,7 +62,7 @@ export default async function Page({
         where: {
             employees: { id_number: id_number },
             status: { in: [3, 4] },
-            created_at: { gt: resetCutoff } 
+            created_at: { gt: resetCutoff }
         },
         select: { leave_type: true }
     });
@@ -89,6 +89,14 @@ export default async function Page({
 
     const totalPages = Math.ceil(totalLeaves / ITEMS_PER_PAGE);
 
+    // Replaced the actual SVG components with the string keys your wrapper expects
+    const stats = [
+        { label: "Total Leave", value: balances.total, iconName: "calendar" as const, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-100 dark:border-blue-800/50" },
+        { label: "Vacation Leave", value: balances.vl, iconName: "plane" as const, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", border: "border-emerald-100 dark:border-emerald-800/50" },
+        { label: "Sick Leave", value: balances.sl, iconName: "stethoscope" as const, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-100 dark:border-amber-800/50" },
+        { label: "Emergency Leave", value: balances.el, iconName: "alert" as const, color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/20", border: "border-rose-100 dark:border-rose-800/50" }
+    ];
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -114,12 +122,12 @@ export default async function Page({
 
                     <LeaveManagementWrapper
                         leavesList={JSON.parse(JSON.stringify(leavesList))}
-                        balances={balances}
+                        statsConfig={stats} // Passed the configured stats array here
                         defaultQuery={query}
                     />
 
                     {totalPages > 0 && (
-                        <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
+                        <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors pt-4">
                             <Pagination
                                 totalPages={totalPages}
                                 currentPage={currentPage}

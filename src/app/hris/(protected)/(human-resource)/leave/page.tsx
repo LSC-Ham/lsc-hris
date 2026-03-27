@@ -1,8 +1,9 @@
+//src\app\hris\(protected)\(human-resource)\leave\page.tsx
 import Pagination from "@/components/ui/Pagination";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import LeaveManagementWrapper from "@/components/hris/leave/table/LeaveManagementWrapper";
+import LeaveManagementWrapper, { StatConfig } from "@/components/hris/leave/table/LeaveManagementWrapper";
 import ResetLeavesButton from "./ResetLeavesButton";
 
 export default async function HRLeavesManagementPage({
@@ -82,6 +83,26 @@ export default async function HRLeavesManagementPage({
         })
     ]);
 
+    const [countPending, countApproved, countRejected] = await Promise.all([
+        prisma.employees_leaves.count({
+            where: {
+                AND: [
+                    whereFilter,
+                    { OR: [{ status: null }, { status: 1 }] }
+                ]
+            }
+        }),
+        prisma.employees_leaves.count({ where: { ...whereFilter, status: 3 } }),
+        prisma.employees_leaves.count({ where: { ...whereFilter, status: { in: [0, 2] } } }),
+    ]);
+    // 3. Define the config array for the dumb wrapper
+    const statsConfig: StatConfig[] = [
+        { label: "Total Leave", value: totalLeaves, iconName: "calendar", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-100 dark:border-blue-800/50" },
+        { label: "Pending", value: countPending, iconName: "alert", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-100 dark:border-amber-800/50" },
+        { label: "Approved", value: countApproved, iconName: "plane", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", border: "border-emerald-100 dark:border-emerald-800/50" },
+        { label: "Rejected", value: countRejected, iconName: "stethoscope", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/20", border: "border-rose-100 dark:border-rose-800/50" }
+    ];
+
     const totalPages = Math.ceil(totalLeaves / ITEMS_PER_PAGE);
 
     return (
@@ -101,10 +122,14 @@ export default async function HRLeavesManagementPage({
             <div className="rounded-xl transition-colors duration-300">
                 <div className="border-gray-200 dark:border-zinc-800 transition-colors">
 
+                    {/* 4. Pass the config to the dumb wrapper */}
                     <LeaveManagementWrapper
                         leavesList={JSON.parse(JSON.stringify(leavesList))}
                         defaultQuery={query}
+                        statsConfig={statsConfig}
+                        viewRoutePrefix="/hris/leave/view"
                     />
+
                     <div className="border-t border-gray-200 dark:border-zinc-800 transition-colors">
                         {totalPages > 0 && (
                             <Pagination

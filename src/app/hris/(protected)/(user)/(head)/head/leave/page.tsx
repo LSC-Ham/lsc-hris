@@ -1,10 +1,10 @@
-// src\app\hris\(protected)\(user)\leave\administration\page.tsx (or your path for the Head view)
+// src\app\hris\(protected)\(user)\leave\administration\page.tsx
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Pagination from "@/components/ui/Pagination";
-import LeaveManagementWrapper from "@/components/hris/leave/table/LeaveManagementWrapper";
+import LeaveManagementWrapper, { StatConfig } from "@/components/hris/leave/table/LeaveManagementWrapper";
 
 export default async function Page({
     searchParams
@@ -97,33 +97,26 @@ export default async function Page({
         })
     ]);
 
-    const allApprovedLeaves = await prisma.employees_leaves.findMany({
-        where: {
-            employees: {
-                departments_id: headEmployee.departments?.id,
-                id: { not: headId }
-            },
-            status: { in: [3, 4] }
-        },
-        select: { leave_type: true }
-    });
+    const [countPending, countApproved, countRejected] = await Promise.all([
+        prisma.employees_leaves.count({
+            where: {
+                AND: [
+                    whereFilter,
+                    { OR: [{ status: null }, { status: 1 }] }
+                ]
+            }
+        }),
+        prisma.employees_leaves.count({ where: { ...whereFilter, status: 3 } }),
+        prisma.employees_leaves.count({ where: { ...whereFilter, status: { in: [0, 2] } } }),
+    ]);
 
-    let totalVL = 0; let totalSL = 0; let totalEL = 0;
-
-    allApprovedLeaves.forEach((leave) => {
-        const type = (leave.leave_type || "").toLowerCase();
-        if (type.includes("vacation")) totalVL += 1;
-        else if (type.includes("sick")) totalSL += 1;
-        else if (type.includes("emergency")) totalEL += 1;
-    });
-
-    // Balances here reflect total approved leaves taken by underlings, rather than an initial pool
-    const balances = {
-        vl: totalVL,
-        sl: totalSL,
-        el: totalEL,
-        get total() { return this.vl + this.sl + this.el; }
-    };
+    // 3. Set the stats config to exactly what you requested
+    const statsConfig: StatConfig[] = [
+        { label: "Total Leave", value: totalLeaves, iconName: "calendar", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20", border: "border-blue-100 dark:border-blue-800/50" },
+        { label: "Pending", value: countPending, iconName: "alert", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/20", border: "border-amber-100 dark:border-amber-800/50" },
+        { label: "Approved", value: countApproved, iconName: "plane", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/20", border: "border-emerald-100 dark:border-emerald-800/50" },
+        { label: "Rejected", value: countRejected, iconName: "stethoscope", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-900/20", border: "border-rose-100 dark:border-rose-800/50" }
+    ];
 
     const totalPages = Math.ceil(totalLeaves / ITEMS_PER_PAGE);
 
@@ -135,7 +128,7 @@ export default async function Page({
                         Department Leave Requests
                     </h1>
                     <p className="text-sm text-gray-500 dark:text-zinc-400 transition-colors">
-                        Review and manage leave applications from your team. Stats reflect total approved leaves.
+                        Review and manage leave applications from your team.
                     </p>
                 </div>
             </div>
@@ -143,9 +136,12 @@ export default async function Page({
             <div className="rounded-xl transition-colors duration-300">
                 <div className="border-gray-200 dark:border-zinc-800 transition-colors">
 
+                    {/* 4. Pass it cleanly to the wrapper */}
                     <LeaveManagementWrapper
                         leavesList={JSON.parse(JSON.stringify(leavesList))}
                         defaultQuery={query}
+                        statsConfig={statsConfig}
+                        viewRoutePrefix="/hris/leave/view"
                     />
 
                     {totalPages > 0 && (

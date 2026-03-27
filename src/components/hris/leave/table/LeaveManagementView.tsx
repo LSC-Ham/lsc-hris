@@ -1,4 +1,4 @@
-// src\app\hris\(protected)\(user)\leave\[id_number]\LeaveManagementView.tsx
+// Unified LeaveManagementView.tsx
 "use client";
 
 import { LoadingSpinner } from "@/components/ui/Loading";
@@ -14,7 +14,7 @@ export interface LeaveRecord {
     time_to: Date | string | null;
     created_at: Date | string | null;
     employees?: {
-        id_number?: string;
+        id_number?: string | null;
         biography?: {
             personal_information?: {
                 firstname: string | null;
@@ -46,7 +46,7 @@ interface Props {
     onRowClick?: (id: string | number) => void;
 }
 
-// --- SVGs ---
+// --- Shared SVGs ---
 export const CalendarSVG = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
         <rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" />
@@ -74,7 +74,7 @@ export const SearchSVG = ({ className }: { className?: string }) => (
 );
 
 export default function LeaveManagementView({
-    title = "Leave Applications Database",
+    title = "Leave Requests",
     leavesList,
     stats,
     searchTerm = "",
@@ -106,7 +106,7 @@ export default function LeaveManagementView({
             case 3:
                 return { label: "Fully Approved", style: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" };
             default:
-                return { label: "Unknown Status", style: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" };
+                return { label: "Pending", style: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" };
         }
     };
 
@@ -119,7 +119,7 @@ export default function LeaveManagementView({
                             <div className={`p-2 rounded-lg bg-white dark:bg-zinc-900 shadow-sm`}>
                                 <stat.icon className={`w-5 h-5 ${stat.color}`} />
                             </div>
-                            <span className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Status</span>
+                            <span className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">Record</span>
                         </div>
                         <div>
                             <span className="text-3xl font-black text-gray-900 dark:text-zinc-100">{stat.value}</span>
@@ -130,13 +130,14 @@ export default function LeaveManagementView({
             </div>
 
             <div className="bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800 rounded-t-xl overflow-hidden flex flex-col w-full">
+                
                 <div className="p-4 sm:p-5 border-b border-gray-100 dark:border-zinc-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50 dark:bg-zinc-900/50">
                     <h3 className="font-bold text-gray-900 dark:text-zinc-100">{title}</h3>
                     <div className="relative w-full md:max-w-sm">
                         <SearchSVG className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search by name, ID, or type..."
+                            placeholder="Search by leave type..."
                             value={searchTerm}
                             onChange={(e) => onSearchChange?.(e.target.value)}
                             className="w-full pl-9 pr-10 py-2 rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a6b36]/20 focus:border-[#1a6b36] transition-colors shadow-sm text-gray-900 dark:text-zinc-100"
@@ -150,26 +151,49 @@ export default function LeaveManagementView({
                 </div>
 
                 <div className={`transition-opacity duration-200 ${isSearching ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
+                    
+                    {/* MOBILE VIEW */}
                     <div className="block md:hidden divide-y divide-gray-100 dark:divide-zinc-800/80 transition-colors duration-300">
                         {leavesList.length > 0 ? (
                             leavesList.map((leave) => {
                                 const status = getStatusDetails(leave.status);
                                 const empInfo = leave.employees?.biography?.personal_information;
-                                const fullName = `${empInfo?.firstname || ''} ${empInfo?.surname || ''}`.trim() || "";
+                                const fullName = `${empInfo?.firstname || ''} ${empInfo?.surname || ''}`.trim() || "Unknown Employee";
 
                                 return (
                                     <div key={leave.id} onClick={() => onRowClick?.(leave.id)} className="p-4 hover:bg-gray-50 dark:hover:bg-zinc-800/30 transition-colors space-y-3 cursor-pointer">
                                         <div className="flex justify-between items-start gap-4">
-                                            <div className="flex flex-col gap-1">
-                                                <h3 className="font-bold text-gray-900 dark:text-zinc-100 text-base leading-tight">
+                                            <div className="flex flex-col gap-1.5">
+                                                <h3 className="font-bold text-gray-900 dark:text-zinc-100 text-base leading-tight capitalize">
                                                     {fullName}
                                                 </h3>
-                                                <span className="text-xs text-[#1a6b36] font-medium">{leave.employees?.id_number}</span>
-                                                <span className="text-xs text-gray-500 dark:text-zinc-400 capitalize">{leave.leave_type}</span>
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    {leave.employees?.id_number && (
+                                                        <span className="text-xs text-[#1a6b36] dark:text-[#208242] font-semibold">{leave.employees.id_number}</span>
+                                                    )}
+                                                    <span className="text-xs text-gray-500 dark:text-zinc-400 font-medium">
+                                                        {leave.employees?.departments?.department || "No Department"}
+                                                    </span>
+                                                </div>
+                                                <span className="text-sm font-semibold text-gray-700 dark:text-zinc-300 capitalize mt-1">
+                                                    {leave.leave_type}
+                                                </span>
                                             </div>
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border whitespace-nowrap ${status.style}`}>
                                                 {status.label}
                                             </span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm pt-2 border-t border-gray-100 dark:border-zinc-800/80 transition-colors">
+                                            <div>
+                                                <span className="text-xs font-semibold opacity-70 text-gray-500 dark:text-zinc-400 uppercase tracking-wider block mb-0.5">Date & Time</span>
+                                                <span className="font-bold text-gray-900 dark:text-zinc-100">{formatDate(leave.date)}</span>
+                                                <span className="block text-xs text-gray-500 dark:text-zinc-400">{formatTime(leave.time_from)} - {formatTime(leave.time_to)}</span>
+                                            </div>
+                                            <div>
+                                                <span className="text-xs font-semibold opacity-70 text-gray-500 dark:text-zinc-400 uppercase tracking-wider block mb-0.5">Details</span>
+                                                <span className="font-bold text-gray-900 dark:text-zinc-100 truncate block max-w-full" title={leave.reason || ""}>{leave.reason || "No Reason"}</span>
+                                                <span className="block text-xs text-gray-500 dark:text-zinc-400">Filed: {formatDate(leave.created_at)}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -207,7 +231,10 @@ export default function LeaveManagementView({
                                             >
                                                 <td className="px-6 py-4">
                                                     <div className="text-sm font-bold text-gray-900 dark:text-zinc-100 capitalize">{fullName}</div>
-                                                    <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">{leave.employees?.departments?.department || ""}</div>
+                                                    <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5 flex gap-2">
+                                                        {leave.employees?.id_number && <span className="text-[#1a6b36] dark:text-[#208242] font-medium">{leave.employees.id_number}</span>}
+                                                        <span>{leave.employees?.departments?.department || ""}</span>
+                                                    </div>
                                                 </td>
 
                                                 <td className="px-6 py-4">
@@ -237,7 +264,8 @@ export default function LeaveManagementView({
                                     })
                                 ) : (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-12 text-center text-gray-500 dark:text-zinc-400 text-sm">
+                                        {/* Fixed colSpan here: 5 columns match the 5 table headers */}
+                                        <td colSpan={5} className="px-6 py-12 text-center text-gray-500 dark:text-zinc-400 text-sm">
                                             No leave records found {searchTerm ? `matching "${searchTerm}"` : ""}.
                                         </td>
                                     </tr>

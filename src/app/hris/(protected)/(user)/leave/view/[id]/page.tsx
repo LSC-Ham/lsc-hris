@@ -108,7 +108,7 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
 
     const isDeptHead =
         employeeData?.departments_id === leaveRecord.employees?.departments_id &&
-        ["head", "assistant head"].includes(employeeData?.department_role?.toLowerCase() || "");
+        ["head"].includes(employeeData?.department_role?.toLowerCase() || "");
 
     if (!employeeData || (!isVP && !isHR && !isOwner && !isDeptHead)) {
         redirect("/hris/dashboard");
@@ -124,7 +124,7 @@ export default async function ViewSpecificLeaveServerPage({ params }: PageProps)
         || "Unknown Department";
 
     const requestorRole = leaveRecord.employees?.department_role?.toLowerCase() || "";
-    const isRequestorHead = ["head", "assistant head"].includes(requestorRole);
+    const isRequestorHead = ["head"].includes(requestorRole);
 
     const applicantDepartmentId = leaveRecord.employees?.departments_id;
     const departmentHead = await prisma.employees.findFirst({
