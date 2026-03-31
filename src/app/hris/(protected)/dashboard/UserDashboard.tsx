@@ -35,7 +35,6 @@ export default async function UserDashboard({ userId }: { userId: string }) {
     const departmentName = userProfile?.departments?.department || "No Department";
     const rankName = userProfile?.ranks?.rank || "No Rank";
 
-    // 1. ADD YOUR NEW STATUS LOGIC HERE
     const getStatusDetails = (status: number | null) => {
         switch (status) {
             case null:
@@ -55,7 +54,6 @@ export default async function UserDashboard({ userId }: { userId: string }) {
 
     return (
         <div className="space-y-6">
-            {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight transition-colors capitalize">
@@ -67,7 +65,6 @@ export default async function UserDashboard({ userId }: { userId: string }) {
                 </div>
             </div>
 
-            {/* MY RECENT LEAVES WIDGET */}
             <div className="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6 transition-all hover:shadow-md flex flex-col">
                 <p className="text-sm font-medium text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                     My Recent Leave Requests
@@ -75,7 +72,6 @@ export default async function UserDashboard({ userId }: { userId: string }) {
 
                 <div className="space-y-4 flex-1 overflow-y-auto">
                     {myRecentLeaves.map((leave) => {
-                        // 2. USE THE NEW FUNCTION HERE
                         const { label: statusLabel, style: statusStyle } = getStatusDetails(leave.status);
 
                         return (

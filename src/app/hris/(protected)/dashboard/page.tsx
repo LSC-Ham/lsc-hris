@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
-// Import your authOptions
 import UserDashboard from "./UserDashboard";
 import { authOptions } from "@/lib/auth";
 import HumanResourceDashboard from "./HumanResourceDashboard";
