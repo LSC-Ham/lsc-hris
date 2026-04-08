@@ -1,8 +1,6 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import fs from 'fs/promises';
-import path from 'path';
 import bcrypt from "bcrypt";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
