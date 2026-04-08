@@ -7,7 +7,12 @@ import bcrypt from "bcrypt";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { createClient } from '@supabase/supabase-js';
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
+const BUCKET_NAME = 'avatars';
 export async function getUsers(userId: string) {
     if (!userId || userId === "") {
         console.warn("getUsers called with an empty userId");
@@ -144,7 +149,7 @@ export async function setupFirstPassword(newPassword: string) {
             where: { id: userId },
             data: {
                 password: hashedPassword,
-                password_changed: true, 
+                password_changed: true,
             },
         });
 
@@ -159,21 +164,26 @@ export async function deleteProfilePicture(userId: string) {
     if (!userId) throw new Error('User ID is required');
 
     try {
+        // 1. Get the current filename
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: { profile_picture: true }
         });
 
+        // 2. Delete from Supabase Storage
         if (user?.profile_picture) {
-            const filepath = path.join(process.cwd(), 'public', user.profile_picture);
+            const fileName = user.profile_picture.replace('/avatar/', '');
 
-            try {
-                await fs.unlink(filepath);
-            } catch (fsError) {
-                console.warn("File already deleted or not found on disk:", fsError);
+            const { error: removeError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .remove([fileName]);
+
+            if (removeError) {
+                console.warn("Could not delete file from Supabase:", removeError.message);
             }
         }
 
+        // 3. Clear the database record
         await prisma.user.update({
             where: { id: userId },
             data: { profile_picture: null }
@@ -195,38 +205,51 @@ export async function uploadProfilePicture(formData: FormData) {
     }
 
     try {
+        // 1. Check for an existing profile picture
         const existingUser = await prisma.user.findUnique({
             where: { id: userId },
             select: { profile_picture: true }
         });
 
+        // 2. Delete the old picture from Supabase if it exists
         if (existingUser?.profile_picture) {
-            const oldFilePath = path.join(process.cwd(), 'public', existingUser.profile_picture);
-            try {
-                await fs.unlink(oldFilePath);
-                console.log("Old profile picture deleted successfully.");
-            } catch (err) {
-                console.warn("Could not delete old file (it may not exist):", err);
+            // .replace is added here as a safety measure for your old local file paths
+            // It ensures if the DB still has "/avatar/filename.jpg", it extracts just "filename.jpg"
+            const oldFileName = existingUser.profile_picture.replace('/avatar/', '');
+
+            const { error: removeError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .remove([oldFileName]);
+
+            if (removeError) {
+                console.warn("Could not delete old file from Supabase:", removeError.message);
             }
         }
 
-        const buffer = Buffer.from(await file.arrayBuffer());
+        // 3. Prepare the new file
         const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
         const filename = `profile-${userId}-${uniqueSuffix}.jpg`;
 
-        const uploadDir = path.join(process.cwd(), 'public/avatar');
-        await fs.mkdir(uploadDir, { recursive: true });
+        // 4. Upload to Supabase Storage
+        const { error: uploadError } = await supabase.storage
+            .from(BUCKET_NAME)
+            .upload(filename, file, {
+                contentType: file.type || 'image/jpeg',
+                upsert: true,
+                cacheControl: '3600'
+            });
 
-        const newFilePath = path.join(uploadDir, filename);
-        await fs.writeFile(newFilePath, buffer);
+        if (uploadError) {
+            throw new Error(`Supabase Upload Error: ${uploadError.message}`);
+        }
 
-        const dbImagePath = `/avatar/${filename}`;
+        // 5. Update Database with ONLY the filename
         await prisma.user.update({
             where: { id: userId },
-            data: { profile_picture: dbImagePath }
+            data: { profile_picture: filename } // Storing just the filename works perfectly with our frontend setup
         });
 
-        return { success: true, imagePath: dbImagePath };
+        return { success: true, imagePath: filename };
 
     } catch (error) {
         console.error("Upload Error:", error);

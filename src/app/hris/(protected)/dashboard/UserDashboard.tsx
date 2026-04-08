@@ -71,28 +71,34 @@ export default async function UserDashboard({ userId }: { userId: string }) {
                 </p>
 
                 <div className="space-y-4 flex-1 overflow-y-auto">
-                    {myRecentLeaves.map((leave) => {
-                        const { label: statusLabel, style: statusStyle } = getStatusDetails(leave.status);
+                    {myRecentLeaves.length === 0 ? (
+                        <div className="py-6 text-center text-sm text-gray-500 dark:text-zinc-400 transition-colors">
+                            No recent leave requests
+                        </div>
+                    ) : (
+                        myRecentLeaves.map((leave) => {
+                            const { label: statusLabel, style: statusStyle } = getStatusDetails(leave.status);
 
-                        return (
-                            <div key={leave.id} className="flex flex-col border-b border-gray-100 dark:border-zinc-800/80 pb-3 last:border-0 last:pb-0 capitalize transition-colors">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-zinc-100 truncate pr-2">
-                                        {leave.leave_type.replace(/_/g, ' ')}
-                                    </p>
-                                    {/* 3. APPLY THE NEW STYLE PROPERTY HERE */}
-                                    <span className={`text-[10px] font-bold border px-2 py-0.5 rounded-md uppercase tracking-wider transition-colors ${statusStyle}`}>
-                                        {statusLabel}
-                                    </span>
+                            return (
+                                <div key={leave.id} className="flex flex-col border-b border-gray-100 dark:border-zinc-800/80 pb-3 last:border-0 last:pb-0 capitalize transition-colors">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-semibold text-gray-900 dark:text-zinc-100 truncate pr-2">
+                                            {leave.leave_type.replace(/_/g, ' ')}
+                                        </p>
+                                        {/* 3. APPLY THE NEW STYLE PROPERTY HERE */}
+                                        <span className={`text-[10px] font-bold border px-2 py-0.5 rounded-md uppercase tracking-wider transition-colors ${statusStyle}`}>
+                                            {statusLabel}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-[11px] text-gray-500 dark:text-zinc-400 whitespace-nowrap flex items-center gap-1">
+                                            {leave.date ? new Date(leave.date).toLocaleDateString() : 'No date'}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[11px] text-gray-500 dark:text-zinc-400 whitespace-nowrap flex items-center gap-1">
-                                        {leave.date ? new Date(leave.date).toLocaleDateString() : 'No date'}
-                                    </span>
-                                </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                 </div>
             </div>
         </div>
