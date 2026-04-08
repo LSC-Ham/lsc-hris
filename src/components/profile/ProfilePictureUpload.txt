@@ -20,20 +20,14 @@ export default function ProfilePictureUpload({
     isEditable = true
 }: ProfilePictureProps) {
 
-    // Define your Supabase details here
-    const BUCKET_NAME = 'avatars'; // <-- CHANGE THIS to your actual bucket name
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
     const [imagePreview, setImagePreview] = useState<string | null>(() => {
         if (!initialImage) return null;
 
-        // If the DB already stored the full HTTP URL (or it's a local blob during edits)
         if (initialImage.startsWith('blob:') || initialImage.startsWith('http')) {
             return initialImage;
         }
 
-        // If the DB only stored the filename (e.g. 'user123.jpg'), construct the Supabase Public URL
-        return `${supabaseUrl}/storage/v1/object/public/${BUCKET_NAME}/${initialImage}`;
+        return `/api/profile_picture?fileName=${initialImage}`;
     });
 
     const [isUploading, setIsUploading] = useState(false);
@@ -122,13 +116,18 @@ export default function ProfilePictureUpload({
         if (!imagePreview) return;
 
         try {
+            const response = await fetch(imagePreview);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+
             const link = document.createElement('a');
-            link.href = imagePreview;
+            link.href = blobUrl;
             link.download = `profile_picture_${userId}.jpg`;
-            link.target = "_blank"; 
             document.body.appendChild(link);
             link.click();
+
             document.body.removeChild(link);
+            URL.revokeObjectURL(blobUrl);
 
             setShowOptions(false);
         } catch (error) {
@@ -152,6 +151,7 @@ export default function ProfilePictureUpload({
 
     return (
         <div className="flex flex-col items-center">
+
             {isEditable ? (
                 <button
                     onClick={() => setShowOptions(true)}

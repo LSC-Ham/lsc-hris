@@ -56,6 +56,7 @@ export default async function Page({
         where: { id_number: id_number },
         select: {
             remarks: true,
+            hired_at: true,
             divisions: {
                 select: { division: true }
             }
@@ -111,20 +112,44 @@ export default async function Page({
     const remarks = employeeData?.remarks?.toLowerCase() || "";
     const divisionName = employeeData?.divisions?.division?.toLowerCase() || "";
 
-    if (remarks === 'regular') {
-        if (divisionName === 'academics') {
-            INITIAL_SIL = 5;
-        } else if (divisionName === 'administration') {
+    let yearsEmployed = 0;
+    if (employeeData?.hired_at) {
+        const hireDate = new Date(employeeData.hired_at);
+        const today = new Date();
+
+        const diffInMs = today.getTime() - hireDate.getTime();
+        yearsEmployed = diffInMs / (1000 * 60 * 60 * 24 * 365.25);
+    }
+    console.log({ yearsEmployed });
+    if (divisionName === 'academics') {
+        if (remarks === 'regular') {
             INITIAL_VL = 5;
             INITIAL_SL = 5;
             INITIAL_EL = 3;
             INITIAL_SIL = 0;
-        } else {
-            INITIAL_VL = 5;
-            INITIAL_SL = 5;
-            INITIAL_SIL = 5;
-            INITIAL_EL = 3;
         }
+        else if (remarks === 'probationary') {
+            if (yearsEmployed < 1) {
+                INITIAL_SIL = 5;
+            } else {
+                INITIAL_SIL = 0;
+            }
+            INITIAL_VL = 0;
+            INITIAL_SL = 0;
+            INITIAL_EL = 0;
+        }
+    }
+    else if (divisionName === 'administration') {
+        INITIAL_VL = 5;
+        INITIAL_SL = 5;
+        INITIAL_EL = 3;
+        INITIAL_SIL = 0;
+    }
+    else {
+        INITIAL_VL = 5;
+        INITIAL_SL = 5;
+        INITIAL_SIL = 0;
+        INITIAL_EL = 3;
     }
 
     let usedVL = 0; let usedSL = 0; let usedSIL = 0; let usedEL = 0;
