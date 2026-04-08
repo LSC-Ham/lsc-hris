@@ -21,21 +21,38 @@ export const authOptions: NextAuthOptions = {
                 if (!credentials?.username || !credentials?.password) {
                     return null;
                 }
-                const user = await prisma.user.findFirst({
-                    where: {
-                        OR: [
-                            { username: credentials?.username },
-                            { biography: { employees: { id_number: credentials?.username, } } }
-                        ]
-                    },
-                });
 
-                if (user && user.password) {
-                    const isValid = await bcrypt.compare(credentials.password, user.password);
-                    if (isValid) return user;
+                try {
+                    const user = await prisma.user.findFirst({
+                        where: {
+                            OR: [
+                                { username: credentials?.username },
+                                { biography: { employees: { id_number: credentials?.username } } }
+                            ]
+                        },
+                    });
+
+                    if (!user) {
+                        console.log("NEXTAUTH DEBUG: User not found in database.");
+                        return null;
+                    }
+
+                    if (user && user.password) {
+                        const isValid = await bcrypt.compare(credentials.password, user.password);
+                        if (isValid) {
+                            return user;
+                        } else {
+                            console.log("NEXTAUTH DEBUG: Password mismatch.");
+                            return null;
+                        }
+                    }
+
+                    return null;
+                } catch (error) {
+                    console.error("NEXTAUTH DATABASE CRASH:", error);
+                    return null;
                 }
-                return null;
-            },
+            }
         }),
     ],
     callbacks: {
@@ -56,7 +73,7 @@ export const authOptions: NextAuthOptions = {
                     where: { biography: { users: { id: user.id } } },
                     select: { departments: { select: { department: true } } }
                 });
-                
+
                 token.dbSessionToken = sessionToken;
                 token.userId = user.id;
                 token.role = (user as any).role;
